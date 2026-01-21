@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ const StoreTable = () => {
       <Card className="shadow-soft border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark overflow-hidden">
         <CardHeader className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-base font-medium text-text-main dark:text-white tracking-wide">Store Performance</CardTitle>
-          <a className="text-sm text-primary font-bold hover:underline cursor-pointer">View All</a>
+          <Link to="/store" className="text-sm text-primary font-bold hover:underline cursor-pointer">View All</Link>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
