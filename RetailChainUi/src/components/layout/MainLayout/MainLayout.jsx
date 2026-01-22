@@ -1,6 +1,6 @@
-// src/components/layout/MainLayout/MainLayout.jsx
 import Sidebar from "../Sidebar/Sidebar";
 import Header from "../Header/Header";
+import Footer from "../Footer";
 import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
@@ -9,8 +9,11 @@ const MainLayout = () => {
       <Sidebar />
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         <Header />
-        <div className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
-          <Outlet />
+        <div className="flex-1 overflow-y-auto flex flex-col scroll-smooth">
+          <div className="flex-1 p-6 lg:p-10">
+            <Outlet />
+          </div>
+          <Footer />
         </div>
       </main>
     </div>

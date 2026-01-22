@@ -1,7 +1,45 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const Sidebar = () => {
+    const location = useLocation();
+
+    const menuItems = [
+      {
+        path: "/",
+        label: "Dashboard (Chain)",
+        icon: "dashboard",
+        filledIcon: true 
+      },
+      {
+        path: "/store",
+        label: "Stores",
+        icon: "storefront"
+      },
+      {
+        path: "/products", 
+        label: "Products",
+        icon: "inventory_2"
+      },
+      {
+        path: "/inventory",
+        label: "Inventory",
+        icon: "inventory"
+      },
+      {
+        path: "/warehouse",
+        label: "Central Warehouse",
+        icon: "warehouse"
+      },
+      {
+        path: "/reports",
+        label: "Chain Reports",
+        icon: "bar_chart"
+      }
+    ];
+
     return (
       <aside className="w-64 h-full bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700 flex flex-col flex-shrink-0 transition-all duration-300">
         {/* Logo Area */}
@@ -14,31 +52,35 @@ const Sidebar = () => {
         
         {/* Navigation */}
         <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
-          {/* Dashboard (Active) */}
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-6 bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/20 hover:text-primary">
-            <span className="material-symbols-outlined w-6 h-6" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-            <span className="text-sm font-semibold">Dashboard (Chain)</span>
-          </Button>
-          
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-6 text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main">
-            <span className="material-symbols-outlined w-6 h-6 group-hover:text-primary">storefront</span>
-            <span className="text-sm font-medium">Stores</span>
-          </Button>
-
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-6 text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main">
-            <span className="material-symbols-outlined w-6 h-6 group-hover:text-primary">inventory_2</span>
-            <span className="text-sm font-medium">Products</span>
-          </Button>
-
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-6 text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main">
-            <span className="material-symbols-outlined w-6 h-6 group-hover:text-primary">warehouse</span>
-            <span className="text-sm font-medium">Central Warehouse</span>
-          </Button>
-
-          <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-6 text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main">
-            <span className="material-symbols-outlined w-6 h-6 group-hover:text-primary">bar_chart</span>
-            <span className="text-sm font-medium">Chain Reports</span>
-          </Button>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                asChild
+                className={cn(
+                  "w-full justify-start gap-3 px-3 py-6",
+                  isActive 
+                    ? "bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/20 hover:text-primary" 
+                    : "text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main"
+                )}
+              >
+                <Link to={item.path}>
+                  <span 
+                    className={cn("material-symbols-outlined w-6 h-6", !isActive && "group-hover:text-primary")}
+                    style={isActive && item.filledIcon ? { fontVariationSettings: "'FILL' 1" } : {}}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className={cn("text-sm", isActive ? "font-semibold" : "font-medium")}>
+                    {item.label}
+                  </span>
+                </Link>
+              </Button>
+            );
+          })}
         </nav>
         
         {/* User Profile (Bottom Sidebar) */}
