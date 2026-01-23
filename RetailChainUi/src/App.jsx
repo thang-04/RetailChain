@@ -26,6 +26,10 @@ import StaffAttendance from "./pages/Staff/Attendance/StaffAttendance";
 import StaffProfile from "./pages/Staff/Profile/StaffProfile";
 import ResourceAssignment from "./pages/Staff/ResourceAssignment/ResourceAssignment";
 
+// Warehouse
+import WarehouseList from "./pages/Warehouse/WarehouseList";
+import WarehouseDetail from "./pages/Warehouse/WarehouseDetail";
+
 import './App.css'
 
 function App() {
@@ -41,6 +45,10 @@ function App() {
           <Route path="/store" element={<StorePage />} />
           <Route path="/store/:id" element={<StoreDashboardPage />} />
           <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
+
+          {/* Warehouse Module */}
+          <Route path="/warehouse" element={<WarehouseList />} />
+          <Route path="/warehouse/:id" element={<WarehouseDetail />} />
 
           {/* Product Module */}
           <Route path="/products" element={<ProductPage />} />
