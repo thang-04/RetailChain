@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import inventoryService from '@/services/inventory.service';
+import { Upload, Plus, Eye } from 'lucide-react';
 
 const StockInList = () => {
     const [records, setRecords] = useState([]);
@@ -12,10 +13,15 @@ const StockInList = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
-            const data = await inventoryService.getStockInRecords();
-            setRecords(data);
-            setLoading(false);
+            try {
+                setLoading(true);
+                const data = await inventoryService.getStockInRecords();
+                setRecords(data);
+            } catch (error) {
+                console.error("Failed to fetch stock in records:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchData();
     }, []);
@@ -28,12 +34,12 @@ const StockInList = () => {
                     <p className="text-muted-foreground">Manage incoming shipments and receipts.</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline">
-                        <span className="material-symbols-outlined mr-2">upload_file</span>
+                    <Button variant="outline" className="gap-2">
+                        <Upload className="w-4 h-4" />
                         Import Excel
                     </Button>
-                    <Button>
-                        <span className="material-symbols-outlined mr-2">add</span>
+                    <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
                         Create Receipt
                     </Button>
                 </div>
@@ -47,7 +53,7 @@ const StockInList = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {loading ? <div>Loading...</div> : (
+                    {loading ? <div className="text-center py-10">Loading records...</div> : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -80,7 +86,7 @@ const StockInList = () => {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="icon">
-                                                <span className="material-symbols-outlined">visibility</span>
+                                                <Eye className="w-4 h-4" />
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -95,3 +101,4 @@ const StockInList = () => {
 };
 
 export default StockInList;
+

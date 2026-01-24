@@ -1,5 +1,5 @@
 // src/pages/Warehouse/WarehouseDetail.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
@@ -8,39 +8,43 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../../components/ui/badge";
 import { Input } from "../../components/ui/input";
 import { ArrowLeft, Package, AlertTriangle, Truck, History, Search, Filter } from 'lucide-react';
+import warehouseService from '../../services/warehouse.service';
 
 const WarehouseDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [warehouseInfo, setWarehouseInfo] = useState(null);
+  const [inventoryData, setInventoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy warehouse data (giả lập data từ API detail)
-  const warehouseInfo = {
-    id: id,
-    name: 'Central Hub North',
-    address: '123 Industrial Blvd, North District',
-    capacity: 50000,
-    currentStock: 42150,
-    manager: 'Nguyen Van A'
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const wh = await warehouseService.getWarehouseById(id || 'WH001');
+            const inv = await warehouseService.getWarehouseInventory(id || 'WH001');
+            setWarehouseInfo(wh);
+            setInventoryData(inv);
+        } catch (error) {
+            console.error("Failed to fetch warehouse details:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchData();
+  }, [id]);
+
+  const getStockStatusBadge = (stock) => {
+    // Determine status based on stock level logic (simplified)
+    if (stock <= 0) return <Badge variant="destructive">Out of Stock</Badge>;
+    if (stock < 50) return <Badge className="bg-orange-500 hover:bg-orange-600">Low Stock</Badge>;
+    if (stock > 2000) return <Badge variant="secondary">Overstock</Badge>;
+    return <Badge className="bg-green-600 hover:bg-green-700">In Stock</Badge>;
   };
 
-  // Dummy inventory data
-  const inventoryData = [
-    { sku: 'SP001', name: 'Premium Cotton T-Shirt', category: 'Apparel', quantity: 1200, minStock: 200, status: 'In Stock' },
-    { sku: 'SP002', name: 'Slim Fit Jeans', category: 'Apparel', quantity: 85, minStock: 100, status: 'Low Stock' },
-    { sku: 'SP003', name: 'Running Sneakers', category: 'Footwear', quantity: 450, minStock: 50, status: 'In Stock' },
-    { sku: 'SP004', name: 'Leather Belt', category: 'Accessories', quantity: 0, minStock: 30, status: 'Out of Stock' },
-    { sku: 'SP005', name: 'Winter Jacket', category: 'Apparel', quantity: 2000, minStock: 150, status: 'Overstock' },
-  ];
-
-  const getStockStatusBadge = (status) => {
-    switch(status) {
-      case 'Out of Stock': return <Badge variant="destructive">Out of Stock</Badge>;
-      case 'Low Stock': return <Badge className="bg-orange-500 hover:bg-orange-600">Low Stock</Badge>;
-      case 'Overstock': return <Badge variant="secondary">Overstock</Badge>;
-      default: return <Badge className="bg-green-600 hover:bg-green-700">In Stock</Badge>;
-    }
-  };
+  if (loading) return <div className="p-10 text-center">Loading warehouse details...</div>;
+  if (!warehouseInfo) return <div className="p-10 text-center">Warehouse not found</div>;
 
   return (
     <div className="p-6 space-y-6">
@@ -51,7 +55,7 @@ const WarehouseDetail = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{warehouseInfo.name}</h1>
           <p className="text-muted-foreground flex items-center gap-2">
-            ID: {warehouseInfo.id} • Manager: {warehouseInfo.manager}
+            ID: {warehouseInfo.id} • Manager: {warehouseInfo.info?.manager || warehouseInfo.manager}
           </p>
         </div>
         <div className="ml-auto flex gap-2">
@@ -66,7 +70,7 @@ const WarehouseDetail = () => {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Items</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">42,150</div>
+                <div className="text-2xl font-bold">{warehouseInfo.metrics?.totalItems || "---"}</div>
             </CardContent>
         </Card>
         <Card>
@@ -85,7 +89,7 @@ const WarehouseDetail = () => {
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold flex items-center gap-2">
-                    3 Orders <Truck size={18} className="text-muted-foreground"/>
+                    {warehouseInfo.metrics?.inboundDaily || "3 Orders"} <Truck size={18} className="text-muted-foreground"/>
                 </div>
             </CardContent>
         </Card>
@@ -94,7 +98,7 @@ const WarehouseDetail = () => {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Occupancy</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">84.3%</div>
+                <div className="text-2xl font-bold">{warehouseInfo.utilization || "84.3"}%</div>
             </CardContent>
         </Card>
       </div>
@@ -139,12 +143,12 @@ const WarehouseDetail = () => {
                         </TableHeader>
                         <TableBody>
                             {inventoryData.map((item) => (
-                                <TableRow key={item.sku}>
-                                    <TableCell className="font-medium">{item.sku}</TableCell>
+                                <TableRow key={item.id || item.sku}>
+                                    <TableCell className="font-medium">{item.id || item.sku}</TableCell>
                                     <TableCell>{item.name}</TableCell>
-                                    <TableCell>{item.category}</TableCell>
-                                    <TableCell className="text-right font-bold">{item.quantity.toLocaleString()}</TableCell>
-                                    <TableCell>{getStockStatusBadge(item.status)}</TableCell>
+                                    <TableCell>{item.category || "General"}</TableCell>
+                                    <TableCell className="text-right font-bold">{item.stock.toLocaleString()}</TableCell>
+                                    <TableCell>{getStockStatusBadge(item.stock)}</TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="sm">History</Button>
                                     </TableCell>
@@ -175,6 +179,7 @@ const WarehouseDetail = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            {/* Mock inbound data inside component for now as service doesn't have it explicitly separate for detail view yet */}
                             {[
                                 { id: 'IB-2023-001', source: 'Supplier ABC Corp', date: '2023-10-25', items: 500, status: 'Completed' },
                                 { id: 'IB-2023-002', source: 'Factory Direct', date: '2023-10-26', items: 1200, status: 'Processing' },
@@ -218,6 +223,7 @@ const WarehouseDetail = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                             {/* Mock outbound data */}
                             {[
                                 { id: 'OB-2023-882', dest: 'Store HCM-01 (Nguyen Hue)', date: '2023-10-24', items: 200, status: 'Shipped' },
                                 { id: 'OB-2023-883', dest: 'Store HN-05 (Cau Giay)', date: '2023-10-25', items: 150, status: 'Delivered' },
@@ -247,3 +253,4 @@ const WarehouseDetail = () => {
 };
 
 export default WarehouseDetail;
+

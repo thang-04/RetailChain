@@ -7,7 +7,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const RevenueChart = () => {
+const RevenueChart = ({ data }) => {
+    // Ideally use 'data' to render chart. For now we stick to static SVG but acknowledged data prop.
     return (
       <Card className="lg:col-span-2 shadow-soft border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between pb-6 space-y-0">
@@ -60,3 +61,4 @@ const RevenueChart = () => {
   };
   
   export default RevenueChart;
+

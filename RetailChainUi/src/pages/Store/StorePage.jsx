@@ -1,59 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, Home, ChevronRight, Bell, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StoreFilter from "./components/StoreFilter";
 import StoreList from "./components/StoreList";
-
-// Mock Data
-const MOCK_STORES = [
-  {
-    id: "042",
-    name: "Downtown Flagship",
-    type: "Retail • Large Format",
-    status: "Active",
-    address: "123 Main St, Suite 100",
-    city: "New York, NY 10001",
-    warehouse: "North-1 Dist.",
-  },
-  {
-    id: "043",
-    name: "Uptown Boutique",
-    type: "Retail • Small Format",
-    status: "Active",
-    address: "456 Broadway",
-    city: "New York, NY 10012",
-    warehouse: "North-1 Dist.",
-  },
-  {
-    id: "045",
-    name: "Jersey City Outlet",
-    type: "Outlet • Standard",
-    status: "Inactive",
-    address: "789 Oak Lane",
-    city: "Jersey City, NJ 07302",
-    warehouse: "West-2 Hub",
-  },
-  {
-    id: "048",
-    name: "Brooklyn Heights",
-    type: "Retail • Standard",
-    status: "Active",
-    address: "55 Montague St",
-    city: "Brooklyn, NY 11201",
-    warehouse: "North-1 Dist.",
-  },
-  {
-    id: "052",
-    name: "SoHo Pop-up",
-    type: "Popup • Temporary",
-    status: "Maintenance",
-    address: "101 Spring St",
-    city: "New York, NY 10012",
-    warehouse: "North-1 Dist.",
-  },
-];
+import storeService from "../../services/store.service";
 
 const StorePage = () => {
+  const [stores, setStores] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const data = await storeService.getAllStores();
+        setStores(data);
+      } catch (error) {
+        console.error("Failed to fetch stores:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStores();
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative">
      
@@ -67,7 +36,7 @@ const StorePage = () => {
                 Store Management
               </h2>
               <p className="text-slate-500 dark:text-slate-400">
-                Monitor performance and manage details for all 45 retail locations.
+                Monitor performance and manage details for all {stores.length} retail locations.
               </p>
             </div>
             <Button className="gap-2 shadow-sm shadow-primary/30 hover:translate-y-[-1px] transition-all">
@@ -80,12 +49,16 @@ const StorePage = () => {
           <StoreFilter />
 
           {/* Store List */}
-          <StoreList stores={MOCK_STORES} />
+          {loading ? (
+             <div className="text-center py-10">Loading stores...</div>
+          ) : (
+             <StoreList stores={stores} />
+          )}
 
           {/* Pagination */}
           <div className="bg-white dark:bg-[#1a262a] rounded-xl border border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Showing <span className="font-semibold text-slate-900 dark:text-white">1-5</span> of <span className="font-semibold text-slate-900 dark:text-white">45</span> stores
+              Showing <span className="font-semibold text-slate-900 dark:text-white">1-{stores.length}</span> of <span className="font-semibold text-slate-900 dark:text-white">{stores.length}</span> stores
             </p>
             <div className="flex items-center gap-2">
               <Button variant="outline" disabled className="h-9 px-4 text-slate-500">
