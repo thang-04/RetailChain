@@ -102,7 +102,7 @@ const staffService = {
     return MOCK_STAFF.find(s => s.id === id);
   },
 
-  getShifts: async (date) => {
+  getShifts: async (date) => { // eslint-disable-line no-unused-vars
     await new Promise(resolve => setTimeout(resolve, 500));
     return [...MOCK_SHIFTS]; // In real app, filter by date
   },
