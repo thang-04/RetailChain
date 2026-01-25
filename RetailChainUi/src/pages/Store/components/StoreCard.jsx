@@ -1,11 +1,13 @@
 import React from "react";
-import { Store, MapPin, Package, Settings, RefreshCcw, Activity } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Store, MapPin, Package, RefreshCcw, Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const StoreCard = ({ store }) => {
+  const navigate = useNavigate();
+
   // Map status to badge styles
   const getStatusStyle = (status) => {
     switch (status) {
@@ -30,68 +32,60 @@ const StoreCard = ({ store }) => {
   };
 
   return (
-    <Card className="flex flex-col group transition-all hover:shadow-lg hover:border-primary/30 overflow-hidden">
-      <div className="p-6 flex-1">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Store className="w-6 h-6" />
+    <Card
+      onClick={() => navigate(`/store/${store.id}`)}
+      className="flex flex-col group transition-all hover:shadow-lg hover:border-primary/30 overflow-hidden h-full cursor-pointer"
+    >
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-1">
+              <Store className="w-5 h-5" />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-start gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors leading-tight">
                   {store.name}
                 </h3>
-                <span className="text-[10px] font-mono bg-slate-100 dark:bg-white/5 text-slate-500 px-1.5 py-0.5 rounded">
+                <span className="text-[10px] font-mono bg-slate-100 dark:bg-white/5 text-slate-500 px-1.5 py-0.5 rounded shrink-0 mt-0.5">
                   #{store.id}
                 </span>
               </div>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 {store.type}
               </span>
             </div>
           </div>
-          <Badge 
-            variant="outline" 
-            className={cn("gap-1.5 px-2.5 py-1 rounded-full font-medium border", getStatusStyle(store.status))}
+          <Badge
+            variant="outline"
+            className={cn("gap-1.5 px-2.5 py-1 rounded-full font-medium border shrink-0", getStatusStyle(store.status))}
           >
             <span className={cn("size-1.5 rounded-full", getStatusDotColor(store.status))}></span>
             {store.status}
           </Badge>
         </div>
 
-        <div className="space-y-3 pt-4 border-t border-slate-50 dark:border-slate-800/50">
+        <div className="space-y-2.5 pt-3 border-t border-slate-50 dark:border-slate-800/50">
           <div className="flex items-start gap-2.5">
-            <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
+            <MapPin className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-tight">
               {store.address}
-              <br />
-              <span className="text-xs">{store.city}</span>
+              {store.city && (
+                <>
+                  <br />
+                  <span className="text-xs">{store.city}</span>
+                </>
+              )}
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
-            <Package className="w-4 h-4 text-slate-400" />
-            <span className="text-sm text-slate-600 dark:text-slate-400">
-              Warehouse: <span className="font-medium text-slate-900 dark:text-slate-200">{store.warehouse}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2">
-        <Button className="w-full gap-2 font-bold" variant="default">
-          <Settings className="w-4 h-4" />
-          Manage Store
-        </Button>
-        <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <RefreshCcw className="w-4 h-4" />
-            Update Status
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-            <Activity className="w-4 h-4" />
-            Performance
-          </Button>
+          {store.warehouse && (
+            <div className="flex items-center gap-2.5">
+              <Package className="w-4 h-4 text-slate-400 shrink-0" />
+              <span className="text-sm text-slate-600 dark:text-slate-400 truncate">
+                Warehouse: <span className="font-medium text-slate-900 dark:text-slate-200">{store.warehouse}</span>
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </Card>

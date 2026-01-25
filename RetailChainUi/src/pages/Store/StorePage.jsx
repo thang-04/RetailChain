@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Home, ChevronRight, Bell, HelpCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StoreFilter from "./components/StoreFilter";
 import StoreList from "./components/StoreList";
+import AddStoreModal from "./components/AddStoreModal";
 import storeService from "../../services/store.service";
 
 const StorePage = () => {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -25,21 +27,20 @@ const StorePage = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative">
-     
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-[1400px] mx-auto flex flex-col gap-6">
+        <div className="max-w-[1400px] mx-auto flex flex-col gap-6 min-h-full">
           {/* Page Title & Actions */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
               <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Store Management
               </h2>
-              <p className="text-slate-500 dark:text-slate-400">
-                Monitor performance and manage details for all {stores.length} retail locations.
-              </p>
             </div>
-            <Button className="gap-2 shadow-sm shadow-primary/30 hover:translate-y-[-1px] transition-all">
+            <Button
+              className="gap-2 shadow-sm shadow-primary/30 hover:translate-y-[-1px] transition-all"
+              onClick={() => setIsModalOpen(true)}
+            >
               <Plus className="w-5 h-5" />
               <span>Add Store</span>
             </Button>
@@ -50,13 +51,13 @@ const StorePage = () => {
 
           {/* Store List */}
           {loading ? (
-             <div className="text-center py-10">Loading stores...</div>
+            <div className="text-center py-10">Loading stores...</div>
           ) : (
-             <StoreList stores={stores} />
+            <StoreList stores={stores} />
           )}
 
-          {/* Pagination */}
-          <div className="bg-white dark:bg-[#1a262a] rounded-xl border border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm">
+          {/* Pagination - Pushed to bottom with mt-auto */}
+          <div className="mt-auto bg-white dark:bg-[#1a262a] rounded-xl border border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Showing <span className="font-semibold text-slate-900 dark:text-white">1-{stores.length}</span> of <span className="font-semibold text-slate-900 dark:text-white">{stores.length}</span> stores
             </p>
@@ -78,6 +79,9 @@ const StorePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Store Modal */}
+      <AddStoreModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };

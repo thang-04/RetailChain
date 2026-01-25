@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import StoreKPIGrid from "./components/StoreKPIGrid";
 import StoreRevenueChart from "./components/StoreRevenueChart";
-import RecentOrdersTable from "./components/RecentOrdersTable";
+import StoreInventoryTable from "./components/StoreInventoryTable";
 import LowInventoryTable from "./components/LowInventoryTable";
 import { Button } from "@/components/ui/button";
 import storeService from "../../services/store.service";
@@ -63,14 +63,14 @@ const StoreDashboardPage = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Recent Sales Orders (60%) */}
         <div className="lg:w-3/5 flex flex-col gap-4">
-          <RecentOrdersTable orders={storeData.recentOrders} />
+          <StoreInventoryTable inventory={storeData.inventory} />
         </div>
         {/* Low Inventory Products (40%) */}
         <div className="lg:w-2/5 flex flex-col gap-4">
           <LowInventoryTable items={storeData.lowStock} />
         </div>
       </div>
-      
+
       <div className="pb-10"></div>
     </div>
   );
