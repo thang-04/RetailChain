@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LocationPicker from '../../../components/ui/LocationPicker';
+import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
 
 const AddStoreModal = ({ isOpen, onClose }) => {

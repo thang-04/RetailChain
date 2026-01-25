@@ -8,7 +8,8 @@ import ExecutiveReport from "../pages/Reports/ExecutiveReport";
 // Store
 import StorePage from "../pages/Store/StorePage";
 import StoreDashboardPage from "../pages/StoreDashboard/StoreDashboardPage";
-import StoreInventoryDetail from "../pages/StoreDashboard/InventoryDetail/StoreInventoryDetail";
+import StoreInventoryDetail from "../pages/StoreDashboard/StoreInventoryDetail";
+import StoreStaffPage from "../pages/StoreDashboard/StoreStaffPage";
 
 // Product
 import ProductPage from "../pages/Product/ProductPage";
@@ -42,6 +43,7 @@ const AppRoutes = () => {
         <Route path="/store" element={<StorePage />} />
         <Route path="/store/:id" element={<StoreDashboardPage />} />
         <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
+        <Route path="/store/:id/staff" element={<StoreStaffPage />} />
 
         {/* Warehouse Module */}
         <Route path="/warehouse" element={<WarehouseList />} />

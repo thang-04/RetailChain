@@ -59,6 +59,64 @@ const STORE_DETAILS = {
     lowStock: [
       { id: "P005", name: "Product X", stock: 5, min: 10 },
       { id: "P008", name: "Product Y", stock: 2, min: 15 }
+    ],
+    staff: [
+        {
+            id: 1,
+            name: "Sarah Jenkins",
+            email: "sarah.j@store-a.retail.com",
+            role: "Store Manager",
+            status: "Active",
+            statusColor: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30",
+            dotColor: "bg-emerald-500",
+            lastShift: "Today, 8:00 AM",
+            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDl32EiV1Cebqa_bpYzpzkBbcGFF7jsfVvdcyGwELL3icwWL-bHEY-vvjlZBbETn4yJHLTd0mlZXULn9VYSftCxIumz9g1Z3s0pn9NbvAs-hhuNAsMgLofsRR0c-xOqf9R0fl4859vT99WzRr1SU1h6x2Gr7sxYqB0xF5V3IZN82iDIJdT1PnC6AxYh1gGxRtIV76JI88pmokhGKX-nU3eYiDxkyoySRf69bFEOg1zjo1IfH0wkaDFX5TAdhicbGk3JxKDW05TpnF4"
+        },
+        {
+            id: 2,
+            name: "Michael Ross",
+            email: "michael.r@store-a.retail.com",
+            role: "Sales Associate",
+            status: "On Leave",
+            statusColor: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30",
+            dotColor: "bg-amber-500",
+            lastShift: "Oct 24, 2023",
+            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAxsnr80ZOP5BAXuopRtLfnFvy2BwFVog_oaGAB4sijHA1C240nQhUVSCIU9ace3HuxY6cHdLO517wFQd1-M9ZBm-NTF9AijCkEKy9UwM7i3tuSShQw8Pt-53kppn0mlQ-17VKWEylWVoGL4pKg6TenTZP-H4m_F4XfLyvq0wyIm4mZN8FqZXlE2gw7FGUecyvOK-f0sPlQkASNF8sEYbPI8x8gYaV3QKg5sYKtnRliN3wdqV_7bFuRSUax-f10i2rhiBqkZbKbS_w"
+        },
+        {
+            id: 3,
+            name: "David Chen",
+            email: "david.c@store-a.retail.com",
+            role: "Inventory Spec.",
+            status: "Active",
+            statusColor: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30",
+            dotColor: "bg-emerald-500",
+            lastShift: "Yesterday, 2:00 PM",
+            initials: "DC",
+            initialsColor: "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+        },
+        {
+            id: 4,
+            name: "Jessica Wu",
+            email: "jessica.w@store-a.retail.com",
+            role: "Cashier",
+            status: "Inactive",
+            statusColor: "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/30",
+            dotColor: "bg-rose-500",
+            lastShift: "Sep 12, 2023",
+            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA5Je__x0w0579S6bdFyCxgWqs1O9N3OiJB1H_cwTsimUeF80bsDKFAbh3RUtyQxpRh8rbKkWsh7Tz23SzHcpyakloL99M_mQtjO8nvmi4p0W5R6yCXJ8u4rmFVMg4uCu2x8mfh6o8rGnZmHJ38PMudqQVD4ywzZKw5-XRKhfFHAIr0Zg-JB7b6K6XpMaMNFlC3eH6Y5L0f_FX1tclo3v1YFAGYOM_nu2UsVCS4HZTWyVgPYU1ZFlEXcrJT_IXoTZ-WiqSQmfbD96A"
+        },
+        {
+            id: 5,
+            name: "Marcus Johnson",
+            email: "marcus.j@store-a.retail.com",
+            role: "Stock Associate",
+            status: "Active",
+            statusColor: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30",
+            dotColor: "bg-emerald-500",
+            lastShift: "Today, 9:30 AM",
+            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuALp4ud2mAvItBjmZoYNVHXiJsmxBPDi6Q1n0_7AyVGd7FjUbVk9kTmaZ1k4aCEaICcwLFI_5_gPAqeqYEyLIFk6ZOEjwOMPmvIXMt-I0z9MSb395yl3T5BayN-LTn37glIKvWiDx_D83Tfq7DzYz5qu88nLdI0VvyvakWaW4fWkBWAAcGTtcGS1JzpXhwVweMm5c6gp8xS6HnqOYiHDHLkjFozn3xgR7keKseDcXFnZBXrSjqJfPGCeV7m6iY6_yHzKNyHpixn7qg"
+        }
     ]
   }
   // Add other stores as needed or fallback to default
@@ -80,6 +138,12 @@ const storeService = {
     const newStore = { ...data, id: `S${Date.now()}` };
     console.log("Created store:", newStore);
     return newStore;
+  },
+
+  getStoreStaff: async (storeId) => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const store = STORE_DETAILS[storeId] || STORE_DETAILS["S001"];
+    return store.staff || [];
   },
 
   updateStore: async (id, data) => {

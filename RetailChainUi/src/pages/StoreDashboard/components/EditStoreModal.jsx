@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import LocationPicker from '../../../components/ui/LocationPicker';
+import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
+import ConfirmModal from '../../../components/ui/ConfirmModal';
 
 const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     });
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
 
     // Pre-populate form when storeData changes
@@ -51,8 +53,13 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     };
 
     const handleSubmit = () => {
+        setIsConfirmOpen(true);
+    };
+
+    const handleConfirmSave = () => {
         console.log('Updating store:', formData);
-        // TODO: Call API to update store
+        //Call API to update store
+        setIsConfirmOpen(false);
         onClose();
     };
 
@@ -64,8 +71,8 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
             <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#1e282c] text-left shadow-lift transition-all flex flex-col h-[85vh]">
                 <div className="flex items-center justify-between border-b border-[#f1f3f4] dark:border-gray-700 px-8 py-4 bg-white dark:bg-[#1e282c] shrink-0">
                     <div>
-                        <h3 className="text-xl font-bold leading-6 text-[#121617] dark:text-white tracking-tight">Chỉnh Sửa Cửa Hàng</h3>
-                        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Cập nhật thông tin cửa hàng của bạn.</p>
+                        <h3 className="text-xl font-bold leading-6 text-[#121617] dark:text-white tracking-tight">Edit Store Location</h3>
+                        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Update your store information.</p>
                     </div>
                     <button
                         className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 transition-colors"
@@ -81,7 +88,7 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                             <div className="relative max-w-lg pointer-events-auto">
                                 <input
                                     className="w-full pl-12 pr-4 py-3.5 rounded-xl border-none bg-white dark:bg-[#1e282c] shadow-xl text-sm focus:ring-2 focus:ring-primary dark:text-white placeholder:text-gray-400"
-                                    placeholder="Tìm kiếm địa điểm (Nhấn Enter)..."
+                                    placeholder="Search location (Press Enter)..."
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -101,10 +108,10 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                         <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-8">
                                 <div className="space-y-4">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Thông Tin Địa Điểm</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Location Details</h4>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="address">
-                                            Địa Chỉ Đầy Đủ
+                                            Full Address
                                         </label>
                                         <div className="relative group">
                                             <textarea
@@ -116,17 +123,17 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                                 value={formData.address}
                                             ></textarea>
                                         </div>
-                                        <p className="text-[11px] text-gray-500 italic">Điều chỉnh ghim trên bản đồ để cập nhật địa chỉ</p>
+                                        <p className="text-[11px] text-gray-500 italic">Adjust map pin to update address</p>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-name">
-                                            Tên Cửa Hàng
+                                            Store Name
                                         </label>
                                         <input
                                             className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
                                             id="store-name"
                                             name="name"
-                                            placeholder="VD: Cửa Hàng Trung Tâm"
+                                            placeholder="e.g., Downtown Flagship"
                                             type="text"
                                             value={formData.name}
                                             onChange={handleInputChange}
@@ -134,13 +141,13 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="city">
-                                            Thành Phố
+                                            City
                                         </label>
                                         <input
                                             className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
                                             id="city"
                                             name="city"
-                                            placeholder="VD: Hà Nội"
+                                            placeholder="e.g., London"
                                             type="text"
                                             value={formData.city}
                                             onChange={handleInputChange}
@@ -149,10 +156,10 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                 </div>
                                 <div className="h-px bg-[#f1f3f4] dark:bg-gray-700"></div>
                                 <div className="space-y-4">
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Vận Hành</h4>
+                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Operations</h4>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="warehouse">
-                                            Kho Được Gán
+                                            Assigned Warehouse
                                         </label>
                                         <div className="relative">
                                             <select
@@ -173,7 +180,7 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="status">
-                                            Trạng Thái Hoạt Động
+                                            Operational Status
                                         </label>
                                         <div className="relative">
                                             <select
@@ -183,9 +190,9 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                                 value={formData.status}
                                                 onChange={handleInputChange}
                                             >
-                                                <option value="Active">Hoạt Động</option>
-                                                <option value="Inactive">Không Hoạt Động</option>
-                                                <option value="Maintenance">Bảo Trì</option>
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                                <option value="Maintenance">Maintenance</option>
                                             </select>
                                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                                 <div className={`h-2.5 w-2.5 rounded-full ${formData.status === 'Active' ? 'bg-green-500' : formData.status === 'Inactive' ? 'bg-amber-500' : 'bg-gray-400'}`}></div>
@@ -199,7 +206,7 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                 <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-4 border border-blue-100 dark:border-blue-800">
                                     <div className="flex gap-3">
                                         <span className="material-symbols-outlined text-blue-500 text-[20px] shrink-0">info</span>
-                                        <p className="text-xs leading-relaxed text-blue-700 dark:text-blue-300 font-medium">Các thay đổi sẽ được áp dụng ngay lập tức sau khi lưu.</p>
+                                        <p className="text-xs leading-relaxed text-blue-700 dark:text-blue-300 font-medium">Changes will be applied immediately after saving.</p>
                                     </div>
                                 </div>
                             </div>
@@ -211,19 +218,31 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                 onClick={handleSubmit}
                             >
                                 <span className="material-symbols-outlined text-[18px]">save</span>
-                                Lưu Thay Đổi
+                                Save Changes
                             </button>
                             <button
                                 className="inline-flex w-full justify-center items-center rounded-xl bg-white dark:bg-transparent px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                                 type="button"
                                 onClick={onClose}
                             >
-                                Hủy
+                                Cancel
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={handleConfirmSave}
+                title="Confirm Save Changes"
+                message="Are you sure you want to save these changes to the store? This action will update the store information immediately."
+                confirmText="Save Changes"
+                cancelText="Cancel"
+                variant="warning"
+            />
         </div>
     );
 };
