@@ -1,7 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const StoreKPIGrid = () => {
+const StoreKPIGrid = ({ data }) => {
+  // Default values or destructuring from data
+  const { dailyRevenue = "---", orders = "---", lowStockCount = 12, activeStaff = 4 } = data || {};
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Revenue Card */}
@@ -17,7 +20,7 @@ const StoreKPIGrid = () => {
             </Badge>
           </div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Revenue</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-primary transition-colors">$4,250.00</h3>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-primary transition-colors">{dailyRevenue}</h3>
         </CardContent>
       </Card>
 
@@ -34,7 +37,7 @@ const StoreKPIGrid = () => {
             </Badge>
           </div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Orders</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors">142</h3>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors">{orders}</h3>
         </CardContent>
       </Card>
 
@@ -51,7 +54,7 @@ const StoreKPIGrid = () => {
             </Badge>
           </div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Low Stock Items</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">12</h3>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{lowStockCount}</h3>
         </CardContent>
       </Card>
 
@@ -65,7 +68,7 @@ const StoreKPIGrid = () => {
             <span className="text-xs font-medium text-slate-500 px-2 py-1">On Shift</span>
           </div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Staff</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">4<span className="text-lg text-slate-400 font-normal">/6</span></h3>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{activeStaff}<span className="text-lg text-slate-400 font-normal">/6</span></h3>
         </CardContent>
       </Card>
     </div>
@@ -73,3 +76,4 @@ const StoreKPIGrid = () => {
 };
 
 export default StoreKPIGrid;
+

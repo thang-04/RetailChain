@@ -1,10 +1,41 @@
+import React, { useEffect, useState } from "react";
 import KPIGrid from "./components/KPIGrid";
 import RevenueChart from "./components/RevenueChart";
 import StoreRanking from "./components/StoreRanking";
 import StoreTable from "./components/StoreTable";
 import { Button } from "@/components/ui/button";
+import dashboardService from "../../services/dashboard.service";
 
 const DashboardPage = () => {
+  const [kpiData, setKpiData] = useState([]);
+  const [revenueData, setRevenueData] = useState([]);
+  const [storeRanking, setStoreRanking] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [kpi, revenue, ranking] = await Promise.all([
+          dashboardService.getKPIData(),
+          dashboardService.getRevenueData(),
+          dashboardService.getStoreRanking()
+        ]);
+        setKpiData(kpi);
+        setRevenueData(revenue);
+        setStoreRanking(ranking);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return <div className="p-10 text-center">Loading dashboard...</div>;
+  }
+
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-8">
       {/* Page Heading */}
@@ -26,12 +57,12 @@ const DashboardPage = () => {
       </div>
 
       {/* KPI Cards */}
-      <KPIGrid />
+      <KPIGrid data={kpiData} />
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RevenueChart />
-        <StoreRanking />
+        <RevenueChart data={revenueData} />
+        <StoreRanking data={storeRanking} />
       </div>
 
       {/* Table Section */}
@@ -43,3 +74,4 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
+

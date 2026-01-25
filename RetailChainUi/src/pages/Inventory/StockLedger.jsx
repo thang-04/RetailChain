@@ -7,11 +7,19 @@ import inventoryService from '@/services/inventory.service';
 
 const StockLedger = () => {
     const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetch = async () => {
-            const data = await inventoryService.getStockLedger();
-            setTransactions(data);
+            try {
+                setLoading(true);
+                const data = await inventoryService.getStockLedger();
+                setTransactions(data);
+            } catch (error) {
+                console.error("Failed to fetch stock ledger:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         fetch();
     }, []);
@@ -44,41 +52,45 @@ const StockLedger = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Time</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Product</TableHead>
-                                <TableHead className="text-right">Quantity</TableHead>
-                                <TableHead>Location</TableHead>
-                                <TableHead>Reference</TableHead>
-                                <TableHead>User</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transactions.map((trx) => (
-                                <TableRow key={trx.id}>
-                                    <TableCell>{trx.date}</TableCell>
-                                    <TableCell>
-                                        <span className={`font-semibold ${
-                                            trx.type === 'Stock In' ? 'text-green-600' :
-                                            trx.type === 'Sales' ? 'text-blue-600' : 'text-orange-600'
-                                        }`}>
-                                            {trx.type}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>{trx.product}</TableCell>
-                                    <TableCell className="text-right font-mono">
-                                        {trx.quantity > 0 ? `+${trx.quantity}` : trx.quantity}
-                                    </TableCell>
-                                    <TableCell>{trx.location}</TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">{trx.ref}</TableCell>
-                                    <TableCell>{trx.user}</TableCell>
+                    {loading ? (
+                        <div className="text-center py-10">Loading ledger...</div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Time</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead className="text-right">Quantity</TableHead>
+                                    <TableHead>Location</TableHead>
+                                    <TableHead>Reference</TableHead>
+                                    <TableHead>User</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.map((trx) => (
+                                    <TableRow key={trx.id}>
+                                        <TableCell>{trx.date}</TableCell>
+                                        <TableCell>
+                                            <span className={`font-semibold ${
+                                                trx.type === 'Stock In' ? 'text-green-600' :
+                                                trx.type === 'Sales' ? 'text-blue-600' : 'text-orange-600'
+                                            }`}>
+                                                {trx.type}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>{trx.product}</TableCell>
+                                        <TableCell className="text-right font-mono">
+                                            {trx.quantity > 0 ? `+${trx.quantity}` : trx.quantity}
+                                        </TableCell>
+                                        <TableCell>{trx.location}</TableCell>
+                                        <TableCell className="text-xs text-muted-foreground">{trx.ref}</TableCell>
+                                        <TableCell>{trx.user}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
         </div>

@@ -29,6 +29,69 @@ const CHAIN_WIDE_STOCK = [
   { storeId: "WH01", storeName: "Central Warehouse", stock: 5000, status: "High" },
 ];
 
+const MOCK_ALL_INVENTORIES = [
+  {
+    id: 1,
+    region: "NY",
+    storeName: "Store A - Downtown",
+    storeId: "ST-1001",
+    skuCount: "1,240",
+    totalStock: "15,400",
+    healthScore: 98,
+    lowItems: "2",
+    status: "Healthy",
+    lastUpdated: "2 min ago"
+  },
+  {
+    id: 2,
+    region: "CA",
+    storeName: "Store B - Westside Mall",
+    storeId: "ST-2045",
+    skuCount: "3,500",
+    totalStock: "42,150",
+    healthScore: 60,
+    lowItems: "23",
+    status: "Warning",
+    lastUpdated: "1 hr ago"
+  },
+  {
+    id: 3,
+    region: "TX",
+    storeName: "Store C - Austin Flagship",
+    storeId: "ST-3301",
+    skuCount: "850",
+    totalStock: "2,300",
+    healthScore: 25,
+    lowItems: "140",
+    status: "Critical",
+    lastUpdated: "Just now"
+  },
+  {
+    id: 4,
+    region: "WA",
+    storeName: "Store D - Seattle North",
+    storeId: "ST-4102",
+    skuCount: "2,100",
+    totalStock: "18,900",
+    healthScore: 88,
+    lowItems: "12",
+    status: "Healthy",
+    lastUpdated: "5 hrs ago"
+  },
+  {
+    id: 5,
+    region: "FL",
+    storeName: "Store E - Miami Bayside",
+    storeId: "ST-5509",
+    skuCount: "1,800",
+    totalStock: "12,500",
+    healthScore: 55,
+    lowItems: "45",
+    status: "Warning",
+    lastUpdated: "12 hrs ago"
+  }
+];
+
 const REPORT_DATA = {
     inventoryValue: 1250000000,
     turnoverRate: 4.5,
@@ -52,12 +115,17 @@ const inventoryService = {
     return STOCK_LEDGER;
   },
 
-  getStoreInventory: async (storeId) => {
+  getStoreInventory: async (storeId) => { // eslint-disable-line no-unused-vars
     await new Promise(resolve => setTimeout(resolve, 500));
     return STORE_INVENTORY;
   },
+  
+  getAllInventories: async () => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    return MOCK_ALL_INVENTORIES;
+  },
 
-  getProductChainStock: async (productId) => {
+  getProductChainStock: async (productId) => { // eslint-disable-line no-unused-vars
     await new Promise(resolve => setTimeout(resolve, 300));
     return CHAIN_WIDE_STOCK;
   },

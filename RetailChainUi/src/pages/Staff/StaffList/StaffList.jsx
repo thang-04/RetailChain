@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import staffService from '@/services/staff.service';
-import { Plus, Search, Filter } from 'lucide-react'; // Dùng lucide-react nếu có, hoặc material icons
+import { Plus, Search, Filter, MoreHorizontal } from 'lucide-react';
 
 const StaffList = () => {
   const [staff, setStaff] = useState([]);
@@ -50,7 +50,7 @@ const StaffList = () => {
           <p className="text-muted-foreground">Manage your store employees and their roles.</p>
         </div>
         <Button className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-lg">add</span>
+          <Plus className="w-4 h-4" />
           Add Staff
         </Button>
       </div>
@@ -61,7 +61,7 @@ const StaffList = () => {
             <CardTitle>All Employees</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative w-64">
-                <span className="material-symbols-outlined absolute left-2.5 top-2.5 text-gray-400">search</span>
+                <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
                 <Input 
                   placeholder="Search staff..." 
                   className="pl-9"
@@ -70,7 +70,7 @@ const StaffList = () => {
                 />
               </div>
               <Button variant="outline" size="icon">
-                 <span className="material-symbols-outlined">filter_list</span>
+                 <Filter className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -113,7 +113,7 @@ const StaffList = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon">
-                        <span className="material-symbols-outlined">more_horiz</span>
+                        <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </TableCell>
                   </TableRow>

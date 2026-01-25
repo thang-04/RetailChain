@@ -1,5 +1,5 @@
 // src/pages/Warehouse/WarehouseList.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
@@ -15,54 +15,27 @@ import { Badge } from "../../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Progress } from "../../components/ui/progress";
 import { Plus, Search, MapPin, Package } from 'lucide-react';
+import warehouseService from "../../services/warehouse.service";
 
 const WarehouseList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [warehouses, setWarehouses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data
-  const warehouses = [
-    {
-      id: 'WH-001',
-      name: 'Central Hub North',
-      address: '123 Industrial Blvd, North District',
-      capacity: 50000,
-      currentStock: 42150,
-      utilization: 84.3,
-      status: 'Active',
-      manager: 'Nguyen Van A'
-    },
-    {
-      id: 'WH-002',
-      name: 'South Distribution Center',
-      address: '456 Logistics Way, South Zone',
-      capacity: 30000,
-      currentStock: 12500,
-      utilization: 41.6,
-      status: 'Active',
-      manager: 'Tran Thi B'
-    },
-    {
-      id: 'WH-003',
-      name: 'East Coast Storage',
-      address: '789 Harbor Rd, East Port',
-      capacity: 40000,
-      currentStock: 38900,
-      utilization: 97.2,
-      status: 'Warning',
-      manager: 'Le Van C'
-    },
-    {
-      id: 'WH-004',
-      name: 'West Overflow Unit',
-      address: '321 Backup Ln, West Side',
-      capacity: 15000,
-      currentStock: 2000,
-      utilization: 13.3,
-      status: 'Maintenance',
-      manager: 'Pham Thi D'
-    }
-  ];
+  useEffect(() => {
+    const fetchWarehouses = async () => {
+      try {
+        const data = await warehouseService.getAllWarehouses();
+        setWarehouses(data);
+      } catch (error) {
+        console.error("Failed to fetch warehouses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWarehouses();
+  }, []);
 
   const filteredWarehouses = warehouses.filter(wh => 
     wh.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,6 +48,10 @@ const WarehouseList = () => {
     if (utilization > 70) return <Badge className="bg-orange-500 hover:bg-orange-600">High Usage</Badge>;
     return <Badge className="bg-green-600 hover:bg-green-700">Optimal</Badge>;
   };
+
+  if (loading) {
+    return <div className="p-6 text-center">Loading warehouses...</div>;
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -162,7 +139,7 @@ const WarehouseList = () => {
                       <span className="text-sm font-medium w-12">{wh.utilization}%</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {wh.currentStock.toLocaleString()} / {wh.capacity.toLocaleString()} units
+                      {wh.currentStock ? wh.currentStock.toLocaleString() : 'N/A'} / {wh.capacity ? wh.capacity.toLocaleString() : 'N/A'} units
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
