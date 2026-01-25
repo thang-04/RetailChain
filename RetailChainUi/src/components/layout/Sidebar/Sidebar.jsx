@@ -19,6 +19,11 @@ const Sidebar = () => {
         icon: "storefront"
       },
       {
+        path: "/warehouse",
+        label: "Central Warehouse",
+        icon: "warehouse"
+      },
+      {
         path: "/products", 
         label: "Products",
         icon: "inventory_2"
@@ -37,11 +42,6 @@ const Sidebar = () => {
         path: "/inventory/ledger",
         label: "Stock Ledger",
         icon: "history"
-      },
-      {
-        path: "/warehouse",
-        label: "Central Warehouse",
-        icon: "warehouse"
       },
       {
         path: "/reports",
