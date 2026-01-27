@@ -36,8 +36,8 @@ import StaffProfile from "../pages/Staff/Profile/StaffProfile";
 import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssignment";
 
 // Warehouse
-import WarehouseList from "../pages/Warehouse/WarehouseList";
-import WarehouseDetail from "../pages/Warehouse/WarehouseDetail";
+import WarehouseListPage from "../pages/Warehouse/WarehouseListPage";
+// import WarehouseDetail from "../pages/Warehouse/WarehouseDetail"; // Unused or replace if you have detail page
 
 const AppRoutes = () => {
   return (
@@ -53,8 +53,8 @@ const AppRoutes = () => {
         <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
 
         {/* Warehouse Module */}
-        <Route path="/warehouse" element={<WarehouseList />} />
-        <Route path="/warehouse/:id" element={<WarehouseDetail />} />
+        <Route path="/warehouse" element={<WarehouseListPage />} />
+        {/* <Route path="/warehouse/:id" element={<WarehouseDetail />} /> */}
 
         {/* Product Module */}
         <Route path="/products" element={<ProductPage />} />

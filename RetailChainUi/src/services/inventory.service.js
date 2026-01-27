@@ -1,8 +1,9 @@
+import { axiosPrivate } from './api/axiosClient';
 
-// Mock data for Inventory & Reports
+// Mock data for Inventory & Reports (Kept for fallback or unfinished APIs)
+// ... (Keep existing mock data variables if needed, or remove them to clean up)
 
 const STOCK_IN_RECORDS = [
-  { id: "SIR001", date: "2024-01-20", supplier: "Vinamilk Corp", totalItems: 500, totalValue: 15000000, status: "Completed", warehouse: "Central Warehouse" },
   { id: "SIR002", date: "2024-01-22", supplier: "Unilever VN", totalItems: 200, totalValue: 8500000, status: "Pending", warehouse: "Store A" },
   { id: "SIR003", date: "2024-01-23", supplier: "Coca-Cola", totalItems: 1000, totalValue: 12000000, status: "Completed", warehouse: "Central Warehouse" },
   { id: "SIR004", date: "2024-01-24", supplier: "Nestle", totalItems: 350, totalValue: 9200000, status: "Processing", warehouse: "Store B" },
@@ -117,6 +118,20 @@ const REPORT_DATA = {
 };
 
 const inventoryService = {
+  // --- Real Backend APIs ---
+  createWarehouse: async (data) => {
+    return axiosPrivate.post('/inventory/warehouse', data);
+  },
+
+  getAllWarehouses: async () => {
+    return axiosPrivate.get('/inventory/warehouse');
+  },
+
+  getStockByWarehouse: async (warehouseId) => {
+    return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
+  },
+
+  // --- Mock Methods (Legacy/Placeholder) ---
   getStockInRecords: async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
     return STOCK_IN_RECORDS;

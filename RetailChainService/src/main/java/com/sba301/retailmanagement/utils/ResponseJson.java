@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ResponseJson {
 
-    private static final Gson gson = new Gson();
+    private static final Gson gson = CommonUtils.gson;
 
     private ResponseJson() {
     }
