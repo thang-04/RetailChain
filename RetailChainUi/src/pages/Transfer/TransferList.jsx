@@ -4,11 +4,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
-import { Upload, Plus, Eye } from 'lucide-react';
+import { Plus, Eye, ArrowRightLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const StockInList = () => {
+const TransferList = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -16,10 +16,10 @@ const StockInList = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await inventoryService.getStockInRecords();
+                const data = await inventoryService.getTransferRecords();
                 setRecords(data);
             } catch (error) {
-                console.error("Failed to fetch stock in records:", error);
+                console.error("Failed to fetch transfer records:", error);
             } finally {
                 setLoading(false);
             }
@@ -31,43 +31,38 @@ const StockInList = () => {
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Stock In Records</h2>
-                    <p className="text-muted-foreground">Manage incoming shipments and receipts.</p>
+                    <h2 className="text-3xl font-bold tracking-tight">Điều Chuyển Kho</h2>
+                    <p className="text-muted-foreground">Quản lý lịch sử và phiếu điều chuyển hàng hóa giữa các kho.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="gap-2">
-                        <Upload className="w-4 h-4" />
-                        Import Excel
+                <Link to="/transfers/create">
+                    <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Tạo Lệnh Điều Chuyển
                     </Button>
-                    <Link to="/stock-in/create">
-                        <Button className="gap-2">
-                            <Plus className="w-4 h-4" />
-                            Create Receipt
-                        </Button>
-                    </Link>
-                </div>
+                </Link>
             </div>
 
             <Card>
                 <CardHeader>
                     <div className="flex justify-between items-center">
-                        <CardTitle>Recent Receipts</CardTitle>
-                        <Input className="max-w-xs" placeholder="Search by ID or Supplier..." />
+                        <CardTitle>Lịch Sử Điều Chuyển</CardTitle>
+                        <Input className="max-w-xs" placeholder="Tìm theo Mã phiếu..." />
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {loading ? <div className="text-center py-10">Loading records...</div> : (
+                    {loading ? <div className="text-center py-10">Đang tải dữ liệu...</div> : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Receipt ID</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Supplier</TableHead>
-                                    <TableHead>Destination</TableHead>
-                                    <TableHead className="text-right">Items</TableHead>
-                                    <TableHead className="text-right">Total Value</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Action</TableHead>
+                                    <TableHead>Mã Phiếu</TableHead>
+                                    <TableHead>Ngày Tạo</TableHead>
+                                    <TableHead>Từ Kho</TableHead>
+                                    <TableHead></TableHead>
+                                    <TableHead>Đến Kho</TableHead>
+                                    <TableHead className="text-right">Tổng Items</TableHead>
+                                    <TableHead>Người Tạo</TableHead>
+                                    <TableHead>Trạng Thái</TableHead>
+                                    <TableHead className="text-right">Hành Động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -75,16 +70,19 @@ const StockInList = () => {
                                     <TableRow key={record.id}>
                                         <TableCell className="font-medium">{record.id}</TableCell>
                                         <TableCell>{record.date}</TableCell>
-                                        <TableCell>{record.supplier}</TableCell>
-                                        <TableCell>{record.warehouse}</TableCell>
+                                        <TableCell>{record.from}</TableCell>
+                                        <TableCell><ArrowRightLeft className="w-4 h-4 text-muted-foreground" /></TableCell>
+                                        <TableCell>{record.to}</TableCell>
                                         <TableCell className="text-right">{record.totalItems}</TableCell>
-                                        <TableCell className="text-right">{record.totalValue.toLocaleString()} VND</TableCell>
+                                        <TableCell>{record.createdBy}</TableCell>
                                         <TableCell>
                                             <Badge variant={
                                                 record.status === 'Completed' ? 'default' : 
                                                 record.status === 'Pending' ? 'secondary' : 'outline'
                                             }>
-                                                {record.status}
+                                                {record.status === 'Completed' ? 'Hoàn thành' : 
+                                                 record.status === 'Pending' ? 'Chờ duyệt' : 
+                                                 record.status === 'In Transit' ? 'Đang vận chuyển' : record.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -103,5 +101,4 @@ const StockInList = () => {
     );
 };
 
-export default StockInList;
-
+export default TransferList;

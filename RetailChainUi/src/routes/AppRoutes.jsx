@@ -18,6 +18,15 @@ import ProductChainView from "../pages/Product/ProductDetail/ProductChainView";
 import InventoryPage from "../pages/Inventory/InventoryPage";
 import StockLedger from "../pages/Inventory/StockLedger";
 import StockInList from "../pages/StockIn/StockInList";
+import CreateStockIn from "../pages/StockIn/CreateStockIn";
+
+// Stock Out
+import StockOutList from "../pages/StockOut/StockOutList";
+import CreateStockOut from "../pages/StockOut/CreateStockOut";
+
+// Transfer
+import TransferList from "../pages/Transfer/TransferList";
+import CreateTransfer from "../pages/Transfer/CreateTransfer";
 
 // Staff
 import StaffList from "../pages/Staff/StaffList/StaffList";
@@ -54,7 +63,16 @@ const AppRoutes = () => {
         {/* Inventory Module */}
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/inventory/ledger" element={<StockLedger />} />
+        
+        {/* Stock In, Out, Transfer */}
         <Route path="/stock-in" element={<StockInList />} />
+        <Route path="/stock-in/create" element={<CreateStockIn />} />
+        
+        <Route path="/stock-out" element={<StockOutList />} />
+        <Route path="/stock-out/create" element={<CreateStockOut />} />
+        
+        <Route path="/transfers" element={<TransferList />} />
+        <Route path="/transfers/create" element={<CreateTransfer />} />
 
         {/* Staff Module */}
         <Route path="/staff" element={<StaffList />} />

@@ -8,6 +8,18 @@ const STOCK_IN_RECORDS = [
   { id: "SIR004", date: "2024-01-24", supplier: "Nestle", totalItems: 350, totalValue: 9200000, status: "Processing", warehouse: "Store B" },
 ];
 
+const STOCK_OUT_RECORDS = [
+  { id: "SOR001", date: "2024-01-26", reason: "Sales Order", totalItems: 120, totalValue: 3500000, status: "Completed", warehouse: "Central Warehouse" },
+  { id: "SOR002", date: "2024-01-27", reason: "Expired", totalItems: 50, totalValue: 1200000, status: "Pending", warehouse: "Store A" },
+  { id: "SOR003", date: "2024-01-27", reason: "Damage", totalItems: 10, totalValue: 500000, status: "Completed", warehouse: "Central Warehouse" },
+];
+
+const TRANSFER_RECORDS = [
+  { id: "TRF001", date: "2024-01-25", from: "Central Warehouse", to: "Store A", totalItems: 500, status: "Completed", createdBy: "Admin" },
+  { id: "TRF002", date: "2024-01-26", from: "Store B", to: "Store C", totalItems: 200, status: "In Transit", createdBy: "Manager B" },
+  { id: "TRF003", date: "2024-01-28", from: "Central Warehouse", to: "Store B", totalItems: 1000, status: "Pending", createdBy: "Admin" },
+];
+
 const STOCK_LEDGER = [
   { id: "TRX001", date: "2024-01-25 08:30", type: "Stock In", product: "Milk 1L", quantity: 100, location: "Store A", ref: "SIR001", user: "Nguyen Van A" },
   { id: "TRX002", date: "2024-01-25 09:15", type: "Sales", product: "Milk 1L", quantity: -2, location: "Store A", ref: "ORD998", user: "System" },
@@ -108,6 +120,37 @@ const inventoryService = {
   getStockInRecords: async () => {
     await new Promise(resolve => setTimeout(resolve, 500));
     return STOCK_IN_RECORDS;
+  },
+
+  getStockOutRecords: async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return STOCK_OUT_RECORDS;
+  },
+
+  getTransferRecords: async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return TRANSFER_RECORDS;
+  },
+
+  createStockIn: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `SIR${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    STOCK_IN_RECORDS.unshift(newRecord);
+    return newRecord;
+  },
+
+  createStockOut: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `SOR${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    STOCK_OUT_RECORDS.unshift(newRecord);
+    return newRecord;
+  },
+
+  createTransfer: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `TRF${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    TRANSFER_RECORDS.unshift(newRecord);
+    return newRecord;
   },
 
   getStockLedger: async () => {
