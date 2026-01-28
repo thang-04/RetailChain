@@ -1,6 +1,8 @@
 package com.sba301.retailmanagement.controller;
 
+import com.google.gson.JsonObject;
 import com.sba301.retailmanagement.dto.request.InventoryHistoryRequest;
+import com.sba301.retailmanagement.dto.response.InventoryHistoryResponse;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.service.InventoryHistoryService;
@@ -8,9 +10,8 @@ import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 
 @Slf4j
 @RestController
@@ -23,42 +24,49 @@ public class InventoryHistoryController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/record")
+    //get list inventory history
+    @GetMapping("/record")
+    public ResponseEntity<?> getAllInventoryHistory() {
+        try {
+            return ResponseEntity.ok(
+                    inventoryHistoryService.getAllInventoryHistory()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    "Lỗi khi lấy lịch sử tồn kho"
+            );
+        }
+    }
+    //get inventory history detail
+    @GetMapping("/record/{id}")
+    public InventoryHistoryResponse getInventoryHistoryDetail(
+            @PathVariable Long id) {
+        return inventoryHistoryService.getInventoryHistoryDetail(id);
+    }
+
+
+
+    //ghi nhận thay đổi inventory history
+    @PostMapping("/record/add")
     public String recordInventoryHistory(
             @RequestParam Long actorUserId,
-            @RequestBody InventoryHistoryRequest request
-    ) {
-        String prefix = "[recordInventoryHistory]"
-                + "|actorUserId=" + actorUserId
-                + "|warehouseId=" + request.getWarehouseId()
-                + "|variantId=" + request.getVariantId();
-
-        log.info("{}|START|warehouseId={}, variantId={}, quantity={}, action={}",
-                prefix,
-                request.getWarehouseId(),
-                request.getVariantId(),
-                request.getQuantity(),
-                request.getAction()
-        );
+            @RequestBody InventoryHistoryRequest request) {
         try {
             User actorUser = userRepository.findById(actorUserId)
                     .orElse(null);
 
             if (actorUser == null) {
-                log.error("{}|FAILED|Không tìm thấy người dùng", prefix);
                 return ResponseJson.toJsonString(
                         ApiCode.UNSUCCESSFUL,
                         "Không tìm thấy người thực hiện thao tác"
                 );
             }
             inventoryHistoryService.recordInventoryChange(request, actorUser);
-            log.info("{}|END|Thành công", prefix);
             return ResponseJson.toJsonString(
                     ApiCode.SUCCESSFUL,
                     "Ghi nhận lịch sử tồn kho thành công"
             );
         } catch (Exception e) {
-            log.error("{}|EXCEPTION|{}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(
                     ApiCode.ERROR_INTERNAL,
                     "Lỗi khi ghi nhận lịch sử tồn kho: " + e.getMessage()
