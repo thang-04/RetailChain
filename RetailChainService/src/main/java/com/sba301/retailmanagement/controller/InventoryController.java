@@ -108,4 +108,19 @@ public class InventoryController {
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error transferring stock: " + e.getMessage());
         }
     }
+
+    @GetMapping("/documents")
+    public String getDocuments(@RequestParam String type) {
+        String prefix = "[getDocuments]|type=" + type;
+        log.info("{}|START", prefix);
+        try {
+            List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> response = inventoryService
+                    .getDocumentsByType(type);
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Documents retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving documents: " + e.getMessage());
+        }
+    }
 }

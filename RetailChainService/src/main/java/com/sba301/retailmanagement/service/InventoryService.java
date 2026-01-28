@@ -9,10 +9,16 @@ import java.util.List;
 
 public interface InventoryService {
     WarehouseResponse createWarehouse(WarehouseRequest request);
+
     List<WarehouseResponse> getAllWarehouses();
+
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
-    
+
     void importStock(StockRequest request);
+
     void exportStock(StockRequest request);
+
     void transferStock(TransferRequest request);
+
+    List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String type);
 }

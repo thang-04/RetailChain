@@ -64,3 +64,13 @@ The application logic is working correctly end-to-end.
 - **Database** correctly maintains stock ledger and calculates balances.
 
 The system is verified to be **Operational** for these features.
+
+## 7. UI-API Integration Verification
+**Feature**: Stock In History List (`/stock-in`)
+**Status**: ✅ Verified
+**Details**:
+- **API Endpoint**: `GET /api/inventory/documents?type=IMPORT` (Implemented & Exposed)
+- **Frontend Integration**: Updated `inventory.service.js` to consume the real API.
+- **Verification**: Playwright script `test_stock_in_list.js` successfully detected **8 records** in the UI table.
+- **Data Match**: The UI displayed the correct Warehouse Name (`PW_WH_1769590014697`) and Quantity (`100`) from the earlier E2E test.
+

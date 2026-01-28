@@ -73,16 +73,16 @@ const StockInList = () => {
                             <TableBody>
                                 {records.map((record) => (
                                     <TableRow key={record.id}>
-                                        <TableCell className="font-medium">{record.id}</TableCell>
-                                        <TableCell>{record.date}</TableCell>
-                                        <TableCell>{record.supplier}</TableCell>
-                                        <TableCell>{record.warehouse}</TableCell>
+                                        <TableCell className="font-medium">{record.documentCode}</TableCell>
+                                        <TableCell>{new Date(record.createdAt).toLocaleDateString('vi-VN')}</TableCell>
+                                        <TableCell>{record.supplier || 'N/A'}</TableCell>
+                                        <TableCell>{record.targetWarehouseName}</TableCell>
                                         <TableCell className="text-right">{record.totalItems}</TableCell>
-                                        <TableCell className="text-right">{record.totalValue.toLocaleString()} VND</TableCell>
+                                        <TableCell className="text-right">{(record.totalValue || 0).toLocaleString()} VND</TableCell>
                                         <TableCell>
                                             <Badge variant={
-                                                record.status === 'Completed' ? 'default' : 
-                                                record.status === 'Pending' ? 'secondary' : 'outline'
+                                                record.status === 'Completed' ? 'default' :
+                                                    record.status === 'Pending' ? 'secondary' : 'outline'
                                             }>
                                                 {record.status}
                                             </Badge>

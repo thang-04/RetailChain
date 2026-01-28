@@ -106,15 +106,15 @@ const MOCK_ALL_INVENTORIES = [
 ];
 
 const REPORT_DATA = {
-    inventoryValue: 1250000000,
-    turnoverRate: 4.5,
-    lowStockItems: 12,
-    stockDistribution: [
-        { name: 'Store A', value: 30 },
-        { name: 'Store B', value: 25 },
-        { name: 'Store C', value: 15 },
-        { name: 'Warehouse', value: 30 },
-    ]
+  inventoryValue: 1250000000,
+  turnoverRate: 4.5,
+  lowStockItems: 12,
+  stockDistribution: [
+    { name: 'Store A', value: 30 },
+    { name: 'Store B', value: 25 },
+    { name: 'Store C', value: 15 },
+    { name: 'Warehouse', value: 30 },
+  ]
 };
 
 const inventoryService = {
@@ -164,9 +164,16 @@ const inventoryService = {
   },
 
   // --- Mock Methods (Legacy/Placeholder) ---
+  // --- Real API Implementation ---
   getStockInRecords: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return STOCK_IN_RECORDS;
+    try {
+      // baseURL already includes /retail-chain/api
+      const response = await axiosPrivate.get('/inventory/documents?type=IMPORT');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch stock in error", error);
+      return [];
+    }
   },
 
   getStockOutRecords: async () => {
@@ -209,7 +216,7 @@ const inventoryService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     return STORE_INVENTORY;
   },
-  
+
   getAllInventories: async () => {
     await new Promise(resolve => setTimeout(resolve, 600));
     return MOCK_ALL_INVENTORIES;
@@ -221,8 +228,8 @@ const inventoryService = {
   },
 
   getExecutiveReport: async () => {
-      await new Promise(resolve => setTimeout(resolve, 600));
-      return REPORT_DATA;
+    await new Promise(resolve => setTimeout(resolve, 600));
+    return REPORT_DATA;
   }
 };
 

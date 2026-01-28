@@ -57,12 +57,12 @@ public class InventoryServiceImpl implements InventoryService {
             StoreWarehouse storeWarehouse = new StoreWarehouse();
             StoreWarehouseId id = new StoreWarehouseId(request.getStoreId(), savedWarehouse.getId());
             storeWarehouse.setId(id);
-            
+
             Store storeProxy = new Store();
             storeProxy.setId(request.getStoreId());
             storeWarehouse.setStore(storeProxy);
             storeWarehouse.setWarehouse(savedWarehouse);
-            
+
             storeWarehouseRepository.save(storeWarehouse);
         }
 
@@ -82,14 +82,14 @@ public class InventoryServiceImpl implements InventoryService {
         return stocks.stream().map(stock -> {
             String sku = "UNKNOWN";
             String productName = "UNKNOWN";
-            
+
             if (stock.getVariant() != null) {
                 sku = stock.getVariant().getSku();
                 if (stock.getVariant().getProduct() != null) {
                     productName = stock.getVariant().getProduct().getName();
                 }
             }
-            
+
             return InventoryStockResponse.builder()
                     .warehouseId(stock.getId().getWarehouseId())
                     .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
@@ -117,7 +117,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setNote(request.getNote());
         document.setCreatedBy(1L); // TODO: Get from SecurityContext
         document.setCreatedAt(LocalDateTime.now());
-        
+
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
 
         for (InventoryItemRequest itemReq : request.getItems()) {
@@ -146,7 +146,8 @@ public class InventoryServiceImpl implements InventoryService {
             inventoryStockRepository.save(stock);
 
             // Log History
-            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, itemReq.getQuantity(), newQuantity);
+            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
+                    newQuantity);
         }
     }
 
@@ -165,7 +166,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setNote(request.getNote());
         document.setCreatedBy(1L); // TODO: Get from SecurityContext
         document.setCreatedAt(LocalDateTime.now());
-        
+
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
 
         for (InventoryItemRequest itemReq : request.getItems()) {
@@ -199,7 +200,8 @@ public class InventoryServiceImpl implements InventoryService {
             inventoryStockRepository.save(stock);
 
             // Log History
-            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.OUT, itemReq.getQuantity(), newQuantity);
+            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.OUT, itemReq.getQuantity(),
+                    newQuantity);
         }
     }
 
@@ -236,7 +238,8 @@ public class InventoryServiceImpl implements InventoryService {
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
             InventoryStock sourceStock = inventoryStockRepository.findById(sourceStockId)
-                    .orElseThrow(() -> new RuntimeException("Stock record not found in Source Warehouse for variant: " + variant.getId()));
+                    .orElseThrow(() -> new RuntimeException(
+                            "Stock record not found in Source Warehouse for variant: " + variant.getId()));
 
             if (sourceStock.getQuantity() < itemReq.getQuantity()) {
                 throw new RuntimeException("Insufficient stock in Source Warehouse for variant: " + variant.getId());
@@ -260,7 +263,8 @@ public class InventoryServiceImpl implements InventoryService {
             inventoryStockRepository.save(sourceStock);
 
             // Log Source History (OUT)
-            createHistory(savedDoc, savedItem, sourceWarehouse, variant, InventoryAction.OUT, itemReq.getQuantity(), sourceNewQty);
+            createHistory(savedDoc, savedItem, sourceWarehouse, variant, InventoryAction.OUT, itemReq.getQuantity(),
+                    sourceNewQty);
 
             // 2. Process Target Warehouse (IN)
             InventoryStockId targetStockId = new InventoryStockId(targetWarehouse.getId(), variant.getId());
@@ -274,12 +278,13 @@ public class InventoryServiceImpl implements InventoryService {
             inventoryStockRepository.save(targetStock);
 
             // Log Target History (IN)
-            createHistory(savedDoc, savedItem, targetWarehouse, variant, InventoryAction.IN, itemReq.getQuantity(), targetNewQty);
+            createHistory(savedDoc, savedItem, targetWarehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
+                    targetNewQty);
         }
     }
 
-    private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse, 
-                             ProductVariant variant, InventoryAction action, int quantity, int balance) {
+    private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
+            ProductVariant variant, InventoryAction action, int quantity, int balance) {
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
@@ -294,7 +299,7 @@ public class InventoryServiceImpl implements InventoryService {
         history.setBalanceAfter(balance);
         history.setActorUserId(1L); // TODO: Get from SecurityContext
         history.setOccurredAt(LocalDateTime.now());
-        
+
         inventoryHistoryRepository.save(history);
     }
 
@@ -309,5 +314,48 @@ public class InventoryServiceImpl implements InventoryService {
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String typeStr) {
+        InventoryDocumentType type;
+        try {
+            type = InventoryDocumentType.valueOf(typeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid document type: " + typeStr);
+        }
+
+        List<InventoryDocument> documents = inventoryDocumentRepository.findByDocumentTypeOrderByCreatedAtDesc(type);
+
+        return documents.stream().map(doc -> {
+            List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
+            int totalItems = items.stream().mapToInt(InventoryDocumentItem::getQuantity).sum();
+
+            // Calculate approximate total value if variant has price (optional, simple
+            // implementation)
+            long totalValue = 0;
+            // Assuming we don't fetch variant prices deeply here to perform fast
+
+            return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
+                    .id(doc.getId())
+                    .documentCode(doc.getDocumentCode())
+                    .documentType(doc.getDocumentType().name())
+                    .sourceWarehouseId(doc.getSourceWarehouseId())
+                    .sourceWarehouseName(doc.getSourceWarehouse() != null ? doc.getSourceWarehouse().getName() : null)
+                    .targetWarehouseId(doc.getTargetWarehouseId())
+                    .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
+                    .note(doc.getNote())
+                    .status("Completed") // Inventory transaction is immediate in this system logic
+                    .createdBy(String.valueOf(doc.getCreatedBy()))
+                    .createdAt(doc.getCreatedAt())
+                    .totalItems(totalItems)
+                    .totalValue(totalValue)
+                    .supplier(doc.getDocumentType() == InventoryDocumentType.IMPORT ? "Supplier (Ref)" : null) // Placeholder
+                                                                                                               // or
+                                                                                                               // data
+                                                                                                               // from
+                                                                                                               // Note
+                    .build();
+        }).collect(Collectors.toList());
     }
 }
