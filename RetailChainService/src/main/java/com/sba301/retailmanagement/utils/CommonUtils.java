@@ -1,44 +1,52 @@
 package com.sba301.retailmanagement.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
 public class CommonUtils {
 
-    public static Gson gson = new Gson();
+    public static Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
+
+    public static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+        private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        @Override
+        public JsonElement serialize(LocalDateTime localDateTime, Type srcType, JsonSerializationContext context) {
+            return new JsonPrimitive(formatter.format(localDateTime));
+        }
+
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            return LocalDateTime.parse(json.getAsString(), formatter);
+        }
+    }
 
     public static boolean isNotEmpty(String string) {
         return string != null && !string.equals("");
     }
 
     public static String toJson(Map<String, Object> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String convertMapToJson(Map<String, String> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String convertMapObjectToJson(Map<Object, Object> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String listToJsonArray(List<Object> lsObject) {
@@ -153,6 +161,5 @@ public class CommonUtils {
         }.getType();
         return gson.fromJson(json, type);
     }
-
 
 }
