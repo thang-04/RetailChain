@@ -1,6 +1,9 @@
 package com.sba301.retailmanagement.controller;
 
+import com.sba301.retailmanagement.dto.request.StockRequest;
+import com.sba301.retailmanagement.dto.request.TransferRequest;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
+
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.service.InventoryService;
@@ -61,6 +64,48 @@ public class InventoryController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving stock: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/import")
+    public String importStock(@RequestBody StockRequest request) {
+        String prefix = "[importStock]";
+        log.info("{}|START|request={}", prefix, gson.toJson(request));
+        try {
+            inventoryService.importStock(request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Stock imported successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error importing stock: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/export")
+    public String exportStock(@RequestBody StockRequest request) {
+        String prefix = "[exportStock]";
+        log.info("{}|START|request={}", prefix, gson.toJson(request));
+        try {
+            inventoryService.exportStock(request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Stock exported successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error exporting stock: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/transfer")
+    public String transferStock(@RequestBody TransferRequest request) {
+        String prefix = "[transferStock]";
+        log.info("{}|START|request={}", prefix, gson.toJson(request));
+        try {
+            inventoryService.transferStock(request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Stock transferred successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error transferring stock: " + e.getMessage());
         }
     }
 }

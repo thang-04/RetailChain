@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Badge } from "../../components/ui/badge";
 import { Input } from "../../components/ui/input";
 import { ArrowLeft, Package, AlertTriangle, Truck, History, Search, Filter } from 'lucide-react';
-import warehouseService from '../../services/warehouse.service';
+import inventoryService from '../../services/inventory.service';
 
 const WarehouseDetail = () => {
   const { id } = useParams();
@@ -22,10 +22,35 @@ const WarehouseDetail = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const wh = await warehouseService.getWarehouseById(id || 'WH001');
-            const inv = await warehouseService.getWarehouseInventory(id || 'WH001');
-            setWarehouseInfo(wh);
-            setInventoryData(inv);
+            
+            // Fetch Warehouse Info (Client-side filter since no detail API yet)
+            const whRes = await inventoryService.getAllWarehouses();
+            const foundWh = whRes.data ? whRes.data.find(w => String(w.id) === id) : null;
+            
+            if (foundWh) {
+                setWarehouseInfo({
+                    ...foundWh,
+                    manager: "N/A", // Mock field
+                    metrics: {
+                        totalItems: 0, // Will be calculated from stock
+                        inboundDaily: "N/A"
+                    }
+                });
+
+                // Fetch Stock
+                const stockRes = await inventoryService.getStockByWarehouse(id);
+                if (stockRes.data) {
+                    setInventoryData(stockRes.data);
+                    // Update metrics based on real stock data
+                    setWarehouseInfo(prev => ({
+                        ...prev,
+                        metrics: {
+                            ...prev.metrics,
+                            totalItems: stockRes.data.reduce((sum, item) => sum + item.quantity, 0)
+                        }
+                    }));
+                }
+            }
         } catch (error) {
             console.error("Failed to fetch warehouse details:", error);
         } finally {
@@ -55,12 +80,12 @@ const WarehouseDetail = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{warehouseInfo.name}</h1>
           <p className="text-muted-foreground flex items-center gap-2">
-            ID: {warehouseInfo.id} • Manager: {warehouseInfo.info?.manager || warehouseInfo.manager}
+            Code: {warehouseInfo.code} • Type: {warehouseInfo.warehouseType === 1 ? 'Main' : 'Store'}
           </p>
         </div>
         <div className="ml-auto flex gap-2">
             <Button variant="outline">Export Report</Button>
-            <Button>Create Transfer</Button>
+            <Button onClick={() => navigate('/transfers')}>Create Transfer</Button>
         </div>
       </div>
 
@@ -70,35 +95,16 @@ const WarehouseDetail = () => {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Items</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{warehouseInfo.metrics?.totalItems || "---"}</div>
+                <div className="text-2xl font-bold">{warehouseInfo.metrics?.totalItems || 0}</div>
             </CardContent>
         </Card>
-        <Card>
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Low Stock Alerts</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold text-orange-600 flex items-center gap-2">
-                    12 <AlertTriangle size={18} />
-                </div>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Inbound</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold flex items-center gap-2">
-                    {warehouseInfo.metrics?.inboundDaily || "3 Orders"} <Truck size={18} className="text-muted-foreground"/>
-                </div>
-            </CardContent>
-        </Card>
-        <Card>
+        {/* ... Other cards kept static for now ... */}
+         <Card>
             <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Occupancy</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{warehouseInfo.utilization || "84.3"}%</div>
+                <div className="text-2xl font-bold">---%</div>
             </CardContent>
         </Card>
       </div>
@@ -119,13 +125,12 @@ const WarehouseDetail = () => {
                             <div className="relative w-64">
                                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                 <Input 
-                                    placeholder="Search SKU, Product Name..." 
+                                    placeholder="Search SKU..." 
                                     className="pl-8"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -133,119 +138,44 @@ const WarehouseDetail = () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>SKU</TableHead>
-                                <TableHead>Product Name</TableHead>
-                                <TableHead>Category</TableHead>
+                                <TableHead>Variant ID</TableHead>
+                                <TableHead>Product Name (Mock)</TableHead>
                                 <TableHead className="text-right">Quantity</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right">Last Updated</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {inventoryData.map((item) => (
-                                <TableRow key={item.id || item.sku}>
-                                    <TableCell className="font-medium">{item.id || item.sku}</TableCell>
-                                    <TableCell>{item.name}</TableCell>
-                                    <TableCell>{item.category || "General"}</TableCell>
-                                    <TableCell className="text-right font-bold">{item.stock.toLocaleString()}</TableCell>
-                                    <TableCell>{getStockStatusBadge(item.stock)}</TableCell>
+                            {inventoryData.filter(item => 
+                                !searchTerm || String(item.variantId).includes(searchTerm)
+                            ).map((item) => (
+                                <TableRow key={item.variantId}>
+                                    <TableCell className="font-medium">{item.variantId}</TableCell>
+                                    <TableCell>Product Variant #{item.variantId}</TableCell>
+                                    <TableCell className="text-right font-bold">{item.quantity.toLocaleString()}</TableCell>
+                                    <TableCell>{getStockStatusBadge(item.quantity)}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm">History</Button>
+                                        {new Date(item.updatedAt).toLocaleDateString()}
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {inventoryData.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-4">No inventory found in this warehouse.</TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
         </TabsContent>
         
+        {/* Inbound/Outbound tabs kept as mocks since no API for history yet */}
         <TabsContent value="inbound">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Inbound Shipments</CardTitle>
-                    <CardDescription>Recent stock arrivals from suppliers or returns.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Inbound ID</TableHead>
-                                <TableHead>Source</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Items Count</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {/* Mock inbound data inside component for now as service doesn't have it explicitly separate for detail view yet */}
-                            {[
-                                { id: 'IB-2023-001', source: 'Supplier ABC Corp', date: '2023-10-25', items: 500, status: 'Completed' },
-                                { id: 'IB-2023-002', source: 'Factory Direct', date: '2023-10-26', items: 1200, status: 'Processing' },
-                                { id: 'IB-2023-003', source: 'Store Return (HCM-01)', date: '2023-10-27', items: 50, status: 'Pending' },
-                            ].map((ib) => (
-                                <TableRow key={ib.id}>
-                                    <TableCell className="font-medium">{ib.id}</TableCell>
-                                    <TableCell>{ib.source}</TableCell>
-                                    <TableCell>{ib.date}</TableCell>
-                                    <TableCell>{ib.items}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={ib.status === 'Completed' ? 'default' : 'secondary'}>{ib.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm">View</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <div className="p-4 text-center text-muted-foreground">Inbound history not available yet (API Pending)</div>
         </TabsContent>
-        
         <TabsContent value="outbound">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Outbound Shipments</CardTitle>
-                    <CardDescription>Stock dispatched to stores or distribution centers.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Outbound ID</TableHead>
-                                <TableHead>Destination</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Items Count</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                             {/* Mock outbound data */}
-                            {[
-                                { id: 'OB-2023-882', dest: 'Store HCM-01 (Nguyen Hue)', date: '2023-10-24', items: 200, status: 'Shipped' },
-                                { id: 'OB-2023-883', dest: 'Store HN-05 (Cau Giay)', date: '2023-10-25', items: 150, status: 'Delivered' },
-                                { id: 'OB-2023-884', dest: 'Store DN-02 (Dragon Bridge)', date: '2023-10-26', items: 300, status: 'Packing' },
-                            ].map((ob) => (
-                                <TableRow key={ob.id}>
-                                    <TableCell className="font-medium">{ob.id}</TableCell>
-                                    <TableCell>{ob.dest}</TableCell>
-                                    <TableCell>{ob.date}</TableCell>
-                                    <TableCell>{ob.items}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={ob.status === 'Delivered' ? 'default' : 'outline'}>{ob.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm">Track</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <div className="p-4 text-center text-muted-foreground">Outbound history not available yet (API Pending)</div>
         </TabsContent>
       </Tabs>
     </div>

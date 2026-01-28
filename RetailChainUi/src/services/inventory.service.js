@@ -131,6 +131,38 @@ const inventoryService = {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
   },
 
+  importStock: async (data) => {
+    // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
+    return axiosPrivate.post('/inventory/import', data);
+  },
+
+  exportStock: async (data) => {
+    // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
+    return axiosPrivate.post('/inventory/export', data);
+  },
+
+  transferStock: async (data) => {
+    // data: { sourceWarehouseId, targetWarehouseId, note, items: [{ variantId, quantity }] }
+    return axiosPrivate.post('/inventory/transfer', data);
+  },
+
+  getAllProducts: async () => {
+    return axiosPrivate.get('/product');
+  },
+
+  // --- Wrapper for Legacy Components (To be refactored) ---
+  createStockIn: async (data) => {
+    return inventoryService.importStock(data);
+  },
+
+  createStockOut: async (data) => {
+    return inventoryService.exportStock(data);
+  },
+
+  createTransfer: async (data) => {
+    return inventoryService.transferStock(data);
+  },
+
   // --- Mock Methods (Legacy/Placeholder) ---
   getStockInRecords: async () => {
     await new Promise(resolve => setTimeout(resolve, 500));

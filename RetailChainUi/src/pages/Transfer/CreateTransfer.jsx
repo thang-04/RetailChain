@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,20 +9,47 @@ import { ArrowLeft, Save, Trash2, Plus, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
 
+// Temporary Mock Products until Product API is ready
+const MOCK_PRODUCTS = [
+    { id: 1, name: "Produce Edge (XL/Red)", sku: "SKU-36912022" },
+    { id: 2, name: "Produce Edge (M/White)", sku: "SKU-13311507" },
+    { id: 3, name: "Produce Edge (L/White)", sku: "SKU-41949529" },
+    { id: 4, name: "Certainly City (S/Blue)", sku: "SKU-99937039" },
+    { id: 5, name: "Certainly City (M/White)", sku: "SKU-96779126" },
+    { id: 6, name: "Certainly City (L/White)", sku: "SKU-14524825" },
+    { id: 7, name: "Just Assume (XL/Red)", sku: "SKU-3523729" },
+    { id: 8, name: "Just Assume (L/Black)", sku: "SKU-88227303" }
+];
+
 const CreateTransfer = () => {
     const navigate = useNavigate();
+    const [warehouses, setWarehouses] = useState([]);
     const [formData, setFormData] = useState({
-        fromWarehouse: 'Central Warehouse',
-        toWarehouse: '',
+        sourceWarehouseId: '',
+        targetWarehouseId: '',
         note: ''
     });
     const [items, setItems] = useState([
-        { id: 1, product: '', quantity: 1, unit: 'pcs' }
+        { id: Date.now(), variantId: '', quantity: 1 }
     ]);
     const [submitting, setSubmitting] = useState(false);
 
+    useEffect(() => {
+        const fetchWarehouses = async () => {
+            try {
+                const res = await inventoryService.getAllWarehouses();
+                if (res.data) {
+                    setWarehouses(res.data);
+                }
+            } catch (error) {
+                console.error("Failed to load warehouses", error);
+            }
+        };
+        fetchWarehouses();
+    }, []);
+
     const handleAddItem = () => {
-        setItems([...items, { id: Date.now(), product: '', quantity: 1, unit: 'pcs' }]);
+        setItems([...items, { id: Date.now(), variantId: '', quantity: 1 }]);
     };
 
     const handleRemoveItem = (id) => {
@@ -38,16 +65,18 @@ const CreateTransfer = () => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            const totalItems = items.reduce((sum, item) => sum + Number(item.quantity), 0);
             
-            await inventoryService.createTransfer({
-                from: formData.fromWarehouse,
-                to: formData.toWarehouse,
+            const payload = {
+                sourceWarehouseId: Number(formData.sourceWarehouseId),
+                targetWarehouseId: Number(formData.targetWarehouseId),
                 note: formData.note,
-                items,
-                totalItems,
-                createdBy: "Admin" // Mock user
-            });
+                items: items.map(item => ({
+                    variantId: Number(item.variantId),
+                    quantity: Number(item.quantity)
+                }))
+            };
+
+            await inventoryService.transferStock(payload);
             
             navigate('/transfers');
         } catch (error) {
@@ -80,16 +109,18 @@ const CreateTransfer = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Kho Nguồn (Từ)</label>
                             <Select 
-                                value={formData.fromWarehouse} 
-                                onValueChange={(val) => setFormData({...formData, fromWarehouse: val})}
+                                value={formData.sourceWarehouseId} 
+                                onValueChange={(val) => setFormData({...formData, sourceWarehouseId: val})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn kho nguồn" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Central Warehouse">Central Warehouse</SelectItem>
-                                    <SelectItem value="Store A">Store A</SelectItem>
-                                    <SelectItem value="Store B">Store B</SelectItem>
+                                    {warehouses.map(wh => (
+                                        <SelectItem key={wh.id} value={String(wh.id)}>
+                                            {wh.name}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -101,16 +132,21 @@ const CreateTransfer = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Kho Đích (Đến)</label>
                             <Select 
-                                value={formData.toWarehouse} 
-                                onValueChange={(val) => setFormData({...formData, toWarehouse: val})}
+                                value={formData.targetWarehouseId} 
+                                onValueChange={(val) => setFormData({...formData, targetWarehouseId: val})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn kho đích" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Central Warehouse" disabled={formData.fromWarehouse === 'Central Warehouse'}>Central Warehouse</SelectItem>
-                                    <SelectItem value="Store A" disabled={formData.fromWarehouse === 'Store A'}>Store A</SelectItem>
-                                    <SelectItem value="Store B" disabled={formData.fromWarehouse === 'Store B'}>Store B</SelectItem>
+                                    {warehouses
+                                        .filter(wh => String(wh.id) !== formData.sourceWarehouseId)
+                                        .map(wh => (
+                                            <SelectItem key={wh.id} value={String(wh.id)}>
+                                                {wh.name}
+                                            </SelectItem>
+                                        ))
+                                    }
                                 </SelectContent>
                             </Select>
                         </div>
@@ -137,8 +173,7 @@ const CreateTransfer = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[40%]">Sản Phẩm</TableHead>
-                                    <TableHead>Đơn Vị</TableHead>
+                                    <TableHead className="w-[40%]">Sản Phẩm (SKU)</TableHead>
                                     <TableHead>Số Lượng</TableHead>
                                     <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
@@ -148,25 +183,20 @@ const CreateTransfer = () => {
                                     <TableRow key={item.id}>
                                         <TableCell>
                                             <Select 
-                                                value={item.product} 
-                                                onValueChange={(val) => handleItemChange(item.id, 'product', val)}
+                                                value={String(item.variantId)} 
+                                                onValueChange={(val) => handleItemChange(item.id, 'variantId', val)}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Chọn sản phẩm" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="Milk 1L">Fresh Milk 1L</SelectItem>
-                                                    <SelectItem value="Orange Juice">Orange Juice</SelectItem>
-                                                    <SelectItem value="Shampoo">Shampoo 500ml</SelectItem>
+                                                    {MOCK_PRODUCTS.map(p => (
+                                                        <SelectItem key={p.id} value={String(p.id)}>
+                                                            {p.name} - {p.sku}
+                                                        </SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Input 
-                                                value={item.unit} 
-                                                disabled 
-                                                className="bg-muted"
-                                            />
                                         </TableCell>
                                         <TableCell>
                                             <Input 
@@ -195,7 +225,7 @@ const CreateTransfer = () => {
                             <Link to="/transfers">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                            <Button onClick={handleSubmit} disabled={submitting || !formData.toWarehouse}>
+                            <Button onClick={handleSubmit} disabled={submitting || !formData.targetWarehouseId}>
                                 {submitting ? "Đang xử lý..." : "Tạo Lệnh Điều Chuyển"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>
