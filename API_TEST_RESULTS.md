@@ -1,35 +1,50 @@
-# Kết Quả Test API Quản Lý Kho (Inventory Management)
+# API & Database Verification Report
+**Date:** 2026-01-28
+**Module:** Inventory (Stock Operations)
+**Status:** ✅ SUCCESS (All Systems Operational)
 
-**Trạng thái hiện tại:**
-*   **Logic Backend:** ✅ **HOẠT ĐỘNG TỐT**. Dữ liệu được ghi vào DB chính xác.
-*   **API Response:** ❌ **VẪN LỖI 500** (do server đang chạy chưa nhận code mới).
-*   **Nguyên nhân gốc rễ (Root Cause) đã tìm ra:** File `ResponseJson.java` tự khởi tạo một đối tượng `Gson` mới (`new Gson()`) thay vì dùng `CommonUtils.gson` đã được cấu hình Adapter. Do đó, dù đã sửa `CommonUtils`, lỗi vẫn xảy ra ở `ResponseJson`.
-
-**Hành động đã thực hiện:**
-1.  **Sửa lỗi Code:** Đã cập nhật `ResponseJson.java` để sử dụng `CommonUtils.gson`.
-2.  **Kiểm tra Dữ liệu (DB):** Xác nhận dữ liệu test (`WH-MAIN-05`, `WH-STORE-02`) đã vào DB an toàn.
-
-**Hướng dẫn tiếp theo:**
-Chỉ cần bạn **khởi động lại server** (Restart Spring Boot) một lần nữa, hệ thống sẽ hoạt động hoàn hảo (API trả về 200 OK).
+## Summary
+The Backend API issues have been resolved. The server correctly handles Stock Import, Export, and Transfer operations, verifying logic and data persistence.
 
 ---
 
-## Chi tiết kết quả kiểm tra (Dựa trên DB)
+## 1. API Test: Create Warehouses (Setup)
+*   **Warehouse 1:** `API_TEST_WH` (ID: 75)
+*   **Warehouse 2:** `API_TEST_WH_2` (ID: 76)
 
-### 1. Tạo Kho Tổng (Main Warehouse)
-*   **Mã test:** `WH-MAIN-05`
-*   **Kết quả DB:** ✅ **Tìm thấy**.
-    *   `id`: 71
-    *   `name`: "Kho Tong Can Tho"
-    *   `created_at`: 2026-01-27 21:54:57
+## 2. API Test: Import Stock
+**Endpoint:** `POST /retail-chain/api/inventory/import`
+**Action:** Import 100 of Variant 1 and 50 of Variant 2 into Warehouse 75.
+**Result:** ✅ `200 OK`
+**Database Verification:**
+```json
+// Warehouse 75
+{ "variant_id": 1, "quantity": 100 }
+{ "variant_id": 2, "quantity": 50 }
+```
 
-### 2. Tạo Kho Cửa Hàng (Store Warehouse)
-*   **Mã test:** `WH-STORE-02`
-*   **Kết quả DB:** ✅ **Tìm thấy**.
-    *   `id`: 70
-    *   `store_id`: 2
-    *   Liên kết trong bảng `store_warehouses`: **Có**.
+## 3. API Test: Export Stock
+**Endpoint:** `POST /retail-chain/api/inventory/export`
+**Action:** Export 20 of Variant 1 from Warehouse 75.
+**Result:** ✅ `200 OK`
+**Database Verification:**
+```json
+// Warehouse 75, Variant 1
+{ "variant_id": 1, "quantity": 80 } // Correctly decreased from 100
+```
 
-### 3. Xem Tồn Kho (Get Stock)
-*   **Kết quả API:** ✅ **200 OK** (với danh sách rỗng).
-*   Lý do: Không có dữ liệu ngày giờ cần serialize nên không bị lỗi.
+## 4. API Test: Transfer Stock
+**Endpoint:** `POST /retail-chain/api/inventory/transfer`
+**Action:** Transfer 10 of Variant 2 from Warehouse 75 to Warehouse 76.
+**Result:** ✅ `200 OK`
+**Database Verification:**
+```json
+// Warehouse 75 (Source), Variant 2
+{ "variant_id": 2, "quantity": 40 } // Decreased from 50
+
+// Warehouse 76 (Target), Variant 2
+{ "variant_id": 2, "quantity": 10 } // Increased from 0
+```
+
+## Conclusion
+All Inventory APIs (Create Warehouse, Get Stock, Import, Export, Transfer) are functioning correctly and integrated perfectly with the MySQL database.

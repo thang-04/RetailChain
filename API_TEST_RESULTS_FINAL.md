@@ -1,64 +1,66 @@
-# KẾT QUẢ TEST API QUẢN LÝ KHO (FINAL)
+# API & End-to-End Test Results
 
-Sau khi khởi động lại server với bản vá lỗi Gson Serialization (`CommonUtils.java` và `ResponseJson.java`), tất cả các API đã hoạt động **hoàn hảo** và trả về kết quả `200 OK` với định dạng JSON chuẩn.
+**Date**: 2026-01-28
+**Executor**: Playwright Automation + MySQL Validation
 
-## 1. Tạo Kho Tổng (Main Warehouse)
-*   **Request:** Tạo kho `WH-MAIN-06` (Kho Tổng Huế).
-*   **Kết quả API:** ✅ **200 OK**
-    ```json
-    {
-      "code": 200,
-      "desc": "Warehouse created successfully",
-      "data": {
-        "id": 72,
-        "code": "WH-MAIN-06",
-        "name": "Kho Tong Hue",
-        "warehouseType": 1,
-        "status": 1,
-        "createdAt": "2026-01-27 21:58:11",
-        "updatedAt": "2026-01-27 21:58:11"
-      }
-    }
-    ```
+## 1. Objective
+Verify the functionality of the RetailChain application by mimicking a real user flow through the UI and validating the resulting data in the MySQL database.
+This test covers the API-integrated modules: **Warehouse**, **Stock In**, **Stock Out**, and **Transfer**.
 
-## 2. Tạo Kho Cửa Hàng (Store Warehouse)
-*   **Request:** Tạo kho `WH-STORE-03` (Kho Cửa Hàng Quận 5).
-*   **Kết quả API:** ✅ **200 OK**
-    ```json
-    {
-      "code": 200,
-      "desc": "Warehouse created successfully",
-      "data": {
-        "id": 73,
-        "code": "WH-STORE-03",
-        "name": "Kho Cua Hang Quan 5",
-        "warehouseType": 2,
-        "storeId": 3,
-        "status": 1,
-        "createdAt": "2026-01-27 21:58:20",
-        "updatedAt": "2026-01-27 21:58:20"
-      }
-    }
-    ```
+## 2. Test Environment
+- **Frontend**: Vite + React (Port 5173)
+- **Backend**: Spring Boot (Port 8080)
+- **Database**: MySQL (Port 3306, DB `retail_chain`)
+- **Automation Tool**: Playwright (Headless/Visible)
 
-## 3. Lấy Danh Sách Tất Cả Kho
-*   **Request:** `GET /api/inventory/warehouse`
-*   **Kết quả API:** ✅ **200 OK**
-    *   Trả về danh sách đầy đủ (bao gồm cả các kho tạo trước đó bị lỗi hiển thị và các kho mới tạo).
-    *   Trường ngày giờ (`createdAt`, `updatedAt`) hiển thị đúng định dạng `yyyy-MM-dd HH:mm:ss`.
+## 3. Test Scenario
+The following sequence was automated:
+1.  **Create Warehouse**: Created a new warehouse named `PW_WH_{timestamp}`.
+2.  **Stock In (Import)**: Imported **100** items of *Produce Edge* (ID 1) into the new warehouse.
+3.  **Stock Out (Export)**: Exported **20** items of *Produce Edge* from the new warehouse.
+4.  **Transfer**: Transferred **10** items of *Produce Edge* from the new warehouse to another warehouse.
 
-## 4. Xem Tồn Kho (Get Stock)
-*   **Request:** Xem tồn kho của kho `73`.
-*   **Kết quả API:** ✅ **200 OK**
-    ```json
-    {
-      "code": 200,
-      "desc": "Stock retrieved successfully",
-      "data": []
-    }
-    ```
+**Expected Final Stock**: `100 (In) - 20 (Out) - 10 (Transfer) = 70`.
 
----
+## 4. Automation Results
+✅ **Playwright Execution**: **SUCCESS**
+- All UI actions (navigation, clicking, typing, submission) completed without errors.
+- Success notifications were observed.
+- Timestamps and dynamic names ensured a clean test run.
 
-## TỔNG KẾT
-Hệ thống Backend (Module Inventory) đã **hoàn thiện**, **không còn lỗi**, và **sẵn sàng** để tích hợp Frontend hoặc phát triển tiếp các tính năng khác.
+**Screenshots**:
+- `C:\tmp\playwright-flow-v2.js` (Test Script)
+- Success logs available in session history.
+
+## 5. Database Verification
+After the test complete, the database was queried to verify data integrity.
+
+### 5.1. Warehouse Check
+**Query**: `SELECT * FROM warehouses WHERE name = 'PW_WH_1769590014697'`
+**Result**: 
+- **ID**: `78`
+- **Name**: `PW_WH_1769590014697`
+- **Status**: Exists
+
+### 5.2. Transaction History
+**Query**: `SELECT * FROM inventory_history WHERE warehouse_id = 78`
+**Result**: 3 Transactions found.
+
+| ID | Action | Quantity | Balance After | Note |
+|---|---|---|---|---|
+| 10 | IN | 100 | 100 | Stock In |
+| 11 | OUT | 20 | 80 | Stock Out |
+| 12 | OUT | 10 | 70 | Transfer (Source) |
+
+### 5.3. Final Stock Balance
+**Query**: `SELECT quantity FROM inventory_stock WHERE warehouse_id = 78 AND variant_id = 1`
+**Result**:
+- **Quantity**: `70`
+
+## 6. Conclusion
+The application logic is working correctly end-to-end.
+- **Frontend Forms** correctly send data to APIs.
+- **Backend APIs** correctly process transactions.
+- **Database** correctly maintains stock ledger and calculates balances.
+
+The system is verified to be **Operational** for these features.
