@@ -1,4 +1,4 @@
-// Mock data for Store Module
+import { axiosPublic } from './api/axiosClient';
 
 const STORES = [
   { 
@@ -124,20 +124,90 @@ const STORE_DETAILS = {
 
 const storeService = {
   getAllStores: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return STORES;
+    try {
+      const response = await axiosPublic.get('/api/stores');
+      if (response && response.data) {
+        return response.data.map(store => ({
+          id: store.code,
+          name: store.name,
+          address: store.address,
+          manager: store.manager || "N/A",
+          phone: store.phone || "N/A",
+          status: store.status || "Active",
+          revenue: store.revenue || "N/A",
+          type: store.type || "Standard"
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+      throw error;
+    }
   },
 
-  getStoreById: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return STORE_DETAILS[id] || { ...STORES[0], id }; // Fallback for demo
+  getStoreById: async (slug) => {
+    try {
+      const response = await axiosPublic.get(`/api/stores/${slug}`);
+      if (response && response.data) {
+        const storeData = response.data;
+
+        return {
+          id: storeData.code,
+          name: storeData.name,
+          address: storeData.address,
+          manager: storeData.manager || "N/A",
+          phone: storeData.phone || "N/A",
+          email: storeData.email || "N/A",
+          openedDate: storeData.openedDate || "N/A",
+          size: storeData.size || "N/A",
+          type: storeData.type || "Standard",
+          status: storeData.status || "Active",
+          kpi: storeData.kpi || {
+            dailyRevenue: "0",
+            monthlyRevenue: "0",
+            orders: 0,
+            avgBasketSize: "0"
+          },
+          inventory: storeData.inventory || [],
+          staff: storeData.staff || [],
+          recentOrders: storeData.recentOrders || [],
+          lowStock: storeData.lowStock || []
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching store detail:', error);
+      throw error;
+    }
   },
 
   createStore: async (data) => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    const newStore = { ...data, id: `S${Date.now()}` };
-    console.log("Created store:", newStore);
-    return newStore;
+    try {
+      const requestData = {
+        code: data.code,
+        name: data.name,
+        address: data.address
+      };
+      
+      const response = await axiosPublic.post('/api/stores', requestData);
+      if (response && response.data) {
+        const newStore = response.data;
+        return {
+          id: newStore.code,
+          name: newStore.name,
+          address: newStore.address,
+          manager: newStore.manager || "N/A",
+          phone: newStore.phone || "N/A",
+          status: newStore.status || "Active",
+          revenue: newStore.revenue || "N/A",
+          type: newStore.type || "Standard"
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error creating store:', error);
+      throw error;
+    }
   },
 
   getStoreStaff: async (storeId) => {
@@ -147,9 +217,25 @@ const storeService = {
   },
 
   updateStore: async (id, data) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log(`Updated store ${id}:`, data);
-    return { id, ...data };
+    try {
+      const statusMap = {
+        'Active': 1,
+        'Inactive': 0,
+        'Maintenance': 0 
+      };
+
+      const requestData = {
+        name: data.name,
+        address: data.address,
+        status: statusMap[data.status] ?? 1
+      };
+
+      const response = await axiosPublic.put(`/api/stores/${id}`, requestData);
+      return response?.data || response;
+    } catch (error) {
+      console.error(`Error updating store ${id}:`, error);
+      throw error;
+    }
   },
 
   deleteStore: async (id) => {

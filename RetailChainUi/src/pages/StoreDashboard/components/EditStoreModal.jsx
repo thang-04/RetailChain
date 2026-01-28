@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
+import storeService from '../../../services/store.service';
 
 const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     const [formData, setFormData] = useState({
         name: '',
         address: '',
-        city: '',
         type: '',
         warehouse: '',
         status: 'Active'
@@ -17,13 +17,11 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
 
-    // Pre-populate form when storeData changes
     useEffect(() => {
         if (storeData) {
             setFormData({
                 name: storeData.name || '',
                 address: storeData.address || '',
-                city: storeData.city || '',
                 type: storeData.type || '',
                 warehouse: storeData.warehouse || '',
                 status: storeData.status || 'Active'
@@ -56,11 +54,24 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
         setIsConfirmOpen(true);
     };
 
-    const handleConfirmSave = () => {
-        console.log('Updating store:', formData);
-        //Call API to update store
-        setIsConfirmOpen(false);
-        onClose();
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleConfirmSave = async () => {
+        if (!storeData?.id) return;
+
+        setIsSaving(true);
+        try {
+            console.log('Updating store:', formData);
+            await storeService.updateStore(storeData.id, formData);
+            setIsConfirmOpen(false);
+            onClose();
+
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to update store:', error);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -139,20 +150,6 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                             onChange={handleInputChange}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="city">
-                                            City
-                                        </label>
-                                        <input
-                                            className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
-                                            id="city"
-                                            name="city"
-                                            placeholder="e.g., London"
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
                                 </div>
                                 <div className="h-px bg-[#f1f3f4] dark:bg-gray-700"></div>
                                 <div className="space-y-4">
@@ -213,12 +210,17 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                         </div>
                         <div className="bg-[#f9fafa] dark:bg-[#182124] px-8 py-6 border-t border-[#f1f3f4] dark:border-gray-700 flex flex-col gap-3">
                             <button
-                                className="inline-flex w-full justify-center items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#1d5e74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all"
+                                className={`inline-flex w-full justify-center items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#1d5e74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 type="button"
+                                disabled={isSaving}
                                 onClick={handleSubmit}
                             >
-                                <span className="material-symbols-outlined text-[18px]">save</span>
-                                Save Changes
+                                {isSaving ? (
+                                    <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                                ) : (
+                                    <span className="material-symbols-outlined text-[18px]">save</span>
+                                )}
+                                {isSaving ? 'Saving...' : 'Save Changes'}
                             </button>
                             <button
                                 className="inline-flex w-full justify-center items-center rounded-xl bg-white dark:bg-transparent px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"

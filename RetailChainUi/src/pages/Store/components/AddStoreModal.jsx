@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
+import storeService from '../../../services/store.service';
 
-const AddStoreModal = ({ isOpen, onClose }) => {
+const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
     const [address, setAddress] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
+    const [formData, setFormData] = useState({ code: '', name: '' });
+    const [submitting, setSubmitting] = useState(false);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
 
     const handleSearch = async (e) => {
@@ -23,6 +26,38 @@ const AddStoreModal = ({ isOpen, onClose }) => {
         console.log(`Fetching address for: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}...`);
         const displayAddress = await getAddressFromCoords(latlng.lat, latlng.lng);
         setAddress(displayAddress);
+    };
+
+    const handleSubmit = async () => {
+        if (!formData.code || !formData.name || !address) {
+            alert('Vui lòng điền đầy đủ thông tin: Mã cửa hàng, Tên cửa hàng và Địa chỉ');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const newStore = await storeService.createStore({
+                code: formData.code,
+                name: formData.name,
+                address: address
+            });
+
+            console.log('Store created successfully:', newStore);
+            alert('Tạo cửa hàng thành công!');
+            // Reset form
+            setFormData({ code: '', name: '' });
+            setAddress('');
+            setSearchQuery('');
+            setMapPosition(null);
+            // Notify parent and close
+            if (onStoreAdded) onStoreAdded(newStore);
+            onClose();
+        } catch (error) {
+            console.error('Error creating store:', error);
+            alert('Lỗi: ' + (error.message || 'Lỗi khi tạo cửa hàng. Vui lòng thử lại.'));
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -88,10 +123,32 @@ const AddStoreModal = ({ isOpen, onClose }) => {
                                         <p className="text-[11px] text-gray-500 italic">Adjust map pin to update address</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-name">
-                                            Store Display Name
+                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-code">
+                                            Mã Cửa Hàng (Code) *
                                         </label>
-                                        <input autoFocus className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary" id="store-name" name="store-name" placeholder="e.g., Downtown Flagship" type="text" />
+                                        <input
+                                            className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
+                                            id="store-code"
+                                            name="store-code"
+                                            placeholder="e.g., S001"
+                                            type="text"
+                                            value={formData.code}
+                                            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-name">
+                                            Tên Cửa Hàng *
+                                        </label>
+                                        <input
+                                            className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
+                                            id="store-name"
+                                            name="store-name"
+                                            placeholder="e.g., Downtown Flagship"
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        />
                                     </div>
                                 </div>
                                 <div className="h-px bg-[#f1f3f4] dark:bg-gray-700"></div>
@@ -140,9 +197,14 @@ const AddStoreModal = ({ isOpen, onClose }) => {
                             </div>
                         </div>
                         <div className="bg-[#f9fafa] dark:bg-[#182124] px-8 py-6 border-t border-[#f1f3f4] dark:border-gray-700 flex flex-col gap-3">
-                            <button className="inline-flex w-full justify-center items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#1d5e74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all" type="button">
+                            <button
+                                className="inline-flex w-full justify-center items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#1d5e74] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={submitting}
+                            >
                                 <span className="material-symbols-outlined text-[18px]">save</span>
-                                Save Store Location
+                                {submitting ? 'Đang lưu...' : 'Lưu Cửa Hàng'}
                             </button>
                             <button
                                 className="inline-flex w-full justify-center items-center rounded-xl bg-white dark:bg-transparent px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"

@@ -17,11 +17,13 @@ const StoreDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [tempSelectedDate, setTempSelectedDate] = useState(new Date());
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     const fetchStoreData = async () => {
       try {
-        const data = await storeService.getStoreById(id || 'S001');
+        const data = await storeService.getStoreById(id);
         setStoreData(data);
       } catch (error) {
         console.error("Failed to fetch store dashboard:", error);
@@ -40,7 +42,7 @@ const StoreDashboardPage = () => {
       {/* Page Heading & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{storeData.name} Overview</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">{storeData.name} - Overview</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Here's what's happening today.</p>
         </div>
         <div className="flex items-center gap-3">
@@ -59,20 +61,32 @@ const StoreDashboardPage = () => {
             <button className="px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all">Week</button>
             <button className="px-3 py-1 text-xs font-medium rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all">Month</button>
           </div>
-          <Popover>
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="h-9 gap-2 bg-surface-light dark:bg-surface-dark border-border-light dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm">
                 <CalendarIcon className="w-4 h-4" />
                 <span>{selectedDate.toLocaleDateString()}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
+            <PopoverContent className="w-auto p-4 flex flex-col gap-3" align="end">
               <Calendar
                 mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
+                selected={tempSelectedDate}
+                onSelect={(date) => date && setTempSelectedDate(date)}
                 initialFocus
               />
+              <div className="flex items-center justify-end border-t border-slate-100 dark:border-slate-800 pt-3">
+                <Button
+                  size="sm"
+                  className="h-8 px-4"
+                  onClick={() => {
+                    setSelectedDate(tempSelectedDate);
+                    setIsPopoverOpen(false);
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </div>
             </PopoverContent>
           </Popover>
           <Button size="icon" className="h-9 w-9 bg-primary hover:bg-primary-dark text-white rounded-lg shadow-sm shadow-primary/30">
