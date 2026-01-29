@@ -20,13 +20,13 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code")
+    @Column(name = "code", nullable = false, unique = true, length = 50)
     private String code;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "address")
+    @Column(name = "address", length = 500)
     private String address;
 
     @Column(name = "status", nullable = false)

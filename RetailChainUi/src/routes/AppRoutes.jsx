@@ -19,6 +19,15 @@ import ProductChainView from "../pages/Product/ProductDetail/ProductChainView";
 import InventoryPage from "../pages/Inventory/InventoryPage";
 import StockLedger from "../pages/Inventory/StockLedger";
 import StockInList from "../pages/StockIn/StockInList";
+import CreateStockIn from "../pages/StockIn/CreateStockIn";
+
+// Stock Out
+import StockOutList from "../pages/StockOut/StockOutList";
+import CreateStockOut from "../pages/StockOut/CreateStockOut";
+
+// Transfer
+import TransferList from "../pages/Transfer/TransferList";
+import CreateTransfer from "../pages/Transfer/CreateTransfer";
 
 // Staff
 import StaffList from "../pages/Staff/StaffList/StaffList";
@@ -28,8 +37,8 @@ import StaffProfile from "../pages/Staff/Profile/StaffProfile";
 import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssignment";
 
 // Warehouse
-import WarehouseList from "../pages/Warehouse/WarehouseList";
-import WarehouseDetail from "../pages/Warehouse/WarehouseDetail";
+import WarehouseListPage from "../pages/Warehouse/WarehouseListPage";
+// import WarehouseDetail from "../pages/Warehouse/WarehouseDetail"; // Unused or replace if you have detail page
 
 const AppRoutes = () => {
   return (
@@ -46,8 +55,8 @@ const AppRoutes = () => {
         <Route path="/store/:id/staff" element={<StoreStaffPage />} />
 
         {/* Warehouse Module */}
-        <Route path="/warehouse" element={<WarehouseList />} />
-        <Route path="/warehouse/:id" element={<WarehouseDetail />} />
+        <Route path="/warehouse" element={<WarehouseListPage />} />
+        {/* <Route path="/warehouse/:id" element={<WarehouseDetail />} /> */}
 
         {/* Product Module */}
         <Route path="/products" element={<ProductPage />} />
@@ -56,7 +65,16 @@ const AppRoutes = () => {
         {/* Inventory Module */}
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/inventory/ledger" element={<StockLedger />} />
+        
+        {/* Stock In, Out, Transfer */}
         <Route path="/stock-in" element={<StockInList />} />
+        <Route path="/stock-in/create" element={<CreateStockIn />} />
+        
+        <Route path="/stock-out" element={<StockOutList />} />
+        <Route path="/stock-out/create" element={<CreateStockOut />} />
+        
+        <Route path="/transfers" element={<TransferList />} />
+        <Route path="/transfers/create" element={<CreateTransfer />} />
 
         {/* Staff Module */}
         <Route path="/staff" element={<StaffList />} />

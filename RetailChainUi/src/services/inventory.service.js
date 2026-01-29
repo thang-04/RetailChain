@@ -1,11 +1,24 @@
+import { axiosPrivate } from './api/axiosClient';
 
-// Mock data for Inventory & Reports
+// Mock data for Inventory & Reports (Kept for fallback or unfinished APIs)
+// ... (Keep existing mock data variables if needed, or remove them to clean up)
 
 const STOCK_IN_RECORDS = [
-  { id: "SIR001", date: "2024-01-20", supplier: "Vinamilk Corp", totalItems: 500, totalValue: 15000000, status: "Completed", warehouse: "Central Warehouse" },
   { id: "SIR002", date: "2024-01-22", supplier: "Unilever VN", totalItems: 200, totalValue: 8500000, status: "Pending", warehouse: "Store A" },
   { id: "SIR003", date: "2024-01-23", supplier: "Coca-Cola", totalItems: 1000, totalValue: 12000000, status: "Completed", warehouse: "Central Warehouse" },
   { id: "SIR004", date: "2024-01-24", supplier: "Nestle", totalItems: 350, totalValue: 9200000, status: "Processing", warehouse: "Store B" },
+];
+
+const STOCK_OUT_RECORDS = [
+  { id: "SOR001", date: "2024-01-26", reason: "Sales Order", totalItems: 120, totalValue: 3500000, status: "Completed", warehouse: "Central Warehouse" },
+  { id: "SOR002", date: "2024-01-27", reason: "Expired", totalItems: 50, totalValue: 1200000, status: "Pending", warehouse: "Store A" },
+  { id: "SOR003", date: "2024-01-27", reason: "Damage", totalItems: 10, totalValue: 500000, status: "Completed", warehouse: "Central Warehouse" },
+];
+
+const TRANSFER_RECORDS = [
+  { id: "TRF001", date: "2024-01-25", from: "Central Warehouse", to: "Store A", totalItems: 500, status: "Completed", createdBy: "Admin" },
+  { id: "TRF002", date: "2024-01-26", from: "Store B", to: "Store C", totalItems: 200, status: "In Transit", createdBy: "Manager B" },
+  { id: "TRF003", date: "2024-01-28", from: "Central Warehouse", to: "Store B", totalItems: 1000, status: "Pending", createdBy: "Admin" },
 ];
 
 const STOCK_LEDGER = [
@@ -93,21 +106,115 @@ const MOCK_ALL_INVENTORIES = [
 ];
 
 const REPORT_DATA = {
-    inventoryValue: 1250000000,
-    turnoverRate: 4.5,
-    lowStockItems: 12,
-    stockDistribution: [
-        { name: 'Store A', value: 30 },
-        { name: 'Store B', value: 25 },
-        { name: 'Store C', value: 15 },
-        { name: 'Warehouse', value: 30 },
-    ]
+  inventoryValue: 1250000000,
+  turnoverRate: 4.5,
+  lowStockItems: 12,
+  stockDistribution: [
+    { name: 'Store A', value: 30 },
+    { name: 'Store B', value: 25 },
+    { name: 'Store C', value: 15 },
+    { name: 'Warehouse', value: 30 },
+  ]
 };
 
 const inventoryService = {
+  // --- Real Backend APIs ---
+  createWarehouse: async (data) => {
+    return axiosPrivate.post('/inventory/warehouse', data);
+  },
+
+  getAllWarehouses: async () => {
+    return axiosPrivate.get('/inventory/warehouse');
+  },
+
+  getStockByWarehouse: async (warehouseId) => {
+    return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
+  },
+
+  importStock: async (data) => {
+    // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
+    return axiosPrivate.post('/inventory/import', data);
+  },
+
+  exportStock: async (data) => {
+    // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
+    return axiosPrivate.post('/inventory/export', data);
+  },
+
+  transferStock: async (data) => {
+    // data: { sourceWarehouseId, targetWarehouseId, note, items: [{ variantId, quantity }] }
+    return axiosPrivate.post('/inventory/transfer', data);
+  },
+
+  getAllProducts: async () => {
+    return axiosPrivate.get('/product');
+  },
+
+  // --- Wrapper for Legacy Components (To be refactored) ---
+  createStockIn: async (data) => {
+    return inventoryService.importStock(data);
+  },
+
+  createStockOut: async (data) => {
+    return inventoryService.exportStock(data);
+  },
+
+  createTransfer: async (data) => {
+    return inventoryService.transferStock(data);
+  },
+
+  // --- Mock Methods (Legacy/Placeholder) ---
+  // --- Real API Implementation ---
   getStockInRecords: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return STOCK_IN_RECORDS;
+    try {
+      // baseURL already includes /retail-chain/api
+      const response = await axiosPrivate.get('/inventory/documents?type=IMPORT');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch stock in error", error);
+      return [];
+    }
+  },
+
+  getStockOutRecords: async () => {
+    try {
+      const response = await axiosPrivate.get('/inventory/documents?type=EXPORT');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch stock out error", error);
+      return [];
+    }
+  },
+
+  getTransferRecords: async () => {
+    try {
+      const response = await axiosPrivate.get('/inventory/documents?type=TRANSFER');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch transfer error", error);
+      return [];
+    }
+  },
+
+  createStockIn: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `SIR${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    STOCK_IN_RECORDS.unshift(newRecord);
+    return newRecord;
+  },
+
+  createStockOut: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `SOR${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    STOCK_OUT_RECORDS.unshift(newRecord);
+    return newRecord;
+  },
+
+  createTransfer: async (data) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newRecord = { ...data, id: `TRF${Date.now()}`, date: new Date().toISOString().split('T')[0], status: "Pending" };
+    TRANSFER_RECORDS.unshift(newRecord);
+    return newRecord;
   },
 
   getStockLedger: async () => {
@@ -119,7 +226,7 @@ const inventoryService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     return STORE_INVENTORY;
   },
-  
+
   getAllInventories: async () => {
     await new Promise(resolve => setTimeout(resolve, 600));
     return MOCK_ALL_INVENTORIES;
@@ -131,8 +238,8 @@ const inventoryService = {
   },
 
   getExecutiveReport: async () => {
-      await new Promise(resolve => setTimeout(resolve, 600));
-      return REPORT_DATA;
+    await new Promise(resolve => setTimeout(resolve, 600));
+    return REPORT_DATA;
   }
 };
 
