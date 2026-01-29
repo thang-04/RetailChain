@@ -84,13 +84,16 @@ function getCodeToExecute() {
  * Clean up old temporary execution files from previous runs
  */
 function cleanupOldTempFiles() {
+  const tempDir = path.join(__dirname, 'internal-temp');
+  if (!fs.existsSync(tempDir)) return;
+
   try {
-    const files = fs.readdirSync(__dirname);
-    const tempFiles = files.filter(f => f.startsWith('.temp-execution-') && f.endsWith('.js'));
+    const files = fs.readdirSync(tempDir);
+    const tempFiles = files.filter(f => f.startsWith('execution-') && f.endsWith('.js'));
 
     if (tempFiles.length > 0) {
       tempFiles.forEach(file => {
-        const filePath = path.join(__dirname, file);
+        const filePath = path.join(tempDir, file);
         try {
           fs.unlinkSync(filePath);
         } catch (e) {
@@ -182,6 +185,11 @@ function getContextOptionsWithHeaders(options = {}) {
 async function main() {
   console.log('🎭 Playwright Skill - Universal Executor\n');
 
+  const tempDir = path.join(__dirname, 'internal-temp');
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+
   // Clean up old temp files from previous runs
   cleanupOldTempFiles();
 
@@ -198,7 +206,7 @@ async function main() {
   const code = wrapCodeIfNeeded(rawCode);
 
   // Create temporary file for execution
-  const tempFile = path.join(__dirname, `.temp-execution-${Date.now()}.js`);
+  const tempFile = path.join(tempDir, `execution-${Date.now()}.js`);
 
   try {
     // Write code to temp file
