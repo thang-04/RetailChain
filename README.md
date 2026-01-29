@@ -11,7 +11,7 @@ Dự án bao gồm 2 thành phần chính:
 | **[`RetailChainService`](./RetailChainService)** | Backend | Java Spring Boot, MySQL | Cung cấp RESTful API, xử lý nghiệp vụ, bảo mật và quản lý dữ liệu. |
 | **[`RetailChainUi`](./RetailChainUi)** | Frontend | React (Vite), Tailwind CSS | Giao diện người dùng web, tương tác với API backend. |
 
-## 🚀 Bắt đầu nhanh
+## 🚀 Bắt đầu 
 
 Để chạy toàn bộ hệ thống, bạn cần cài đặt và chạy riêng biệt cả Backend và Frontend.
 

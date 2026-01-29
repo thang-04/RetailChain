@@ -46,24 +46,15 @@ public class CommonUtils {
     }
 
     public static String toJson(Map<String, Object> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String convertMapToJson(Map<String, String> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String convertMapObjectToJson(Map<Object, Object> map) {
-        Gson gsonBuilder = new GsonBuilder().create();
-        String jsonStr = gsonBuilder.toJson(map);
-        return jsonStr;
-
+        return gson.toJson(map);
     }
 
     public static String listToJsonArray(List<Object> lsObject) {
@@ -178,6 +169,5 @@ public class CommonUtils {
         }.getType();
         return gson.fromJson(json, type);
     }
-
 
 }
