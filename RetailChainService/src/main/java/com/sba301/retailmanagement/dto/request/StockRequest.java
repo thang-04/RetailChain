@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class StockRequest {
     private Long warehouseId;
+    private Long supplierId; // Added for Import
     private String note;
     private List<InventoryItemRequest> items;
 }

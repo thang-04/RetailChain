@@ -48,6 +48,16 @@ public class InventoryDocument {
     @Column(name = "reference_id")
     private Long referenceId;
 
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false)
+    private Supplier supplier;
+
+    @Column(name = "total_amount")
+    private java.math.BigDecimal totalAmount;
+
     @Column(name = "note", length = 500)
     private String note;
 

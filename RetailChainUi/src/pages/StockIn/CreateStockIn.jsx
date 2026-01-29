@@ -8,15 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
+import supplierService from '@/services/supplier.service';
 
-// Removed MOCK_PRODUCTS and updated CreateStockIn component
 const CreateStockIn = () => {
     const navigate = useNavigate();
     // const { toast } = useToast();
     const [warehouses, setWarehouses] = useState([]);
     const [productVariants, setProductVariants] = useState([]); // State for real product variants
+    const [suppliers, setSuppliers] = useState([]); // State for suppliers
     const [formData, setFormData] = useState({
-        supplier: '', // Not used in backend yet but kept for UI
+        supplierId: '', // Changed to ID
         warehouseId: '',
         note: ''
     });
@@ -28,14 +29,19 @@ const CreateStockIn = () => {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                // Parallel fetch: Warehouses + Products
-                const [warehouseRes, productRes] = await Promise.all([
+                // Parallel fetch: Warehouses + Products + Suppliers
+                const [warehouseRes, productRes, supplierRes] = await Promise.all([
                     inventoryService.getAllWarehouses(),
-                    inventoryService.getAllProducts()
+                    inventoryService.getAllProducts(),
+                    supplierService.getAllSuppliers()
                 ]);
 
                 if (warehouseRes.data) {
                     setWarehouses(warehouseRes.data);
+                }
+
+                if (supplierRes.data) {
+                    setSuppliers(supplierRes.data);
                 }
 
                 if (productRes.data) {
@@ -84,6 +90,7 @@ const CreateStockIn = () => {
             // Format payload for backend
             const payload = {
                 warehouseId: Number(formData.warehouseId),
+                supplierId: formData.supplierId ? Number(formData.supplierId) : null,
                 note: formData.note,
                 items: items.map(item => ({
                     variantId: Number(item.variantId),
@@ -146,18 +153,22 @@ const CreateStockIn = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nhà Cung Cấp</label>
                             <Select 
-                                value={formData.supplier} 
-                                onValueChange={(val) => setFormData({...formData, supplier: val})}
+                                value={formData.supplierId} 
+                                onValueChange={(val) => setFormData({...formData, supplierId: val})}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn nhà cung cấp" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Vinamilk Corp">Vinamilk Corp</SelectItem>
-                                    <SelectItem value="Unilever VN">Unilever VN</SelectItem>
-                                    <SelectItem value="Coca-Cola">Coca-Cola</SelectItem>
-                                    <SelectItem value="Nestle">Nestle</SelectItem>
-                                    <SelectItem value="P&G Vietnam">P&G Vietnam</SelectItem>
+                                    {suppliers.length > 0 ? (
+                                        suppliers.map(sup => (
+                                            <SelectItem key={sup.id} value={String(sup.id)}>
+                                                {sup.name}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <SelectItem value="loading" disabled>Đang tải danh sách...</SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>

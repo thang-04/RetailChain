@@ -26,6 +26,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     private final WarehouseRepository warehouseRepository;
     private final StoreWarehouseRepository storeWarehouseRepository;
+    private final SupplierRepository supplierRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final InventoryDocumentRepository inventoryDocumentRepository;
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
@@ -108,21 +109,33 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
+        if (request.getSupplierId() != null && !supplierRepository.existsById(request.getSupplierId())) {
+            throw new RuntimeException("Supplier not found: " + request.getSupplierId());
+        }
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("IMP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         document.setDocumentType(InventoryDocumentType.IMPORT);
         document.setTargetWarehouseId(warehouse.getId());
         document.setTargetWarehouse(warehouse);
+        document.setSupplierId(request.getSupplierId());
         document.setNote(request.getNote());
         document.setCreatedBy(1L); // TODO: Get from SecurityContext
         document.setCreatedAt(LocalDateTime.now());
+        document.setTotalAmount(java.math.BigDecimal.ZERO);
 
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
+        java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
 
         for (InventoryItemRequest itemReq : request.getItems()) {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
+            
+            // Calculate Value
+            if (variant.getPrice() != null) {
+                totalAmount = totalAmount.add(variant.getPrice().multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
+            }
 
             // Save Document Item
             InventoryDocumentItem docItem = new InventoryDocumentItem();
@@ -149,6 +162,10 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
                     newQuantity);
         }
+        
+        // Update Total Amount
+        savedDoc.setTotalAmount(totalAmount);
+        inventoryDocumentRepository.save(savedDoc);
     }
 
     @Override
@@ -331,10 +348,10 @@ public class InventoryServiceImpl implements InventoryService {
             List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
             int totalItems = items.stream().mapToInt(InventoryDocumentItem::getQuantity).sum();
 
-            // Calculate approximate total value if variant has price (optional, simple
-            // implementation)
-            long totalValue = 0;
-            // Assuming we don't fetch variant prices deeply here to perform fast
+            // Total Value can now be retrieved directly
+            java.math.BigDecimal totalValue = doc.getTotalAmount() != null ? doc.getTotalAmount() : java.math.BigDecimal.ZERO;
+            
+            String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
 
             return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
                     .id(doc.getId())
@@ -349,12 +366,8 @@ public class InventoryServiceImpl implements InventoryService {
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
-                    .totalValue(totalValue)
-                    .supplier(doc.getDocumentType() == InventoryDocumentType.IMPORT ? "Supplier (Ref)" : null) // Placeholder
-                                                                                                               // or
-                                                                                                               // data
-                                                                                                               // from
-                                                                                                               // Note
+                    .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
+                    .supplier(supplierName)
                     .build();
         }).collect(Collectors.toList());
     }
