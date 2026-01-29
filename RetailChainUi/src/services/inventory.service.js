@@ -177,13 +177,23 @@ const inventoryService = {
   },
 
   getStockOutRecords: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return STOCK_OUT_RECORDS;
+    try {
+      const response = await axiosPrivate.get('/inventory/documents?type=EXPORT');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch stock out error", error);
+      return [];
+    }
   },
 
   getTransferRecords: async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return TRANSFER_RECORDS;
+    try {
+      const response = await axiosPrivate.get('/inventory/documents?type=TRANSFER');
+      return response.data || [];
+    } catch (error) {
+      console.error("Fetch transfer error", error);
+      return [];
+    }
   },
 
   createStockIn: async (data) => {

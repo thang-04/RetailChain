@@ -68,21 +68,21 @@ const TransferList = () => {
                             <TableBody>
                                 {records.map((record) => (
                                     <TableRow key={record.id}>
-                                        <TableCell className="font-medium">{record.id}</TableCell>
-                                        <TableCell>{record.date}</TableCell>
-                                        <TableCell>{record.from}</TableCell>
+                                        <TableCell className="font-medium">{record.documentCode}</TableCell>
+                                        <TableCell>{record.createdAt ? new Date(record.createdAt).toLocaleDateString('vi-VN') : '-'}</TableCell>
+                                        <TableCell>{record.sourceWarehouseName}</TableCell>
                                         <TableCell><ArrowRightLeft className="w-4 h-4 text-muted-foreground" /></TableCell>
-                                        <TableCell>{record.to}</TableCell>
+                                        <TableCell>{record.targetWarehouseName}</TableCell>
                                         <TableCell className="text-right">{record.totalItems}</TableCell>
-                                        <TableCell>{record.createdBy}</TableCell>
+                                        <TableCell>{record.createdBy || 'Admin'}</TableCell>
                                         <TableCell>
                                             <Badge variant={
-                                                record.status === 'Completed' ? 'default' : 
-                                                record.status === 'Pending' ? 'secondary' : 'outline'
+                                                record.status === 'Completed' ? 'default' :
+                                                    record.status === 'Pending' ? 'secondary' : 'outline'
                                             }>
-                                                {record.status === 'Completed' ? 'Hoàn thành' : 
-                                                 record.status === 'Pending' ? 'Chờ duyệt' : 
-                                                 record.status === 'In Transit' ? 'Đang vận chuyển' : record.status}
+                                                {record.status === 'Completed' ? 'Hoàn thành' :
+                                                    record.status === 'Pending' ? 'Chờ duyệt' :
+                                                        record.status === 'IN_TRANSIT' ? 'Đang vận chuyển' : record.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">

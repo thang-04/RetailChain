@@ -65,7 +65,7 @@ const CreateTransfer = () => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            
+
             const payload = {
                 sourceWarehouseId: Number(formData.sourceWarehouseId),
                 targetWarehouseId: Number(formData.targetWarehouseId),
@@ -77,7 +77,7 @@ const CreateTransfer = () => {
             };
 
             await inventoryService.transferStock(payload);
-            
+
             navigate('/transfers');
         } catch (error) {
             console.error("Failed to create transfer:", error);
@@ -108,9 +108,9 @@ const CreateTransfer = () => {
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Kho Nguồn (Từ)</label>
-                            <Select 
-                                value={formData.sourceWarehouseId} 
-                                onValueChange={(val) => setFormData({...formData, sourceWarehouseId: val})}
+                            <Select
+                                value={formData.sourceWarehouseId}
+                                onValueChange={(val) => setFormData({ ...formData, sourceWarehouseId: val })}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn kho nguồn" />
@@ -131,9 +131,9 @@ const CreateTransfer = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Kho Đích (Đến)</label>
-                            <Select 
-                                value={formData.targetWarehouseId} 
-                                onValueChange={(val) => setFormData({...formData, targetWarehouseId: val})}
+                            <Select
+                                value={formData.targetWarehouseId}
+                                onValueChange={(val) => setFormData({ ...formData, targetWarehouseId: val })}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn kho đích" />
@@ -153,10 +153,10 @@ const CreateTransfer = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Ghi Chú Vận Chuyển</label>
-                            <Textarea 
-                                placeholder="Nhập ghi chú..." 
+                            <Textarea
+                                placeholder="Nhập ghi chú..."
                                 value={formData.note}
-                                onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                             />
                         </div>
                     </CardContent>
@@ -182,8 +182,8 @@ const CreateTransfer = () => {
                                 {items.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <Select 
-                                                value={String(item.variantId)} 
+                                            <Select
+                                                value={String(item.variantId)}
                                                 onValueChange={(val) => handleItemChange(item.id, 'variantId', val)}
                                             >
                                                 <SelectTrigger>
@@ -199,17 +199,17 @@ const CreateTransfer = () => {
                                             </Select>
                                         </TableCell>
                                         <TableCell>
-                                            <Input 
-                                                type="number" 
+                                            <Input
+                                                type="number"
                                                 min="1"
                                                 value={item.quantity}
                                                 onChange={(e) => handleItemChange(item.id, 'quantity', e.target.value)}
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="text-destructive hover:text-destructive"
                                                 onClick={() => handleRemoveItem(item.id)}
                                             >
@@ -225,7 +225,7 @@ const CreateTransfer = () => {
                             <Link to="/transfers">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                            <Button onClick={handleSubmit} disabled={submitting || !formData.targetWarehouseId}>
+                            <Button onClick={handleSubmit} disabled={submitting || !formData.sourceWarehouseId || !formData.targetWarehouseId}>
                                 {submitting ? "Đang xử lý..." : "Tạo Lệnh Điều Chuyển"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>

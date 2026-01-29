@@ -73,19 +73,19 @@ const StockOutList = () => {
                             <TableBody>
                                 {records.map((record) => (
                                     <TableRow key={record.id}>
-                                        <TableCell className="font-medium">{record.id}</TableCell>
-                                        <TableCell>{record.date}</TableCell>
-                                        <TableCell>{record.reason}</TableCell>
-                                        <TableCell>{record.warehouse}</TableCell>
+                                        <TableCell className="font-medium">{record.documentCode}</TableCell>
+                                        <TableCell>{record.createdAt ? new Date(record.createdAt).toLocaleDateString('vi-VN') : '-'}</TableCell>
+                                        <TableCell>{record.note || 'Xuất Bán Hàng'}</TableCell>
+                                        <TableCell>{record.sourceWarehouseName}</TableCell>
                                         <TableCell className="text-right">{record.totalItems}</TableCell>
-                                        <TableCell className="text-right">{record.totalValue.toLocaleString()} VND</TableCell>
+                                        <TableCell className="text-right">{record.totalValue > 0 ? record.totalValue.toLocaleString() : '-'} VND</TableCell>
                                         <TableCell>
                                             <Badge variant={
-                                                record.status === 'Completed' ? 'default' : 
-                                                record.status === 'Pending' ? 'secondary' : 'outline'
+                                                record.status === 'Completed' ? 'default' :
+                                                    record.status === 'Pending' ? 'secondary' : 'outline'
                                             }>
-                                                {record.status === 'Completed' ? 'Hoàn thành' : 
-                                                 record.status === 'Pending' ? 'Chờ duyệt' : record.status}
+                                                {record.status === 'Completed' ? 'Hoàn thành' :
+                                                    record.status === 'Pending' ? 'Chờ duyệt' : record.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
