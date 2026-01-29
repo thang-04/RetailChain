@@ -9,22 +9,12 @@ import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
 
-// Temporary Mock Products until Product API is ready
-const MOCK_PRODUCTS = [
-    { id: 1, name: "Produce Edge (XL/Red)", sku: "SKU-36912022" },
-    { id: 2, name: "Produce Edge (M/White)", sku: "SKU-13311507" },
-    { id: 3, name: "Produce Edge (L/White)", sku: "SKU-41949529" },
-    { id: 4, name: "Certainly City (S/Blue)", sku: "SKU-99937039" },
-    { id: 5, name: "Certainly City (M/White)", sku: "SKU-96779126" },
-    { id: 6, name: "Certainly City (L/White)", sku: "SKU-14524825" },
-    { id: 7, name: "Just Assume (XL/Red)", sku: "SKU-3523729" },
-    { id: 8, name: "Just Assume (L/Black)", sku: "SKU-88227303" }
-];
-
+// Removed MOCK_PRODUCTS and updated CreateStockIn component
 const CreateStockIn = () => {
     const navigate = useNavigate();
     // const { toast } = useToast();
     const [warehouses, setWarehouses] = useState([]);
+    const [productVariants, setProductVariants] = useState([]); // State for real product variants
     const [formData, setFormData] = useState({
         supplier: '', // Not used in backend yet but kept for UI
         warehouseId: '',
@@ -36,17 +26,41 @@ const CreateStockIn = () => {
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchWarehouses = async () => {
+        const fetchInitialData = async () => {
             try {
-                const res = await inventoryService.getAllWarehouses();
-                if (res.data) {
-                    setWarehouses(res.data);
+                // Parallel fetch: Warehouses + Products
+                const [warehouseRes, productRes] = await Promise.all([
+                    inventoryService.getAllWarehouses(),
+                    inventoryService.getAllProducts()
+                ]);
+
+                if (warehouseRes.data) {
+                    setWarehouses(warehouseRes.data);
+                }
+
+                if (productRes.data) {
+                    // Flatten the product structure to get a list of variants
+                    // API returns: [{ id, name, ..., variants: [{ id, sku, size, color, ... }] }]
+                    const variantsList = [];
+                    productRes.data.forEach(product => {
+                        if (product.variants && product.variants.length > 0) {
+                            product.variants.forEach(variant => {
+                                variantsList.push({
+                                    id: variant.id,
+                                    name: `${product.name} - ${variant.sku} (${variant.color}/${variant.size})`,
+                                    sku: variant.sku,
+                                    productName: product.name
+                                });
+                            });
+                        }
+                    });
+                    setProductVariants(variantsList);
                 }
             } catch (error) {
-                console.error("Failed to load warehouses", error);
+                console.error("Failed to load initial data", error);
             }
         };
-        fetchWarehouses();
+        fetchInitialData();
     }, []);
 
     const handleAddItem = () => {
@@ -188,11 +202,15 @@ const CreateStockIn = () => {
                                                     <SelectValue placeholder="Chọn sản phẩm" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {MOCK_PRODUCTS.map(p => (
-                                                        <SelectItem key={p.id} value={String(p.id)}>
-                                                            {p.name} - {p.sku}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {productVariants.length > 0 ? (
+                                                        productVariants.map(v => (
+                                                            <SelectItem key={v.id} value={String(v.id)}>
+                                                                {v.name}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <SelectItem value="loading" disabled>Đang tải danh sách...</SelectItem>
+                                                    )}
                                                 </SelectContent>
                                             </Select>
                                         </TableCell>
