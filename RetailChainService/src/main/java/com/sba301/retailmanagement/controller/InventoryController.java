@@ -53,6 +53,34 @@ public class InventoryController {
         }
     }
 
+    @PutMapping("/warehouse/{id}")
+    public String updateWarehouse(@PathVariable Long id, @RequestBody WarehouseRequest request) {
+        String prefix = "[updateWarehouse]|id=" + id;
+        log.info("{}|START|request={}", prefix, gson.toJson(request));
+        try {
+            WarehouseResponse response = inventoryService.updateWarehouse(id, request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouse updated successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating warehouse: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/warehouse/{id}")
+    public String deleteWarehouse(@PathVariable Long id) {
+        String prefix = "[deleteWarehouse]|id=" + id;
+        log.info("{}|START", prefix);
+        try {
+            inventoryService.deleteWarehouse(id);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Warehouse deleted successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting warehouse: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/stock/{warehouseId}")
     public String getStockByWarehouse(@PathVariable Long warehouseId) {
         String prefix = "[getStockByWarehouse]|warehouseId=" + warehouseId;

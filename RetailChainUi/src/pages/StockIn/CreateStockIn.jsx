@@ -38,6 +38,11 @@ const CreateStockIn = () => {
 
                 if (warehouseRes.data) {
                     setWarehouses(warehouseRes.data);
+                    // Automatically select the first Central Warehouse (Type 1)
+                    const centralWarehouse = warehouseRes.data.find(wh => wh.warehouseType === 1);
+                    if (centralWarehouse) {
+                        setFormData(prev => ({ ...prev, warehouseId: String(centralWarehouse.id) }));
+                    }
                 }
 
                 if (supplierRes.data) {
@@ -86,7 +91,7 @@ const CreateStockIn = () => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            
+
             // Format payload for backend
             const payload = {
                 warehouseId: Number(formData.warehouseId),
@@ -131,30 +136,23 @@ const CreateStockIn = () => {
                         <CardTitle>Thông Tin Chung</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+
+
+
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Kho Nhập</label>
-                            <Select 
-                                value={formData.warehouseId} 
-                                onValueChange={(val) => setFormData({...formData, warehouseId: val})}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn kho nhập" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {warehouses.map(wh => (
-                                        <SelectItem key={wh.id} value={String(wh.id)}>
-                                            {wh.name} ({wh.code})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <label className="text-sm font-medium">Kho Nhập (Kho Tổng)</label>
+                            <Input
+                                disabled
+                                value={warehouses.find(w => String(w.id) === formData.warehouseId)?.name || "Đang tải..."}
+                                className="bg-muted"
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nhà Cung Cấp</label>
-                            <Select 
-                                value={formData.supplierId} 
-                                onValueChange={(val) => setFormData({...formData, supplierId: val})}
+                            <Select
+                                value={formData.supplierId}
+                                onValueChange={(val) => setFormData({ ...formData, supplierId: val })}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Chọn nhà cung cấp" />
@@ -175,10 +173,10 @@ const CreateStockIn = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Ghi Chú</label>
-                            <Textarea 
-                                placeholder="Nhập ghi chú nhập kho..." 
+                            <Textarea
+                                placeholder="Nhập ghi chú nhập kho..."
                                 value={formData.note}
-                                onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                             />
                         </div>
                     </CardContent>
@@ -205,8 +203,8 @@ const CreateStockIn = () => {
                                 {items.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <Select 
-                                                value={String(item.variantId)} 
+                                            <Select
+                                                value={String(item.variantId)}
                                                 onValueChange={(val) => handleItemChange(item.id, 'variantId', val)}
                                             >
                                                 <SelectTrigger>
@@ -226,17 +224,17 @@ const CreateStockIn = () => {
                                             </Select>
                                         </TableCell>
                                         <TableCell>
-                                            <Input 
-                                                type="number" 
+                                            <Input
+                                                type="number"
                                                 min="1"
                                                 value={item.quantity}
                                                 onChange={(e) => handleItemChange(item.id, 'quantity', e.target.value)}
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="text-destructive hover:text-destructive"
                                                 onClick={() => handleRemoveItem(item.id)}
                                             >

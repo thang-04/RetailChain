@@ -25,8 +25,8 @@ const CreateStockOut = () => {
     const navigate = useNavigate();
     const [warehouses, setWarehouses] = useState([]);
     const [formData, setFormData] = useState({
-        reason: '', // Not sent to backend directly but kept for UI/Logic
-        warehouseId: '',
+        sourceWarehouseId: '', // Was warehouseId
+        targetWarehouseId: '', // New field for Store Destination
         note: ''
     });
     const [items, setItems] = useState([
@@ -40,6 +40,11 @@ const CreateStockOut = () => {
                 const res = await inventoryService.getAllWarehouses();
                 if (res.data) {
                     setWarehouses(res.data);
+                    // Automatically select the first Central Warehouse (Type 1) as Source
+                    const centralWarehouse = res.data.find(wh => wh.warehouseType === 1);
+                    if (centralWarehouse) {
+                        setFormData(prev => ({ ...prev, sourceWarehouseId: String(centralWarehouse.id) }));
+                    }
                 }
             } catch (error) {
                 console.error("Failed to load warehouses", error);
@@ -65,22 +70,23 @@ const CreateStockOut = () => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            
-            // Format payload
+
+            // Use Transfer Payload Structure
             const payload = {
-                warehouseId: Number(formData.warehouseId),
-                note: `${formData.reason ? '[' + formData.reason + '] ' : ''}${formData.note}`, // Combine reason into note
+                sourceWarehouseId: Number(formData.sourceWarehouseId),
+                targetWarehouseId: Number(formData.targetWarehouseId),
+                note: formData.note,
                 items: items.map(item => ({
                     variantId: Number(item.variantId),
-                    quantity: Number(item.quantity),
-                    note: ""
+                    quantity: Number(item.quantity)
                 }))
             };
 
-            await inventoryService.exportStock(payload);
-            navigate('/stock-out');
+            // Call Transfer API instead of Export API
+            await inventoryService.transferStock(payload);
+            navigate('/stock-out'); // Or navigate to transfer list? User might expect to stay in Stock Out list
         } catch (error) {
-            console.error("Failed to create stock out:", error);
+            console.error("Failed to create stock out/transfer:", error);
         } finally {
             setSubmitting(false);
         }
@@ -96,8 +102,8 @@ const CreateStockOut = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Tạo Phiếu Xuất Kho</h2>
-                    <p className="text-muted-foreground">Điền thông tin để tạo phiếu xuất kho mới.</p>
+                    <h2 className="text-3xl font-bold tracking-tight">Xuất Kho Đến Cửa Hàng</h2>
+                    <p className="text-muted-foreground">Tạo phiếu xuất hàng từ Kho Tổng đến các Kho Cửa Hàng.</p>
                 </div>
             </div>
 
@@ -108,49 +114,47 @@ const CreateStockOut = () => {
                         <CardTitle>Thông Tin Chung</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+
+
+
+
+                        {/* Hidden Source Warehouse (Central) - Implied BUT VISIBLE as Read-only */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Kho Xuất</label>
-                            <Select 
-                                value={formData.warehouseId} 
-                                onValueChange={(val) => setFormData({...formData, warehouseId: val})}
+                            <label className="text-sm font-medium">Kho Xuất (Kho Tổng)</label>
+                            <Input
+                                disabled
+                                value={warehouses.find(w => String(w.id) === formData.sourceWarehouseId)?.name || "Đang tải..."}
+                                className="bg-muted"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Xuất Kho Đến Cửa Hàng (Kho Đích)</label>
+                            <Select
+                                value={formData.targetWarehouseId}
+                                onValueChange={(val) => setFormData({ ...formData, targetWarehouseId: val })}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Chọn kho" />
+                                    <SelectValue placeholder="Chọn kho cửa hàng nhận hàng" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {warehouses.map(wh => (
-                                        <SelectItem key={wh.id} value={String(wh.id)}>
-                                            {wh.name} ({wh.code})
-                                        </SelectItem>
-                                    ))}
+                                    {warehouses
+                                        .filter(wh => wh.warehouseType === 2) // Target must be Store Warehouse
+                                        .map(wh => (
+                                            <SelectItem key={wh.id} value={String(wh.id)}>
+                                                {wh.name}
+                                            </SelectItem>
+                                        ))}
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Lý Do Xuất</label>
-                            <Select 
-                                value={formData.reason} 
-                                onValueChange={(val) => setFormData({...formData, reason: val})}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn lý do" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Sales Order">Bán Hàng (Sales)</SelectItem>
-                                    <SelectItem value="Damage">Hư Hỏng / Hủy</SelectItem>
-                                    <SelectItem value="Expired">Hết Hạn Sử Dụng</SelectItem>
-                                    <SelectItem value="Internal Use">Sử Dụng Nội Bộ</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Ghi Chú</label>
-                            <Textarea 
-                                placeholder="Nhập ghi chú..." 
+                            <label className="text-sm font-medium">Ghi Chú Xuất Kho</label>
+                            <Textarea
+                                placeholder="Nhập ghi chú xuất hàng..."
                                 value={formData.note}
-                                onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                             />
                         </div>
                     </CardContent>
@@ -177,8 +181,8 @@ const CreateStockOut = () => {
                                 {items.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <Select 
-                                                value={String(item.variantId)} 
+                                            <Select
+                                                value={String(item.variantId)}
                                                 onValueChange={(val) => handleItemChange(item.id, 'variantId', val)}
                                             >
                                                 <SelectTrigger>
@@ -194,17 +198,17 @@ const CreateStockOut = () => {
                                             </Select>
                                         </TableCell>
                                         <TableCell>
-                                            <Input 
-                                                type="number" 
+                                            <Input
+                                                type="number"
                                                 min="1"
                                                 value={item.quantity}
                                                 onChange={(e) => handleItemChange(item.id, 'quantity', e.target.value)}
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="text-destructive hover:text-destructive"
                                                 onClick={() => handleRemoveItem(item.id)}
                                             >
@@ -220,7 +224,7 @@ const CreateStockOut = () => {
                             <Link to="/stock-out">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                            <Button onClick={handleSubmit} disabled={submitting || !formData.warehouseId}>
+                            <Button onClick={handleSubmit} disabled={submitting || !formData.sourceWarehouseId || !formData.targetWarehouseId}>
                                 {submitting ? "Đang xử lý..." : "Lưu Phiếu Xuất"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>

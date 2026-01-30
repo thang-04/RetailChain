@@ -127,6 +127,14 @@ const inventoryService = {
     return axiosPrivate.get('/inventory/warehouse');
   },
 
+  updateWarehouse: async (id, data) => {
+    return axiosPrivate.put(`/inventory/warehouse/${id}`, data);
+  },
+
+  deleteWarehouse: async (id) => {
+    return axiosPrivate.delete(`/inventory/warehouse/${id}`);
+  },
+
   getStockByWarehouse: async (warehouseId) => {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
   },
