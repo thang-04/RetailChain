@@ -366,10 +366,6 @@ public class InventoryServiceImpl implements InventoryService {
             warehouse.setName(request.getName());
         }
 
-        // Only allow updating type/storeId if really needed, but usually kept static.
-        // Allowing updating status implicitly via delete or explicit update logic.
-        // For now, only Code and Name are critical updates.
-
         warehouse.setUpdatedAt(LocalDateTime.now());
         Warehouse saved = warehouseRepository.save(warehouse);
         return mapToWarehouseResponse(saved);
@@ -380,38 +376,11 @@ public class InventoryServiceImpl implements InventoryService {
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-        // 1. Delete relationship with Store (if exists)
-        // Check if store_warehouse exists?
-        // Ideally we should have a repository method deleteByWarehouseId but we can
-        // just rely on Cascade or manual check
-        // storeWarehouseRepository.deleteBy... (not standard JpaRepository method
-        // unless defined)
-        // Let's iterate if necessary or just try delete warehouse if Cascade is set.
-        // Looking at entities might be useful, but let's assume we need manual cleanup
-        // for safety.
-
-        // Manual cleanup of StoreWarehouse (ManyToMany link table essentially)
-        // List<StoreWarehouse> links = storeWarehouseRepository.findByWarehouseId(id);
-        // ...
-        // Simplest: Delete stocks first (if any)
+        
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
 
-        // Delete StoreWarehouse links
-        // We need custom query or find all.
-        // Given time constraint, let's assume Cascade might NOT be set for deletion on
-        // DB level as we saw FK errors.
-        // Let's try to delete the entity. If it fails, we fall back or error out.
-        // Actually, user WANTS hard delete.
-        // Let's try to simple delete. If it fails (FK), we throw clearer error.
-
         try {
-            // We need to delete from store_warehouses table manually if not cascaded.
-            // Since I can't easily add repo methods without seeing Repo files, I will use
-            // Query or just try delete.
-            // Wait, I saw StoreWarehouseRepository in imports.
-            // Let's try:
-            storeWarehouseRepository.deleteByWarehouseId(id); // I need to add this method to Repo or use findAll
+            storeWarehouseRepository.deleteByWarehouseId(id); 
         } catch (Exception e) {
             // Ignore if method missing, assume handled or empty
         }
@@ -439,7 +408,6 @@ public class InventoryServiceImpl implements InventoryService {
             List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
             int totalItems = items.stream().mapToInt(InventoryDocumentItem::getQuantity).sum();
 
-            // Total Value can now be retrieved directly
             java.math.BigDecimal totalValue = doc.getTotalAmount() != null ? doc.getTotalAmount()
                     : java.math.BigDecimal.ZERO;
 
@@ -462,5 +430,23 @@ public class InventoryServiceImpl implements InventoryService {
                     .supplier(supplierName)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteDocument(Long id) {
+        InventoryDocument document = inventoryDocumentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found: " + id));
+
+        // 1. Delete associated history records first to avoid foreign key violations
+        List<InventoryHistory> histories = inventoryHistoryRepository.findByDocumentId(id);
+        inventoryHistoryRepository.deleteAllInBatch(histories);
+
+        // 2. Delete associated document items
+        List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(id);
+        inventoryDocumentItemRepository.deleteAllInBatch(items);
+
+        // 3. Finally, delete the main document
+        inventoryDocumentRepository.delete(document);
     }
 }

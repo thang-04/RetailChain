@@ -21,7 +21,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
-import { Upload, Plus, Eye, Edit, Trash2, MoreHorizontal, Search, FileText } from 'lucide-react';
+import {
+    Upload, Plus, Eye, Edit, Trash2, MoreHorizontal,
+    Search, FileText, Filter, RotateCcw, Calendar,
+    CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight
+} from 'lucide-react';
 
 const StockInList = () => {
     const [originalRecords, setOriginalRecords] = useState([]);
@@ -90,11 +94,21 @@ const StockInList = () => {
         setIsDetailOpen(true);
     };
 
-    const handleDelete = (id) => {
-        if (confirm('Are you sure you want to delete this record?')) {
-            // Delete logic stub
-            console.log('Delete', id);
+    const handleDelete = async (id) => {
+        if (confirm('Bạn có chắc chắn muốn xóa phiếu nhập kho này?')) {
+            try {
+                await inventoryService.deleteDocument(id);
+                setOriginalRecords(prevRecords => prevRecords.filter(record => record.id !== id));
+            } catch (error) {
+                console.error("Failed to delete stock in record:", error);
+            }
         }
+    };
+
+    const handleResetFilters = () => {
+        setSearchTerm('');
+        setStatusFilter('ALL');
+        setDateFilter({ start: '', end: '' });
     };
 
     // Reset pagination
@@ -107,69 +121,117 @@ const StockInList = () => {
             <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-[1400px] mx-auto flex flex-col gap-6 min-h-full">
 
-                    {/* Page Title & Actions */}
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                        <div className="flex flex-col gap-1">
-                            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                Stock In Management
-                            </h2>
-                            <p className="text-slate-500 dark:text-slate-400">Manage incoming shipments and receipts efficiently.</p>
+                    {/* Header Section */}
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                                <FileText className="w-7 h-7 text-primary" />
+                            </div>
+                            <div className="space-y-0.5">
+                                <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                    Quản Lý Nhập Kho
+                                </h2>
+                                <p className="text-slate-500 dark:text-slate-400 font-medium">Theo dõi và quản lý các phiếu nhập hàng vào hệ thống.</p>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" className="gap-2 shadow-sm">
+
+                        <div className="flex items-center gap-3">
+                            <Button variant="outline" className="gap-2 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                                 <Upload className="w-4 h-4" />
-                                Import Excel
+                                <span>Nhập Excel</span>
                             </Button>
                             <Link to="/stock-in/create">
-                                <Button className="gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
+                                <Button className="gap-2 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 px-6">
                                     <Plus className="w-5 h-5" />
-                                    <span>New Receipt</span>
+                                    <span className="font-semibold">Tạo Phiếu Mới</span>
                                 </Button>
                             </Link>
                         </div>
                     </div>
 
-                    {/* Filter Bar */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-4 relative group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors w-4 h-4" />
-                            <Input
-                                className="w-full pl-10 bg-white dark:bg-[#1a262a] border-slate-200 dark:border-slate-700 focus-visible:ring-primary/20 focus-visible:border-primary"
-                                placeholder="Search ID, Supplier..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                    {/* Filter Bar - Modern Glassmorphism Style */}
+                    <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] p-6 shadow-xl shadow-slate-200/20 dark:shadow-none">
+                        <div className="flex items-center gap-2 mb-5">
+                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Filter className="w-4 h-4 text-primary" />
+                            </div>
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Bộ lọc thông minh</h3>
                         </div>
 
-                        <div className="md:col-span-2">
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full bg-white dark:bg-[#1a262a] border-slate-200 dark:border-slate-700">
-                                    <SelectValue placeholder="All Statuses" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="ALL">All Statuses</SelectItem>
-                                    <SelectItem value="Pending">Pending</SelectItem>
-                                    <SelectItem value="Completed">Completed</SelectItem>
-                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+                            {/* Search Input */}
+                            <div className="lg:col-span-4 relative group">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-all duration-300 w-4 h-4" />
+                                <Input
+                                    className="w-full h-12 pl-11 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus-visible:ring-primary/20 focus-visible:border-primary rounded-2xl transition-all duration-300"
+                                    placeholder="Tìm theo mã phiếu, nhà cung cấp, kho..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
 
-                        <div className="md:col-span-3">
-                            <Input
-                                type="date"
-                                className="bg-white dark:bg-[#1a262a] border-slate-200 dark:border-slate-700"
-                                value={dateFilter.start}
-                                onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value }))}
-                            />
-                        </div>
-                        <div className="md:col-span-3">
-                            <Input
-                                type="date"
-                                className="bg-white dark:bg-[#1a262a] border-slate-200 dark:border-slate-700"
-                                value={dateFilter.end}
-                                onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value }))}
-                            />
+                            {/* Status Filter */}
+                            <div className="lg:col-span-2">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-primary/20">
+                                        <SelectValue placeholder="Trạng thái" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-2xl border-slate-200 dark:border-slate-800">
+                                        <SelectItem value="ALL" className="rounded-xl">Tất cả trạng thái</SelectItem>
+                                        <SelectItem value="Pending" className="rounded-xl">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-amber-500" />
+                                                <span>Chờ duyệt</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="Completed" className="rounded-xl">
+                                            <div className="flex items-center gap-2">
+                                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                                <span>Hoàn thành</span>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="Cancelled" className="rounded-xl">
+                                            <div className="flex items-center gap-2">
+                                                <XCircle className="w-4 h-4 text-rose-500" />
+                                                <span>Đã hủy</span>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Date Range Filters */}
+                            <div className="lg:col-span-2 relative group">
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-primary transition-colors" />
+                                <Input
+                                    type="date"
+                                    className="w-full h-12 pl-11 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus-visible:ring-primary/20 transition-all font-medium"
+                                    value={dateFilter.start}
+                                    onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value }))}
+                                />
+                            </div>
+
+                            <div className="lg:col-span-2 relative group">
+                                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-primary transition-colors" />
+                                <Input
+                                    type="date"
+                                    className="w-full h-12 pl-11 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-2xl focus-visible:ring-primary/20 transition-all font-medium"
+                                    value={dateFilter.end}
+                                    onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value }))}
+                                />
+                            </div>
+
+                            {/* Reset Button */}
+                            <div className="lg:col-span-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={handleResetFilters}
+                                    className="w-full h-12 gap-2 rounded-2xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all active:scale-[0.98] group"
+                                >
+                                    <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-[-45deg]" />
+                                    <span className="font-medium">Làm mới</span>
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -189,19 +251,19 @@ const StockInList = () => {
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-white dark:bg-[#1a262a] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <div className="bg-white dark:bg-[#1a262a] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none overflow-hidden transition-all duration-300">
                             <Table>
-                                <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+                                <TableHeader className="bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
                                     <TableRow>
-                                        <TableHead className="w-[60px] text-center">#</TableHead>
-                                        <TableHead>Receipt ID</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Supplier</TableHead>
-                                        <TableHead>Destination</TableHead>
-                                        <TableHead className="text-right">Items</TableHead>
-                                        <TableHead className="text-right">Total Value</TableHead>
-                                        <TableHead className="text-center">Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
+                                        <TableHead className="w-[70px] text-center font-bold text-slate-700 dark:text-slate-300">STT</TableHead>
+                                        <TableHead className="font-bold text-slate-700 dark:text-slate-300">Mã Phiếu</TableHead>
+                                        <TableHead className="font-bold text-slate-700 dark:text-slate-300">Ngày Nhập</TableHead>
+                                        <TableHead className="font-bold text-slate-700 dark:text-slate-300">Nhà Cung Cấp</TableHead>
+                                        <TableHead className="font-bold text-slate-700 dark:text-slate-300">Kho Đích</TableHead>
+                                        <TableHead className="text-right font-bold text-slate-700 dark:text-slate-300">Sản Phẩm</TableHead>
+                                        <TableHead className="text-right font-bold text-slate-700 dark:text-slate-300">Giá Trị</TableHead>
+                                        <TableHead className="text-center font-bold text-slate-700 dark:text-slate-300">Trạng Thái</TableHead>
+                                        <TableHead className="text-right font-bold text-slate-700 dark:text-slate-300">Thao Tác</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -233,17 +295,20 @@ const StockInList = () => {
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => handleViewDetail(record)}>
-                                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                                    <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-2xl">
+                                                        <DropdownMenuLabel className="text-xs uppercase tracking-widest text-slate-500">Thao Tác</DropdownMenuLabel>
+                                                        <DropdownMenuItem onClick={() => handleViewDetail(record)} className="rounded-xl cursor-pointer">
+                                                            <Eye className="mr-2 h-4 w-4" /> Xem Chi Tiết
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Edit className="mr-2 h-4 w-4" /> Edit
+                                                        <DropdownMenuItem className="rounded-xl cursor-pointer">
+                                                            <Edit className="mr-2 h-4 w-4" /> Chỉnh Sửa
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(record.id)}>
-                                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                        <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800" />
+                                                        <DropdownMenuItem
+                                                            className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-900/20 rounded-xl cursor-pointer"
+                                                            onClick={() => handleDelete(record.id)}
+                                                        >
+                                                            <Trash2 className="mr-2 h-4 w-4" /> Xóa Phiếu
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -254,48 +319,54 @@ const StockInList = () => {
                             </Table>
 
                             {/* Pagination Footer */}
-                            <div className="flex items-center justify-between p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
-                                <div className="text-sm text-slate-500 dark:text-slate-400">
-                                    Showing <span className="font-semibold text-slate-900 dark:text-white">
+                            <div className="flex flex-col sm:flex-row items-center justify-between p-6 gap-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/20">
+                                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                    Hiển thị <span className="text-slate-900 dark:text-white font-bold">
                                         {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredRecords.length)}
-                                    </span> of <span className="font-semibold text-slate-900 dark:text-white">{filteredRecords.length}</span>
+                                    </span> trong <span className="text-slate-900 dark:text-white font-bold">{filteredRecords.length}</span> phiếu nhập
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Select
-                                        value={itemsPerPage.toString()}
-                                        onValueChange={(val) => {
-                                            setItemsPerPage(Number(val));
-                                            setCurrentPage(1);
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-[70px] h-8 bg-white border-slate-200">
-                                            <SelectValue placeholder="10" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="5">5</SelectItem>
-                                            <SelectItem value="10">10</SelectItem>
-                                            <SelectItem value="20">20</SelectItem>
-                                            <SelectItem value="50">50</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <div className="flex gap-1">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-slate-400 font-semibold uppercase">Hiển thị:</span>
+                                        <Select
+                                            value={itemsPerPage.toString()}
+                                            onValueChange={(val) => {
+                                                setItemsPerPage(Number(val));
+                                                setCurrentPage(1);
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-[70px] h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">
+                                                <SelectValue placeholder="10" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl border-slate-200">
+                                                <SelectItem value="5">5</SelectItem>
+                                                <SelectItem value="10">10</SelectItem>
+                                                <SelectItem value="20">20</SelectItem>
+                                                <SelectItem value="50">50</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="flex items-center gap-2">
                                         <Button
                                             variant="outline"
-                                            size="sm"
-                                            className="h-8 w-8 p-0"
+                                            size="icon"
+                                            className="h-9 w-9 rounded-xl border-slate-200 dark:border-slate-700 hover:text-primary transition-all active:scale-95"
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage === 1}
                                         >
-                                            &lt;
+                                            <ChevronLeft className="h-4 w-4" />
                                         </Button>
+                                        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-sm font-bold min-w-[80px] text-center">
+                                            {currentPage} / {totalPages}
+                                        </div>
                                         <Button
                                             variant="outline"
-                                            size="sm"
-                                            className="h-8 w-8 p-0"
+                                            size="icon"
+                                            className="h-9 w-9 rounded-xl border-slate-200 dark:border-slate-700 hover:text-primary transition-all active:scale-95"
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage === totalPages || totalPages === 0}
                                         >
-                                            &gt;
+                                            <ChevronRight className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </div>
@@ -307,85 +378,92 @@ const StockInList = () => {
 
             {/* Detail Modal */}
             <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="max-w-3xl">
-                    <DialogHeader>
-                        <DialogTitle>Stock In Receipt Detail</DialogTitle>
-                        <DialogDescription>
-                            Receipt ID: <span className="font-bold text-primary">{selectedRecord?.documentCode}</span>
+                <DialogContent className="max-w-3xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
+                    <DialogHeader className="bg-primary p-8 text-white relative">
+                        <DialogTitle className="text-2xl font-bold">Chi Tiết Phiếu Nhập Kho</DialogTitle>
+                        <DialogDescription className="text-primary-foreground/80 font-medium">
+                            Mã phiếu: <span className="font-bold border-b border-primary-foreground/40">{selectedRecord?.documentCode}</span>
                         </DialogDescription>
+                        <div className="absolute right-0 bottom-0 opacity-10">
+                            <FileText size={120} />
+                        </div>
                     </DialogHeader>
 
                     {selectedRecord && (
-                        <div className="space-y-6">
+                        <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
                             {/* Meta Info */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
-                                <div>
-                                    <p className="text-xs text-slate-500 uppercase font-semibold">Date Created</p>
-                                    <p className="font-medium text-slate-900 dark:text-slate-100">{new Date(selectedRecord.createdAt).toLocaleDateString()}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Ngày tạo</p>
+                                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                                        <Calendar size={14} className="text-primary" />
+                                        <p className="font-bold">{new Date(selectedRecord.createdAt).toLocaleDateString('vi-VN')}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-slate-500 uppercase font-semibold">Supplier</p>
-                                    <p className="font-medium text-slate-900 dark:text-slate-100">{selectedRecord.supplier || 'N/A'}</p>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Nhà cung cấp</p>
+                                    <p className="font-bold text-slate-700 dark:text-slate-200">{selectedRecord.supplier || 'N/A'}</p>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-slate-500 uppercase font-semibold">Destination</p>
-                                    <p className="font-medium text-slate-900 dark:text-slate-100">{selectedRecord.targetWarehouseName}</p>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Kho đích</p>
+                                    <p className="font-bold text-slate-700 dark:text-slate-200">{selectedRecord.targetWarehouseName}</p>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-slate-500 uppercase font-semibold">Status</p>
-                                    <Badge className="mt-1">{selectedRecord.status}</Badge>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Trạng thái</p>
+                                    <Badge variant={
+                                        selectedRecord.status === 'Completed' ? 'default' :
+                                            selectedRecord.status === 'Pending' ? 'secondary' : 'outline'
+                                    } className="rounded-lg px-3 shadow-sm">
+                                        {selectedRecord.status === 'Completed' ? 'Hoàn thành' :
+                                            selectedRecord.status === 'Pending' ? 'Chờ duyệt' : 'Đã hủy'}
+                                    </Badge>
                                 </div>
-                                <div className="col-span-2">
-                                    <p className="text-xs text-slate-500 uppercase font-semibold">Note</p>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300">{selectedRecord.note || 'No notes provided.'}</p>
+                                <div className="col-span-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 mt-2">
+                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Ghi chú</p>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic">
+                                        "{selectedRecord.note || 'Không có ghi chú.'}"
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Items List */}
-                            <div>
-                                <h4 className="font-semibold mb-2 flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                                    <span className="bg-primary w-1 h-4 rounded-full"></span>
-                                    Item Details
+                            <div className="space-y-4">
+                                <h4 className="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                                    <span className="w-1.5 h-6 bg-primary rounded-full"></span>
+                                    Danh sách mặt hàng
                                 </h4>
-                                <div className="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden">
+                                <div className="border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
                                     <Table>
-                                        <TableHeader className="bg-slate-50 dark:bg-slate-900">
+                                        <TableHeader className="bg-slate-50 dark:bg-slate-800">
                                             <TableRow>
-                                                <TableHead>Product Name</TableHead>
-                                                <TableHead className="text-right">Quantity</TableHead>
-                                                <TableHead className="text-right">Unit Price</TableHead>
-                                                <TableHead className="text-right">Total</TableHead>
+                                                <TableHead className="font-bold">Sản phẩm</TableHead>
+                                                <TableHead className="text-right font-bold">Số lượng</TableHead>
+                                                <TableHead className="text-right font-bold">Đơn giá</TableHead>
+                                                <TableHead className="text-right font-bold">Thành tiền</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {selectedRecord.items?.length > 0 ? (
                                                 selectedRecord.items.map((item, idx) => (
-                                                    <TableRow key={idx}>
-                                                        <TableCell>{item.productName || `Product Item #${idx + 1}`}</TableCell>
-                                                        <TableCell className="text-right">{item.quantity}</TableCell>
-                                                        <TableCell className="text-right">--</TableCell>
-                                                        <TableCell className="text-right">--</TableCell>
+                                                    <TableRow key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                        <TableCell className="font-medium">{item.productName || `Sản phẩm #${idx + 1}`}</TableCell>
+                                                        <TableCell className="text-right font-bold text-primary">{item.quantity}</TableCell>
+                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
+                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
                                                     </TableRow>
                                                 ))
                                             ) : (
-                                                <>
-                                                    <TableRow>
-                                                        <TableCell>Premium Milk (Mock)</TableCell>
-                                                        <TableCell className="text-right">50</TableCell>
-                                                        <TableCell className="text-right">24,000</TableCell>
-                                                        <TableCell className="text-right">1,200,000</TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell>Chocolate Bar (Mock)</TableCell>
-                                                        <TableCell className="text-right">100</TableCell>
-                                                        <TableCell className="text-right">15,000</TableCell>
-                                                        <TableCell className="text-right">1,500,000</TableCell>
-                                                    </TableRow>
-                                                </>
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="text-center py-8 text-slate-400 italic">
+                                                        Không có dữ liệu mặt hàng
+                                                    </TableCell>
+                                                </TableRow>
                                             )}
-                                            <TableRow className="bg-slate-50 dark:bg-slate-800 font-bold">
-                                                <TableCell colSpan={3} className="text-right">Total Value:</TableCell>
-                                                <TableCell className="text-right">{(selectedRecord.totalValue || 2700000).toLocaleString()} VND</TableCell>
+                                            <TableRow className="bg-slate-50 dark:bg-slate-800/80 font-extrabold text-lg">
+                                                <TableCell colSpan={3} className="text-right text-slate-700 dark:text-slate-200">Tổng cộng:</TableCell>
+                                                <TableCell className="text-right text-primary">
+                                                    {(selectedRecord.totalValue || 0).toLocaleString('vi-VN')} đ
+                                                </TableCell>
                                             </TableRow>
                                         </TableBody>
                                     </Table>
@@ -394,9 +472,11 @@ const StockInList = () => {
                         </div>
                     )}
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDetailOpen(false)}>Close</Button>
-                        <Button>Print Receipt</Button>
+                    <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900/50 gap-4">
+                        <Button variant="outline" onClick={() => setIsDetailOpen(false)} className="rounded-xl px-8 border-slate-200">Đóng</Button>
+                        <Button className="rounded-xl px-8 shadow-lg shadow-primary/20">
+                            <Upload className="w-4 h-4 mr-2 rotate-180" /> In Phiếu
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -25,4 +25,6 @@ public interface InventoryService {
     WarehouseResponse updateWarehouse(Long id, WarehouseRequest request);
 
     void deleteWarehouse(Long id);
+
+    void deleteDocument(Long id);
 }

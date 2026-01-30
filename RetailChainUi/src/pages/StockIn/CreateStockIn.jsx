@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,7 +88,23 @@ const CreateStockIn = () => {
         setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
     };
 
+
+    const isFormInvalid = useMemo(() => {
+        if (!formData.warehouseId) return true;
+        if (items.length === 0) return true;
+        const hasInvalidItem = items.some(item => !item.variantId || !item.quantity || Number(item.quantity) <= 0);
+        if (hasInvalidItem) return true;
+        return false;
+    }, [items, formData.warehouseId]);
+
     const handleSubmit = async () => {
+        // Validation check
+        if (isFormInvalid) {
+            // TODO: Replace with a proper toast notification
+            alert("Vui lòng điền đầy đủ thông tin sản phẩm và số lượng hợp lệ.");
+            return;
+        }
+
         try {
             setSubmitting(true);
 
@@ -108,11 +124,13 @@ const CreateStockIn = () => {
             navigate('/stock-in');
         } catch (error) {
             console.error("Failed to create stock in:", error);
-            // toast({ title: "Error", description: "Failed to create ticket", variant: "destructive" });
+             // TODO: Replace with a proper toast notification
+            alert("Đã có lỗi xảy ra khi tạo phiếu nhập. Vui lòng thử lại.");
         } finally {
             setSubmitting(false);
         }
     };
+
 
     return (
         <div className="p-6 space-y-6">
@@ -138,15 +156,6 @@ const CreateStockIn = () => {
                     <CardContent className="space-y-4">
 
 
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Kho Nhập (Kho Tổng)</label>
-                            <Input
-                                disabled
-                                value={warehouses.find(w => String(w.id) === formData.warehouseId)?.name || "Đang tải..."}
-                                className="bg-muted"
-                            />
-                        </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nhà Cung Cấp</label>
@@ -250,7 +259,7 @@ const CreateStockIn = () => {
                             <Link to="/stock-in">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                            <Button onClick={handleSubmit} disabled={submitting || !formData.warehouseId}>
+                             <Button onClick={handleSubmit} disabled={submitting || isFormInvalid}>
                                 {submitting ? "Đang xử lý..." : "Lưu Phiếu Nhập"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>

@@ -154,13 +154,17 @@ const inventoryService = {
     return axiosPrivate.post('/inventory/transfer', data);
   },
 
-  getAllProducts: async () => {
-    return axiosPrivate.get('/product');
-  },
+   getAllProducts: async () => {
+     return axiosPrivate.get('/product');
+   },
 
-  // --- Wrapper for Legacy Components (To be refactored) ---
-  createStockIn: async (data) => {
-    return inventoryService.importStock(data);
+  deleteDocument: async (id) => {
+    return axiosPrivate.delete(`/inventory/documents/${id}`);
+  },
+ 
+   // --- Wrapper for Legacy Components (To be refactored) ---
+   createStockIn: async (data) => {
+     return inventoryService.importStock(data);
   },
 
   createStockOut: async (data) => {

@@ -151,4 +151,18 @@ public class InventoryController {
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving documents: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/documents/{id}")
+    public String deleteDocument(@PathVariable Long id) {
+        String prefix = "[deleteDocument]|id=" + id;
+        log.info("{}|START", prefix);
+        try {
+            inventoryService.deleteDocument(id);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Document deleted successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting document: " + e.getMessage());
+        }
+    }
 }
