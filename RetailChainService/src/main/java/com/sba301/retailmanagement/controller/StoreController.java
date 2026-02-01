@@ -93,21 +93,10 @@ public class StoreController {
         }
     }
 
-    @DeleteMapping("/{slug}")
-    public String deleteStore(@PathVariable String slug) {
-        String prefix = "[deleteStore]|slug=" + slug;
-        try {
-            log.info("{}|START", prefix);
-            Boolean result = storeService.deleteStore(slug);
-            if (result == null) {
-                log.error("{}|FAILED|Error occurred while deleting store", prefix);
-                return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting store");
-            }
-            log.info("{}|END", prefix);
-            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Delete store success");
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting store: " + e.getMessage());
-        }
+    @GetMapping("/{id}/staff")
+    public String getStoreStaff(@PathVariable Long id) {
+        // Mock response for now as User/Staff structure is complex
+        // In real impl, query User repo by storeId
+        return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success", java.util.Collections.emptyList());
     }
 }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain';
+const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain') + '/api';
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
