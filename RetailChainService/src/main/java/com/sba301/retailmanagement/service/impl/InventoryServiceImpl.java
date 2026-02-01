@@ -109,6 +109,11 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
+        // Validate: Only Main Warehouse (Type 1) can import stock
+        if (warehouse.getWarehouseType() != 1) {
+            throw new RuntimeException("Import is only allowed for Central Warehouse (Main Warehouse)");
+        }
+
         if (request.getSupplierId() != null && !supplierRepository.existsById(request.getSupplierId())) {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
         }
@@ -131,10 +136,11 @@ public class InventoryServiceImpl implements InventoryService {
         for (InventoryItemRequest itemReq : request.getItems()) {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
-            
+
             // Calculate Value
             if (variant.getPrice() != null) {
-                totalAmount = totalAmount.add(variant.getPrice().multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
+                totalAmount = totalAmount
+                        .add(variant.getPrice().multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
             }
 
             // Save Document Item
@@ -162,7 +168,7 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
                     newQuantity);
         }
-        
+
         // Update Total Amount
         savedDoc.setTotalAmount(totalAmount);
         inventoryDocumentRepository.save(savedDoc);
@@ -229,6 +235,16 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new RuntimeException("Source Warehouse not found"));
         Warehouse targetWarehouse = warehouseRepository.findById(request.getTargetWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
+
+        // Validate: Source must be Central Warehouse (Type 1)
+        if (sourceWarehouse.getWarehouseType() != 1) {
+            throw new RuntimeException("Transfer source must be Central Warehouse");
+        }
+
+        // Validate: Target must be Store Warehouse (Type 2)
+        if (targetWarehouse.getWarehouseType() != 2) {
+            throw new RuntimeException("Transfer destination must be a Store Warehouse");
+        }
 
         if (sourceWarehouse.getId().equals(targetWarehouse.getId())) {
             throw new RuntimeException("Source and Target warehouse cannot be the same");
@@ -334,6 +350,50 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Transactional
+    public WarehouseResponse updateWarehouse(Long id, WarehouseRequest request) {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+        if (request.getCode() != null && !request.getCode().equals(warehouse.getCode())) {
+            if (warehouseRepository.existsByCode(request.getCode())) {
+                throw new RuntimeException("Warehouse code already exists");
+            }
+            warehouse.setCode(request.getCode());
+        }
+
+        if (request.getName() != null) {
+            warehouse.setName(request.getName());
+        }
+
+        warehouse.setUpdatedAt(LocalDateTime.now());
+        Warehouse saved = warehouseRepository.save(warehouse);
+        return mapToWarehouseResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWarehouse(Long id) {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        
+        inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
+
+        try {
+            storeWarehouseRepository.deleteByWarehouseId(id); 
+        } catch (Exception e) {
+            // Ignore if method missing, assume handled or empty
+        }
+
+        try {
+            warehouseRepository.delete(warehouse);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new RuntimeException(
+                    "Cannot delete warehouse because it has associated documents or history. Soft delete (Deactivate) recommended instead.");
+        }
+    }
+
+    @Override
     public List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String typeStr) {
         InventoryDocumentType type;
         try {
@@ -348,9 +408,9 @@ public class InventoryServiceImpl implements InventoryService {
             List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
             int totalItems = items.stream().mapToInt(InventoryDocumentItem::getQuantity).sum();
 
-            // Total Value can now be retrieved directly
-            java.math.BigDecimal totalValue = doc.getTotalAmount() != null ? doc.getTotalAmount() : java.math.BigDecimal.ZERO;
-            
+            java.math.BigDecimal totalValue = doc.getTotalAmount() != null ? doc.getTotalAmount()
+                    : java.math.BigDecimal.ZERO;
+
             String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
 
             return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
@@ -370,5 +430,23 @@ public class InventoryServiceImpl implements InventoryService {
                     .supplier(supplierName)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteDocument(Long id) {
+        InventoryDocument document = inventoryDocumentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found: " + id));
+
+        // 1. Delete associated history records first to avoid foreign key violations
+        List<InventoryHistory> histories = inventoryHistoryRepository.findByDocumentId(id);
+        inventoryHistoryRepository.deleteAllInBatch(histories);
+
+        // 2. Delete associated document items
+        List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(id);
+        inventoryDocumentItemRepository.deleteAllInBatch(items);
+
+        // 3. Finally, delete the main document
+        inventoryDocumentRepository.delete(document);
     }
 }

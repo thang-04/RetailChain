@@ -21,4 +21,10 @@ public interface InventoryService {
     void transferStock(TransferRequest request);
 
     List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String type);
+
+    WarehouseResponse updateWarehouse(Long id, WarehouseRequest request);
+
+    void deleteWarehouse(Long id);
+
+    void deleteDocument(Long id);
 }

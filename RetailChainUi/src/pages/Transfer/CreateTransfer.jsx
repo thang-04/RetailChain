@@ -40,6 +40,11 @@ const CreateTransfer = () => {
                 const res = await inventoryService.getAllWarehouses();
                 if (res.data) {
                     setWarehouses(res.data);
+                    // Automatically select the first Central Warehouse (Type 1) as Source
+                    const centralWarehouse = res.data.find(wh => wh.warehouseType === 1);
+                    if (centralWarehouse) {
+                        setFormData(prev => ({ ...prev, sourceWarehouseId: String(centralWarehouse.id) }));
+                    }
                 }
             } catch (error) {
                 console.error("Failed to load warehouses", error);
@@ -106,23 +111,15 @@ const CreateTransfer = () => {
                         <CardTitle>Thông Tin Vận Chuyển</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+
+
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Kho Nguồn (Từ)</label>
-                            <Select
-                                value={formData.sourceWarehouseId}
-                                onValueChange={(val) => setFormData({ ...formData, sourceWarehouseId: val })}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Chọn kho nguồn" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {warehouses.map(wh => (
-                                        <SelectItem key={wh.id} value={String(wh.id)}>
-                                            {wh.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <label className="text-sm font-medium">Kho Nguồn (Kho Tổng)</label>
+                            <Input
+                                disabled
+                                value={warehouses.find(w => String(w.id) === formData.sourceWarehouseId)?.name || "Đang tải..."}
+                                className="bg-muted"
+                            />
                         </div>
 
                         <div className="flex justify-center">
@@ -140,6 +137,7 @@ const CreateTransfer = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     {warehouses
+                                        .filter(wh => wh.warehouseType === 2) // Target must be Store Warehouse
                                         .filter(wh => String(wh.id) !== formData.sourceWarehouseId)
                                         .map(wh => (
                                             <SelectItem key={wh.id} value={String(wh.id)}>

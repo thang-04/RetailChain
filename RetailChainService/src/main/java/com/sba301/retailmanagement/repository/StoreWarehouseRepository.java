@@ -10,5 +10,8 @@ import java.util.List;
 @Repository
 public interface StoreWarehouseRepository extends JpaRepository<StoreWarehouse, StoreWarehouseId> {
     List<StoreWarehouse> findByStoreId(Long storeId);
+
     List<StoreWarehouse> findByWarehouseId(Long warehouseId);
+
+    void deleteByWarehouseId(Long warehouseId);
 }
