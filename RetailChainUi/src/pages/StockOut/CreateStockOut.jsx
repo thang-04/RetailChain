@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +9,10 @@ import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
 
-// Temporary Mock Products until Product API is ready
-const MOCK_PRODUCTS = [
-    { id: 1, name: "Produce Edge (XL/Red)", sku: "SKU-36912022" },
-    { id: 2, name: "Produce Edge (M/White)", sku: "SKU-13311507" },
-    { id: 3, name: "Produce Edge (L/White)", sku: "SKU-41949529" },
-    { id: 4, name: "Certainly City (S/Blue)", sku: "SKU-99937039" },
-    { id: 5, name: "Certainly City (M/White)", sku: "SKU-96779126" },
-    { id: 6, name: "Certainly City (L/White)", sku: "SKU-14524825" },
-    { id: 7, name: "Just Assume (XL/Red)", sku: "SKU-3523729" },
-    { id: 8, name: "Just Assume (L/Black)", sku: "SKU-88227303" }
-];
-
 const CreateStockOut = () => {
     const navigate = useNavigate();
     const [warehouses, setWarehouses] = useState([]);
+    const [productVariants, setProductVariants] = useState([]); // Real product variants
     const [formData, setFormData] = useState({
         sourceWarehouseId: '', // Was warehouseId
         targetWarehouseId: '', // New field for Store Destination
@@ -33,24 +22,50 @@ const CreateStockOut = () => {
         { id: Date.now(), variantId: '', quantity: 1 }
     ]);
     const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState(null); // Add error state
 
     useEffect(() => {
-        const fetchWarehouses = async () => {
+        const fetchInitialData = async () => {
             try {
-                const res = await inventoryService.getAllWarehouses();
-                if (res.data) {
-                    setWarehouses(res.data);
+                // Parallel fetch: Warehouses + Products
+                const [warehouseRes, productRes] = await Promise.all([
+                    inventoryService.getAllWarehouses(),
+                    inventoryService.getAllProducts() // Use inventoryService instead of productService
+                ]);
+
+                if (warehouseRes.data) {
+                    setWarehouses(warehouseRes.data);
                     // Automatically select the first Central Warehouse (Type 1) as Source
-                    const centralWarehouse = res.data.find(wh => wh.warehouseType === 1);
+                    const centralWarehouse = warehouseRes.data.find(wh => wh.warehouseType === 1);
                     if (centralWarehouse) {
                         setFormData(prev => ({ ...prev, sourceWarehouseId: String(centralWarehouse.id) }));
                     }
                 }
+
+                if (productRes.data) {
+                    // Flatten the product structure to get a list of variants
+                    // API returns: [{ id, name, ..., variants: [{ id, sku, size, color, ... }] }]
+                    const variantsList = [];
+                    productRes.data.forEach(product => {
+                        if (product.variants && product.variants.length > 0) {
+                            product.variants.forEach(variant => {
+                                variantsList.push({
+                                    id: variant.id,
+                                    name: `${product.name} - ${variant.sku} (${variant.color}/${variant.size})`,
+                                    sku: variant.sku,
+                                    productName: product.name
+                                });
+                            });
+                        }
+                    });
+                    setProductVariants(variantsList);
+                }
             } catch (error) {
-                console.error("Failed to load warehouses", error);
+                console.error("Failed to load initial data", error);
+                setError("Không thể tải dữ liệu. Vui lòng kiểm tra kết nối server.");
             }
         };
-        fetchWarehouses();
+        fetchInitialData();
     }, []);
 
     const handleAddItem = () => {
@@ -70,6 +85,19 @@ const CreateStockOut = () => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
+            setError(null); // Clear previous errors
+
+            // Validation check
+            if (!formData.sourceWarehouseId || !formData.targetWarehouseId) {
+                throw new Error("Vui lòng chọn kho xuất và kho nhận.");
+            }
+            if (items.length === 0) {
+                throw new Error("Vui lòng thêm ít nhất một sản phẩm.");
+            }
+            const hasInvalidItem = items.some(item => !item.variantId || !item.quantity || Number(item.quantity) <= 0);
+            if (hasInvalidItem) {
+                throw new Error("Vui lòng chọn sản phẩm và nhập số lượng hợp lệ.");
+            }
 
             // Use Transfer Payload Structure
             const payload = {
@@ -82,11 +110,15 @@ const CreateStockOut = () => {
                 }))
             };
 
-            // Call Transfer API instead of Export API
+            // Call Transfer API
             await inventoryService.transferStock(payload);
-            navigate('/stock-out'); // Or navigate to transfer list? User might expect to stay in Stock Out list
+            navigate('/stock-out'); // Navigate back to stock out list
         } catch (error) {
             console.error("Failed to create stock out/transfer:", error);
+            // Show error to user
+            const errorMessage = error.response?.data?.desc || error.message || "Đã có lỗi xảy ra. Vui lòng thử lại.";
+            setError(errorMessage);
+            alert("Lỗi: " + errorMessage); // Show alert for now
         } finally {
             setSubmitting(false);
         }
@@ -106,6 +138,14 @@ const CreateStockOut = () => {
                     <p className="text-muted-foreground">Tạo phiếu xuất hàng từ Kho Tổng đến các Kho Cửa Hàng.</p>
                 </div>
             </div>
+
+            {/* Error Display */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                    <span className="font-bold">Lỗi:</span>
+                    <span>{error}</span>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* General Info */}
@@ -188,13 +228,17 @@ const CreateStockOut = () => {
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Chọn sản phẩm" />
                                                 </SelectTrigger>
-                                                <SelectContent>
-                                                    {MOCK_PRODUCTS.map(p => (
+                                            <SelectContent>
+                                                {productVariants.length > 0 ? (
+                                                    productVariants.map(p => (
                                                         <SelectItem key={p.id} value={String(p.id)}>
-                                                            {p.name} - {p.sku}
+                                                            {p.name}
                                                         </SelectItem>
-                                                    ))}
-                                                </SelectContent>
+                                                    ))
+                                                ) : (
+                                                    <SelectItem value="loading" disabled>Đang tải sản phẩm...</SelectItem>
+                                                )}
+                                            </SelectContent>
                                             </Select>
                                         </TableCell>
                                         <TableCell>
