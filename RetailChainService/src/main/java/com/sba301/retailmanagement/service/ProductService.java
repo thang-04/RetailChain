@@ -12,4 +12,8 @@ public interface ProductService {
     ProductResponse updateProduct(String slug, ProductRequest request);
 
     ProductResponse getProductBySlug(String slug);
+
+    String getNextProductCode(Long categoryId);
+
+    List<com.sba301.retailmanagement.entity.ProductCategory> getAllCategories();
 }

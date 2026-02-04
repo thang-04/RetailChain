@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Upload, X, Loader2 } from "lucide-react";
 import uploadService from "@/services/upload.service";
+import productService from "@/services/product.service";
 
 const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => {
     const [formData, setFormData] = useState({
@@ -56,6 +57,26 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => 
             });
         }
     }, [initialData, open]);
+
+    const [loadingCode, setLoadingCode] = useState(false);
+
+    useEffect(() => {
+        if (!initialData && formData.categoryId) {
+            setLoadingCode(true);
+            productService.getNextCode(formData.categoryId)
+                .then(res => {
+                    const nextCode = res.data; // Data is directly string or object wrapper? Assuming response.data.data from backend utility
+                    // Backend returns ResponseJson: { status: 200, message: ..., data: "CODE" }
+                    // Axios interceptor usually extracts data. If not: res.data.data
+                    // Let's assume axiosClient handles it or check structure.
+                    // Based on previous code flow: res.data might be the payload.
+                    // Safely handle it.
+                    setFormData(prev => ({ ...prev, code: res.data || res }));
+                })
+                .catch(err => console.error("Failed to fetch next code", err))
+                .finally(() => setLoadingCode(false));
+        }
+    }, [formData.categoryId, initialData]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -143,18 +164,25 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => 
                     <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="code" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Product Code <span className="text-red-500">*</span>
+                                Product Code
                             </Label>
-                            <Input
-                                id="code"
-                                name="code"
-                                value={formData.code}
-                                onChange={handleChange}
-                                placeholder="e.g. TSHIRT-001"
-                                required
-                                className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
-                                disabled={!!initialData}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="code"
+                                    name="code"
+                                    value={formData.code}
+                                    readOnly
+                                    disabled
+                                    className="h-10 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed pr-10"
+                                    placeholder={loadingCode ? "Generating..." : "Auto-generated"}
+                                />
+                                {loadingCode && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                    </div>
+                                )}
+                            </div>
+                            {!initialData && <p className="text-xs text-slate-500">Code will be generated automatically based on Category.</p>}
                         </div>
 
                         <div className="space-y-2">
@@ -207,7 +235,7 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => 
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className={initialData ? "grid grid-cols-2 gap-5" : "w-full"}>
                         <div className="space-y-2">
                             <Label htmlFor="gender" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Gender</Label>
                             <Select
@@ -226,21 +254,23 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => 
                             </Select>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="status" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</Label>
-                            <Select
-                                value={String(formData.status)}
-                                onValueChange={(value) => handleSelectChange("status", parseInt(value))}
-                            >
-                                <SelectTrigger className="h-10 border-slate-200 dark:border-slate-700">
-                                    <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="1">Active</SelectItem>
-                                    <SelectItem value="0">Inactive</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {initialData && (
+                            <div className="space-y-2">
+                                <Label htmlFor="status" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</Label>
+                                <Select
+                                    value={String(formData.status)}
+                                    onValueChange={(value) => handleSelectChange("status", parseInt(value))}
+                                >
+                                    <SelectTrigger className="h-10 border-slate-200 dark:border-slate-700">
+                                        <SelectValue placeholder="Select status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="1">Active</SelectItem>
+                                        <SelectItem value="0">Inactive</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                     </div>
 
                     <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">

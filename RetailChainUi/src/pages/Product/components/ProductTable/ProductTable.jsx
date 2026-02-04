@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const ProductTable = ({ products, onEditClick, onViewClick }) => {
+const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -50,13 +50,8 @@ const ProductTable = ({ products, onEditClick, onViewClick }) => {
 
   // Helper to map category ID to name
   const getCategoryName = (id) => {
-    switch (id) {
-      case 1: return "Fashion";
-      case 2: return "Shirts";
-      case 3: return "Pants";
-      case 4: return "Bags";
-      default: return "Unknown";
-    }
+    const cat = categories && categories.find(c => c.id === id);
+    return cat ? cat.name : "Unknown";
   };
 
   return (

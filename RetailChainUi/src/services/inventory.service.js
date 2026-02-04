@@ -154,17 +154,17 @@ const inventoryService = {
     return axiosPrivate.post('/inventory/transfer', data);
   },
 
-   getAllProducts: async () => {
-     return axiosPrivate.get('/product');
-   },
+  getAllProducts: async () => {
+    return axiosPrivate.get('/product');
+  },
 
   deleteDocument: async (id) => {
     return axiosPrivate.delete(`/inventory/documents/${id}`);
   },
- 
-   // --- Wrapper for Legacy Components (To be refactored) ---
-   createStockIn: async (data) => {
-     return inventoryService.importStock(data);
+
+  // --- Wrapper for Legacy Components (To be refactored) ---
+  createStockIn: async (data) => {
+    return inventoryService.importStock(data);
   },
 
   createStockOut: async (data) => {
@@ -244,9 +244,12 @@ const inventoryService = {
     return MOCK_ALL_INVENTORIES;
   },
 
-  getProductChainStock: async (productId) => { // eslint-disable-line no-unused-vars
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return CHAIN_WIDE_STOCK;
+  getStockByProduct: async (productId) => {
+    return axiosPrivate.get(`/inventory/product/${productId}`);
+  },
+
+  getProductChainStock: async (productId) => {
+    return inventoryService.getStockByProduct(productId);
   },
 
   getExecutiveReport: async () => {

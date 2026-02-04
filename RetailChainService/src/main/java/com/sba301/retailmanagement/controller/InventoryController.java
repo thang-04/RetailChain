@@ -95,6 +95,20 @@ public class InventoryController {
         }
     }
 
+    @GetMapping("/product/{productId}")
+    public String getStockByProduct(@PathVariable Long productId) {
+        String prefix = "[getStockByProduct]|productId=" + productId;
+        log.info("{}|START", prefix);
+        try {
+            List<InventoryStockResponse> response = inventoryService.getStockByProduct(productId);
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Stock retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving stock: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/import")
     public String importStock(@RequestBody StockRequest request) {
         String prefix = "[importStock]";

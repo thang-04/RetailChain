@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ProductFilter = ({ filters, onFilterChange }) => {
+const ProductFilter = ({ filters, onFilterChange, categories }) => {
   const handleInputChange = (e) => {
     onFilterChange("search", e.target.value);
   };
@@ -46,10 +46,9 @@ const ProductFilter = ({ filters, onFilterChange }) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="1">Fashion</SelectItem>
-            <SelectItem value="2">Shirts</SelectItem>
-            <SelectItem value="3">Pants</SelectItem>
-            <SelectItem value="4">Bags</SelectItem>
+            {categories && categories.map(cat => (
+              <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

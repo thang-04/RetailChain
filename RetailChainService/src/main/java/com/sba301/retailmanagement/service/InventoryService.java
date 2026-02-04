@@ -14,6 +14,8 @@ public interface InventoryService {
 
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
 
+    List<InventoryStockResponse> getStockByProduct(Long productId);
+
     void importStock(StockRequest request);
 
     void exportStock(StockRequest request);

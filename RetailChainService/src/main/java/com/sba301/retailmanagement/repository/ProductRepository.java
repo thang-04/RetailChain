@@ -11,4 +11,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByCode(String code);
 
     Optional<Product> findBySlug(String slug);
+
+    Optional<Product> findTopByCodeStartingWithOrderByCodeDesc(String prefix);
 }

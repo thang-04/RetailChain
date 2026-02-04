@@ -25,6 +25,16 @@ const productService = {
     return response;
   },
 
+  getNextCode: async (categoryId) => {
+    const response = await axiosPrivate.get(`${PRODUCT_API_PATH}/next-code?categoryId=${categoryId}`);
+    return response;
+  },
+
+  getCategories: async () => {
+    const response = await axiosPrivate.get(`${PRODUCT_API_PATH}/categories`);
+    return response;
+  },
+
   getProductChainStock: async (id) => {
     return [
       { locationId: "WH01", locationName: "Kho Tổng", type: "Warehouse", stock: 100, status: "High" },

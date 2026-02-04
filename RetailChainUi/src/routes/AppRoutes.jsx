@@ -13,7 +13,8 @@ import StoreStaffPage from "../pages/StoreDashboard/StoreStaffPage";
 
 // Product
 import ProductPage from "../pages/Product/ProductPage";
-import ProductChainView from "../pages/Product/ProductDetail/ProductChainView";
+import ProductDetailPage from "../pages/Product/ProductDetailPage";
+import ProductEditPage from "../pages/Product/ProductEditPage";
 
 // Inventory
 import InventoryPage from "../pages/Inventory/InventoryPage";
@@ -59,7 +60,9 @@ const AppRoutes = () => {
 
         {/* Product Module */}
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/products/:id" element={<ProductChainView />} />
+        <Route path="/products/create" element={<ProductEditPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="/products/:slug/edit" element={<ProductEditPage />} />
 
         {/* Inventory Module */}
         <Route path="/inventory" element={<InventoryPage />} />

@@ -139,4 +139,26 @@ public class ProductController {
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating product: " + e.getMessage());
         }
     }
+
+    @GetMapping("/next-code")
+    public String getNextCode(@RequestParam Long categoryId) {
+        try {
+            String nextCode = productService.getNextProductCode(categoryId);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Next product code retrieved", nextCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error generating next code: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/categories")
+    public String getCategories() {
+        try {
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Categories fetched",
+                    productService.getAllCategories());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error fetching categories: " + e.getMessage());
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
+import com.sba301.retailmanagement.entity.ProductCategory;
 import com.sba301.retailmanagement.entity.ProductVariant;
 import com.sba301.retailmanagement.enums.Gender;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
@@ -28,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final com.sba301.retailmanagement.repository.ProductCategoryRepository productCategoryRepository;
 
     @Override
     public List<ProductResponse> getAllProducts() {
@@ -50,6 +52,15 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse createProduct(ProductRequest request) {
         Product product = new Product();
         mapRequestToEntity(request, product);
+
+        // Auto-generate code if category is present and code is not manually set (or
+        // just always for consistency enforcement)
+        if (request.getCategoryId() != null) {
+            String newCode = generateProductCode(request.getCategoryId());
+            product.setCode(newCode);
+        } else {
+            throw new IllegalArgumentException("Category ID is required to generate product code");
+        }
 
         // Default values for new product
         product.setStatus(1); // Active
@@ -84,11 +95,54 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(product, variants);
     }
 
+    @Override
+    public String getNextProductCode(Long categoryId) {
+        return generateProductCode(categoryId);
+    }
+
     // --- Helper Methods ---
+
+    private String generateProductCode(Long categoryId) {
+        com.sba301.retailmanagement.entity.ProductCategory category = productCategoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        // Generate Prefix: T-Shirt -> TSHIRT
+        String prefix = category.getName().toUpperCase().replaceAll("[^A-Z0-9]", "");
+        if (prefix.isEmpty()) {
+            prefix = "PROD"; // Fallback
+        }
+
+        // Find last code
+        String searchPrefix = prefix + "-";
+        java.util.Optional<Product> lastProduct = productRepository
+                .findTopByCodeStartingWithOrderByCodeDesc(searchPrefix);
+
+        int nextId = 1;
+        if (lastProduct.isPresent()) {
+            String lastCode = lastProduct.get().getCode();
+            // Extract number part: TSHIRT-001 -> 001
+            if (lastCode.length() > searchPrefix.length()) {
+                String numberPart = lastCode.substring(searchPrefix.length());
+                try {
+                    nextId = Integer.parseInt(numberPart) + 1;
+                } catch (NumberFormatException e) {
+                    nextId = 1;
+                }
+            }
+        }
+
+        return String.format("%s-%03d", prefix, nextId);
+    }
+
+    @Override
+    public List<ProductCategory> getAllCategories() {
+        return productCategoryRepository.findAll();
+    }
 
     private void mapRequestToEntity(ProductRequest request, Product product) {
         product.setCategoryId(request.getCategoryId());
-        product.setCode(request.getCode());
+        // Code is auto-generated on create and immutable on update
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setImage(request.getImage());

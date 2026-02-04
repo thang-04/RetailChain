@@ -104,6 +104,32 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public List<InventoryStockResponse> getStockByProduct(Long productId) {
+        List<InventoryStock> stocks = inventoryStockRepository.findByVariant_ProductId(productId);
+        return stocks.stream().map(stock -> {
+            String sku = "UNKNOWN";
+            String productName = "UNKNOWN";
+
+            if (stock.getVariant() != null) {
+                sku = stock.getVariant().getSku();
+                if (stock.getVariant().getProduct() != null) {
+                    productName = stock.getVariant().getProduct().getName();
+                }
+            }
+
+            return InventoryStockResponse.builder()
+                    .warehouseId(stock.getId().getWarehouseId())
+                    .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
+                    .variantId(stock.getId().getVariantId())
+                    .sku(sku)
+                    .productName(productName)
+                    .quantity(stock.getQuantity())
+                    .lastUpdated(stock.getUpdatedAt())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void importStock(StockRequest request) {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
@@ -376,11 +402,11 @@ public class InventoryServiceImpl implements InventoryService {
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        
+
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
 
         try {
-            storeWarehouseRepository.deleteByWarehouseId(id); 
+            storeWarehouseRepository.deleteByWarehouseId(id);
         } catch (Exception e) {
             // Ignore if method missing, assume handled or empty
         }
