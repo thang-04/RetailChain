@@ -71,6 +71,35 @@ const inventoryService = {
     return axiosPrivate.delete(`/inventory/documents/${id}`);
   },
 
+  /**
+   * Lấy danh sách lịch sử tồn kho (inventory history records).
+   * GET /api/inventory-history/record
+   * @returns {Promise<Array>} Mảng bản ghi lịch sử
+   */
+  getInventoryHistoryRecords: async () => {
+    const raw = await axiosPrivate.get('/inventory-history/record');
+    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (res && res.code === 200 && Array.isArray(res.data)) {
+      return res.data;
+    }
+    return [];
+  },
+
+  /**
+   * Lấy chi tiết một bản ghi lịch sử tồn kho theo id.
+   * GET /api/inventory-history/record/{id}
+   * @param {number} id - ID bản ghi
+   * @returns {Promise<Object|null>} Chi tiết bản ghi hoặc null
+   */
+  getInventoryHistoryRecordById: async (id) => {
+    const raw = await axiosPrivate.get(`/inventory-history/record/${id}`);
+    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (res && res.code === 200 && res.data) {
+      return res.data;
+    }
+    return null;
+  },
+
   // --- Wrapper for Legacy Components ---
   createStockIn: async (data) => {
     return inventoryService.importStock(data);
