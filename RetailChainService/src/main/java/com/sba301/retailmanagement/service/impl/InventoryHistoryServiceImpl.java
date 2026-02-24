@@ -1,6 +1,7 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.request.InventoryHistoryRequest;
+import com.sba301.retailmanagement.dto.response.InventoryHistoryPageResponse;
 import com.sba301.retailmanagement.dto.response.InventoryHistoryResponse;
 import com.sba301.retailmanagement.entity.InventoryDocument;
 import com.sba301.retailmanagement.entity.InventoryHistory;
@@ -20,8 +21,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryHistoryServiceImpl implements InventoryHistoryService {
@@ -63,27 +67,86 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
         }
     }
 
+    private InventoryHistoryResponse toDto(InventoryHistory e) {
+        InventoryHistoryResponse dto = new InventoryHistoryResponse();
+        dto.setId(e.getId());
+        dto.setDocumentId(e.getDocumentId());
+        dto.setDocumentItemId(e.getDocumentItemId());
+        dto.setWarehouseId(e.getWarehouseId());
+        dto.setVariantId(e.getVariantId());
+        dto.setAction(e.getAction());
+        dto.setQuantity(e.getQuantity());
+        dto.setBalanceAfter(e.getBalanceAfter());
+        dto.setOccurredAt(e.getOccurredAt());
+        dto.setActorUserId(e.getActorUser() != null ? e.getActorUser().getId() : null);
+        fillNames(e, dto);
+        return dto;
+    }
+
     @Override
     public List<InventoryHistoryResponse> getAllInventoryHistory() {
-        List<InventoryHistory> entities =
-                inventoryHistoryRepository.findAllByOrderByOccurredAtDesc();
+        List<InventoryHistory> entities = inventoryHistoryRepository.findAllByOrderByOccurredAtDesc();
         List<InventoryHistoryResponse> responses = new ArrayList<>();
         for (InventoryHistory e : entities) {
-            InventoryHistoryResponse dto = new InventoryHistoryResponse();
-            dto.setId(e.getId());
-            dto.setDocumentId(e.getDocumentId());
-            dto.setDocumentItemId(e.getDocumentItemId());
-            dto.setWarehouseId(e.getWarehouseId());
-            dto.setVariantId(e.getVariantId());
-            dto.setAction(e.getAction());
-            dto.setQuantity(e.getQuantity());
-            dto.setBalanceAfter(e.getBalanceAfter());
-            dto.setOccurredAt(e.getOccurredAt());
-            dto.setActorUserId(e.getActorUser() != null ? e.getActorUser().getId() : null);
-            fillNames(e, dto);
-            responses.add(dto);
+            responses.add(toDto(e));
         }
         return responses;
+    }
+
+    private List<InventoryHistoryResponse> filterHistory(List<InventoryHistoryResponse> base,
+                                                         String search,
+                                                         String action,
+                                                         LocalDateTime fromDate,
+                                                         LocalDateTime toDate) {
+        String keyword = search != null ? search.trim().toLowerCase(Locale.ROOT) : "";
+        String actionFilter = action != null ? action.trim() : "";
+
+        return base.stream()
+                .filter(dto -> {
+                    if (!keyword.isEmpty()) {
+                        String combined = ("" +
+                                nullSafe(dto.getDocumentName()) + " " +
+                                nullSafe(dto.getDocumentId()) + " " +
+                                nullSafe(dto.getWarehouseName()) + " " +
+                                nullSafe(dto.getWarehouseId()) + " " +
+                                nullSafe(dto.getVariantName()) + " " +
+                                nullSafe(dto.getVariantId())
+                        ).toLowerCase(Locale.ROOT);
+                        if (!combined.contains(keyword)) {
+                            return false;
+                        }
+                    }
+
+                    if (!actionFilter.isEmpty() && !"all".equalsIgnoreCase(actionFilter)) {
+                        if (dto.getAction() == null
+                                || !dto.getAction().name().equalsIgnoreCase(actionFilter)) {
+                            return false;
+                        }
+                    }
+
+                    if (fromDate != null || toDate != null) {
+                        if (dto.getOccurredAt() == null) {
+                            return false;
+                        }
+                        if (fromDate != null && dto.getOccurredAt().isBefore(fromDate)) {
+                            return false;
+                        }
+                        if (toDate != null && dto.getOccurredAt().isAfter(toDate)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                })
+                .sorted(Comparator.comparing(
+                                InventoryHistoryResponse::getOccurredAt,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .reversed())
+                .collect(Collectors.toList());
+    }
+
+    private String nullSafe(Object value) {
+        return value == null ? "" : String.valueOf(value);
     }
 
 
@@ -132,5 +195,80 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
         inventoryHistoryRepository.save(inventoryHistory);
     }
 
+    @Override
+    public InventoryHistoryPageResponse getInventoryHistoryPage(String search,
+                                                                String action,
+                                                                LocalDateTime fromDate,
+                                                                LocalDateTime toDate,
+                                                                int page,
+                                                                int size) {
+        if (page < 0) {
+            page = 0;
+        }
+        if (size <= 0) {
+            size = 10;
+        }
 
+        List<InventoryHistoryResponse> all = filterHistory(getAllInventoryHistory(), search, action, fromDate,
+                toDate);
+
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, all.size());
+
+        List<InventoryHistoryResponse> items = new ArrayList<>();
+        if (fromIndex < all.size()) {
+            items = all.subList(fromIndex, toIndex);
+        }
+
+        return InventoryHistoryPageResponse.builder()
+                .items(items)
+                .totalElements(all.size())
+                .page(page)
+                .size(size)
+                .build();
+    }
+
+    @Override
+    public String exportInventoryHistoryCsv(String search,
+                                            String action,
+                                            LocalDateTime fromDate,
+                                            LocalDateTime toDate) {
+        List<InventoryHistoryResponse> data = filterHistory(getAllInventoryHistory(), search, action, fromDate,
+                toDate);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Document,Warehouse,Variant,Action,Quantity,BalanceAfter,OccurredAt,Actor\n");
+
+        for (InventoryHistoryResponse dto : data) {
+            sb.append(escapeCsv(dto.getDocumentName() != null ? dto.getDocumentName() : dto.getDocumentId()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getWarehouseName() != null ? dto.getWarehouseName() : dto.getWarehouseId()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getVariantName() != null ? dto.getVariantName() : dto.getVariantId()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getAction() != null ? dto.getAction().name() : null))
+                    .append(',');
+            sb.append(escapeCsv(dto.getQuantity()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getBalanceAfter()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getOccurredAt()))
+                    .append(',');
+            sb.append(escapeCsv(dto.getActorUserName() != null ? dto.getActorUserName() : dto.getActorUserId()))
+                    .append('\n');
+        }
+
+        return sb.toString();
+    }
+
+    private String escapeCsv(Object value) {
+        if (value == null) {
+            return "";
+        }
+        String str = String.valueOf(value);
+        if (str.contains(",") || str.contains("\"") || str.contains("\n")) {
+            return "\"" + str.replace("\"", "\"\"") + "\"";
+        }
+        return str;
+    }
 }

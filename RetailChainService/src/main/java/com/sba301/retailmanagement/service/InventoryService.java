@@ -3,6 +3,7 @@ package com.sba301.retailmanagement.service;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
+import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import java.util.List;
@@ -27,4 +28,9 @@ public interface InventoryService {
     void deleteWarehouse(Long id);
 
     void deleteDocument(Long id);
+
+    /**
+     * Lấy thông tin tổng quan tồn kho toàn hệ thống (dùng cho dashboard Inventory).
+     */
+    InventoryOverviewResponse getInventoryOverview();
 }
