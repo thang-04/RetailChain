@@ -38,7 +38,14 @@ const ActionBadge = ({ action }) => {
   return <Badge variant={variant}>{a || "—"}</Badge>;
 };
 
-const InventoryTable = ({ inventoryData = [], onFetchDetail }) => {
+const InventoryTable = ({
+  inventoryData = [],
+  page = 1,
+  pageSize = 10,
+  total = 0,
+  onPageChange,
+  onFetchDetail,
+}) => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -60,12 +67,9 @@ const InventoryTable = ({ inventoryData = [], onFetchDetail }) => {
     }
   };
 
-  const total = inventoryData.length;
-  const pageSize = 10;
-  const [page, setPage] = useState(1);
   const from = (page - 1) * pageSize;
   const to = Math.min(from + pageSize, total);
-  const pageData = inventoryData.slice(from, to);
+  const pageData = inventoryData;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
@@ -154,7 +158,7 @@ const InventoryTable = ({ inventoryData = [], onFetchDetail }) => {
               size="icon"
               className="size-8"
               disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => onPageChange?.(Math.max(1, page - 1))}
             >
               <ChevronLeft className="w-[18px] h-[18px]" />
             </Button>
@@ -169,7 +173,7 @@ const InventoryTable = ({ inventoryData = [], onFetchDetail }) => {
                     variant={p === page ? "default" : "ghost"}
                     size="icon"
                     className={`size-8 ${p === page ? "bg-primary text-white" : "border border-slate-200 dark:border-slate-700"}`}
-                    onClick={() => setPage(p)}
+                    onClick={() => onPageChange?.(p)}
                   >
                     {p}
                   </Button>
@@ -180,7 +184,7 @@ const InventoryTable = ({ inventoryData = [], onFetchDetail }) => {
               size="icon"
               className="size-8"
               disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => onPageChange?.(Math.min(totalPages, page + 1))}
             >
               <ChevronRight className="w-[18px] h-[18px]" />
             </Button>
