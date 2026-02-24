@@ -8,7 +8,14 @@ import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -21,12 +28,20 @@ public class InventoryHistoryController {
 
     // get list inventory history
     @GetMapping("/record")
-    public String getAllInventoryHistory() {
+    public String getAllInventoryHistory(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String action,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         String prefix = "[getAllInventoryHistory]";
         try {
-            log.info("{}|START", prefix);
-            var response = inventoryHistoryService.getAllInventoryHistory();
-            log.info("{}|END|size={}", prefix, response.size());
+            log.info("{}|START|search={}|action={}|fromDate={}|toDate={}|page={}|size={}",
+                    prefix, search, action, fromDate, toDate, page, size);
+            var response = inventoryHistoryService.getInventoryHistoryPage(search, action, fromDate, toDate, page,
+                    size);
+            log.info("{}|END|total={}", prefix, response.getTotalElements());
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get all inventory history success", response);
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
@@ -73,6 +88,30 @@ public class InventoryHistoryController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Lỗi khi ghi nhận lịch sử tồn kho: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/record/export")
+    public ResponseEntity<String> exportInventoryHistory(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String action,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate) {
+        String prefix = "[exportInventoryHistory]";
+        try {
+            log.info("{}|START|search={}|action={}|fromDate={}|toDate={}", prefix, search, action, fromDate, toDate);
+            String csv = inventoryHistoryService.exportInventoryHistoryCsv(search, action, fromDate, toDate);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.TEXT_PLAIN);
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=inventory-history.csv");
+
+            log.info("{}|END|length={}", prefix, csv != null ? csv.length() : 0);
+            return new ResponseEntity<>(csv, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error exporting inventory history: " + e.getMessage());
         }
     }
 }

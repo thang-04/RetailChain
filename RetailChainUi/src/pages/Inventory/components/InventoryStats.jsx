@@ -2,7 +2,30 @@ import React from "react";
 import { TrendingUp, Layers, AlertTriangle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
-const InventoryStats = () => {
+const formatCurrency = (value) => {
+  if (value == null) return "—";
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 1,
+    }).format(value);
+  } catch {
+    return value.toString();
+  }
+};
+
+const formatNumber = (value) => {
+  if (value == null) return "—";
+  return new Intl.NumberFormat("en-US").format(value);
+};
+
+const InventoryStats = ({ overview }) => {
+  const totalChainValue = overview?.totalChainValue ?? 0;
+  const totalStockQuantity = overview?.totalStockQuantity ?? 0;
+  const criticalStores = overview?.criticalStoreCount ?? 0;
+  const growthPercentage = overview?.growthPercentage ?? 0;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Total Chain Value */}
@@ -13,11 +36,13 @@ const InventoryStats = () => {
           </div>
           <span className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full">
             <TrendingUp className="w-3.5 h-3.5 mr-1" />
-            +2.4%
+            {growthPercentage >= 0 ? `+${growthPercentage}%` : `${growthPercentage}%`}
           </span>
         </div>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Chain Value</p>
-        <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">$12.5M</p>
+        <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
+          {formatCurrency(totalChainValue)}
+        </p>
       </Card>
 
       {/* Total Stock Quantity */}
@@ -29,7 +54,8 @@ const InventoryStats = () => {
         </div>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Stock Quantity</p>
         <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
-          45,200 <span className="text-sm font-normal text-slate-400 ml-1">units</span>
+          {formatNumber(totalStockQuantity)}{" "}
+          <span className="text-sm font-normal text-slate-400 ml-1">units</span>
         </p>
       </Card>
 
@@ -47,7 +73,9 @@ const InventoryStats = () => {
           </span>
         </div>
         <p className="text-sm font-medium text-slate-500 dark:text-slate-400 relative z-10">Critical Alerts</p>
-        <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1 relative z-10">5 Stores</p>
+        <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1 relative z-10">
+          {formatNumber(criticalStores)} Stores
+        </p>
       </Card>
     </div>
   );
