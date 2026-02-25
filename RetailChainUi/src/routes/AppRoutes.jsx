@@ -46,6 +46,9 @@ import RegisterPage from "../pages/Auth/RegisterPage/RegisterPage";
 // Role & Permission
 import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
 
+// User Management
+import UserManagementPage from "../pages/UserManagement/UserManagementPage";
+
 // Route Protection
 import ProtectedRoute from "../components/common/ProtectedRoute/ProtectedRoute";
 
@@ -97,6 +100,9 @@ const AppRoutes = () => {
         <Route path="/staff/attendance" element={<StaffAttendance />} />
         <Route path="/staff/profile/:id" element={<StaffProfile />} />
         <Route path="/staff/resource" element={<ResourceAssignment />} />
+
+        {/* User Management (Super Admin, Regional Admin, Store Manager) */}
+        <Route path="/users" element={<UserManagementPage />} />
 
         {/* Role & Permission Management (Super Admin) */}
         <Route path="/roles" element={<RolePermissionPage />} />

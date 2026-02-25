@@ -138,6 +138,7 @@ public class RoleServiceImpl implements RoleService {
 
         return RoleDTO.builder()
                 .id(role.getId())
+                .code(role.getCode())
                 .name(role.getName())
                 .description(role.getDescription())
                 .permissions(permissionDTOs)

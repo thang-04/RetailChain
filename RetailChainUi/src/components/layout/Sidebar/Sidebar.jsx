@@ -24,59 +24,76 @@ const Sidebar = () => {
   const menuItems = [
     {
       path: "/",
-      label: "Dashboard (Chain)",
+      label: "Dashboard",
       icon: "dashboard",
       filledIcon: true
+      // Tất cả role đều thấy
     },
     {
       path: "/store",
       label: "Stores",
-      icon: "storefront"
+      icon: "storefront",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN"]
     },
     {
       path: "/warehouse",
       label: "Central Warehouse",
-      icon: "warehouse"
+      icon: "warehouse",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN"]
     },
     {
       path: "/products",
       label: "Products",
       icon: "inventory_2"
+      // Tất cả role đều thấy (PRODUCT_VIEW)
     },
     {
       path: "/inventory",
       label: "Inventory",
       icon: "inventory"
+      // Tất cả role đều thấy (INVENTORY_VIEW)
     },
     {
       path: "/stock-in",
       label: "Stock In",
-      icon: "input_circle"
+      icon: "input_circle",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     },
     {
       path: "/stock-out",
       label: "Stock Out",
-      icon: "output_circle"
+      icon: "output_circle",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     },
     {
       path: "/inventory/ledger",
       label: "Stock Ledger",
-      icon: "history"
+      icon: "history",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     },
     {
       path: "/reports",
-      label: "Chain Reports",
-      icon: "bar_chart"
+      label: "Reports",
+      icon: "bar_chart",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     },
     {
       path: "/staff",
       label: "Human Resources",
-      icon: "badge"
+      icon: "badge",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     },
     {
       path: "/roles",
       label: "Roles & Permissions",
-      icon: "admin_panel_settings"
+      icon: "admin_panel_settings",
+      allowedRoles: ["SUPER_ADMIN"]
+    },
+    {
+      path: "/users",
+      label: "User Management",
+      icon: "manage_accounts",
+      allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
     }
   ];
 
@@ -92,35 +109,46 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+        {menuItems
+          .filter((item) => {
+            // Không có allowedRoles → hiển thị cho tất cả
+            if (!item.allowedRoles) return true;
+            if (!user?.roles) return false;
+            // Kiểm tra user có ít nhất 1 role nằm trong allowedRoles
+            return user.roles.some((r) => {
+              const roleName = typeof r === 'string' ? r : r.name || r.code;
+              return item.allowedRoles.includes(roleName);
+            });
+          })
+          .map((item) => {
+            const isActive = location.pathname === item.path;
 
-          return (
-            <Button
-              key={item.path}
-              variant="ghost"
-              asChild
-              className={cn(
-                "w-full justify-start gap-3 px-3 py-6",
-                isActive
-                  ? "bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/20 hover:text-primary"
-                  : "text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main"
-              )}
-            >
-              <Link to={item.path}>
-                <span
-                  className={cn("material-symbols-outlined w-6 h-6", !isActive && "group-hover:text-primary")}
-                  style={isActive && item.filledIcon ? { fontVariationSettings: "'FILL' 1" } : {}}
-                >
-                  {item.icon}
-                </span>
-                <span className={cn("text-sm", isActive ? "font-semibold" : "font-medium")}>
-                  {item.label}
-                </span>
-              </Link>
-            </Button>
-          );
-        })}
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                asChild
+                className={cn(
+                  "w-full justify-start gap-3 px-3 py-6",
+                  isActive
+                    ? "bg-primary/10 text-primary dark:text-primary-400 hover:bg-primary/20 hover:text-primary"
+                    : "text-text-muted hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 hover:text-text-main"
+                )}
+              >
+                <Link to={item.path}>
+                  <span
+                    className={cn("material-symbols-outlined w-6 h-6", !isActive && "group-hover:text-primary")}
+                    style={isActive && item.filledIcon ? { fontVariationSettings: "'FILL' 1" } : {}}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className={cn("text-sm", isActive ? "font-semibold" : "font-medium")}>
+                    {item.label}
+                  </span>
+                </Link>
+              </Button>
+            );
+          })}
       </nav>
 
       {/* User Profile (Bottom Sidebar) - Hiển thị thông tin người dùng đăng nhập */}

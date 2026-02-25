@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.sba301.retailmanagement.security.SecurityConstants.USER_CREATE;
 import static com.sba301.retailmanagement.security.SecurityConstants.USER_DELETE;
 import static com.sba301.retailmanagement.security.SecurityConstants.USER_VIEW;
+import static com.sba301.retailmanagement.security.SecurityConstants.USER_UPDATE;
+import static com.sba301.retailmanagement.security.SecurityConstants.USER_BLOCK;
 
 @Slf4j
 @RestController
@@ -132,6 +136,40 @@ public class UserController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting user: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user", description = "Update user information including scope and roles")
+    @PreAuthorize("hasAuthority('" + USER_UPDATE + "')")
+    public String updateUser(@PathVariable Long id,
+            @RequestBody com.sba301.retailmanagement.dto.request.UpdateUserRequest request) {
+        String prefix = "[updateUser]|id=" + id;
+        try {
+            log.info("{}|START", prefix);
+            var user = userService.updateUser(id, request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "User updated successfully", user);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating user: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/{id}/block")
+    @Operation(summary = "Toggle block user", description = "Toggle user status between Active and Blocked")
+    @PreAuthorize("hasAuthority('" + USER_BLOCK + "')")
+    public String toggleBlockUser(@PathVariable Long id) {
+        String prefix = "[toggleBlockUser]|id=" + id;
+        try {
+            log.info("{}|START", prefix);
+            var user = userService.toggleBlockUser(id);
+            log.info("{}|END|newStatus={}", prefix, user.getStatus());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "User block status toggled successfully", user);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error toggling user block status: " + e.getMessage());
         }
     }
 }

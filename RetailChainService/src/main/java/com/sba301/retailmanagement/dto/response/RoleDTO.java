@@ -17,6 +17,7 @@ import java.util.Set;
 @Builder
 public class RoleDTO {
     private Long id;
+    private String code;
     private String name;
     private String description;
     @Builder.Default

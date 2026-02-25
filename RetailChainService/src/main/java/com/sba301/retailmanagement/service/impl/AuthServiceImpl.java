@@ -158,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
 
         private UserDTO toUserDTO(User user) {
                 List<String> roleNames = user.getRoles() != null
-                                ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
+                                ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                                 : List.of();
 
                 return UserDTO.builder()

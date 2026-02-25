@@ -1,6 +1,7 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.request.CreateUserRequest;
+import com.sba301.retailmanagement.dto.request.UpdateUserRequest;
 import com.sba301.retailmanagement.dto.response.UserDTO;
 import com.sba301.retailmanagement.entity.Role;
 import com.sba301.retailmanagement.entity.User;
@@ -146,6 +147,70 @@ public class UserServiceImpl implements UserService {
         log.info("Deleted user: {}", id);
     }
 
+    @Override
+    @Transactional
+    public UserDTO updateUser(Long id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Không cho sửa Super Admin (trừ khi mình là Super Admin)
+        User currentUser = getCurrentUser();
+        validateScopeAccess(currentUser, user);
+
+        // Cập nhật thông tin cơ bản
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhoneNumber() != null) {
+            user.setPhone(request.getPhoneNumber());
+        }
+
+        // Cập nhật roles
+        if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
+            Set<Role> newRoles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
+            validateRoleAssignment(currentUser, newRoles);
+            user.setRoles(newRoles);
+        }
+
+        // Cập nhật scope
+        if (request.getRegion() != null) {
+            user.setRegion(request.getRegion());
+        }
+        if (request.getWarehouseId() != null) {
+            user.setWarehouseId(request.getWarehouseId());
+        }
+        if (request.getStoreId() != null) {
+            user.setStoreId(request.getStoreId());
+        }
+
+        User savedUser = userRepository.save(user);
+        log.info("Updated user: {} (id={})", savedUser.getUsername(), savedUser.getId());
+        return toDTO(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserDTO toggleBlockUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Không cho block Super Admin
+        if (user.hasRole(RoleConstant.SUPER_ADMIN.name())) {
+            throw new RuntimeException("Cannot block Super Admin account");
+        }
+
+        User currentUser = getCurrentUser();
+        validateScopeAccess(currentUser, user);
+
+        // Toggle status: 1 (active) <-> 0 (blocked)
+        int newStatus = (user.getStatus() != null && user.getStatus() == 1) ? 0 : 1;
+        user.setStatus(newStatus);
+
+        User savedUser = userRepository.save(user);
+        log.info("Toggled block status for user {} (id={}) to status={}", savedUser.getUsername(), id, newStatus);
+        return toDTO(savedUser);
+    }
+
     /**
      * Gán scope cho user mới dựa trên role được gán
      */
@@ -273,7 +338,7 @@ public class UserServiceImpl implements UserService {
 
     private UserDTO toDTO(User user) {
         List<String> roleNames = user.getRoles() != null
-                ? user.getRoles().stream().map(Role::getName).collect(Collectors.toList())
+                ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                 : List.of();
 
         return UserDTO.builder()

@@ -5,6 +5,7 @@ import com.sba301.retailmanagement.entity.Role;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.enums.PermissionName;
 import com.sba301.retailmanagement.enums.RoleConstant;
+import com.sba301.retailmanagement.enums.Region;
 import com.sba301.retailmanagement.repository.PermissionRepository;
 import com.sba301.retailmanagement.repository.RoleRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
@@ -55,7 +56,12 @@ public class DataSeeder implements CommandLineRunner {
         Role staffRole = createStaffRole(allPermissions);
 
         // Bước 3: Tạo Super Admin mặc định
-        createDefaultSuperAdmin(superAdminRole);
+        User superAdmin = createDefaultSuperAdmin(superAdminRole);
+
+        // Bước 4: Tạo Demo accounts cho từng vai trò (Use Case Diagram)
+        createDemoRegionalAdmin(regionalAdminRole, superAdmin);
+        createDemoStoreManager(storeManagerRole, superAdmin);
+        createDemoStaff(staffRole, superAdmin);
 
         log.info("========== Data Seeder Completed ==========");
     }
@@ -211,7 +217,7 @@ public class DataSeeder implements CommandLineRunner {
      * Tạo Super Admin mặc định
      * Scope: NULL (toàn hệ thống)
      */
-    private void createDefaultSuperAdmin(Role superAdminRole) {
+    private User createDefaultSuperAdmin(Role superAdminRole) {
         String adminUsername = "superadmin";
         String adminEmail = "superadmin@retailchain.com";
 
@@ -229,16 +235,106 @@ public class DataSeeder implements CommandLineRunner {
                     .roles(Set.of(superAdminRole))
                     .build();
 
-            userRepository.save(admin);
+            User saved = userRepository.save(admin);
             log.info("Created default Super Admin: {}", adminUsername);
-            log.warn("========================================");
-            log.warn("IMPORTANT SECURITY NOTICE:");
-            log.warn("Username: {}", adminUsername);
-            log.warn("Password: SuperAdmin@123");
-            log.warn("Please change this password immediately!");
-            log.warn("========================================");
+            return saved;
         } else {
             log.info("Super Admin already exists: {}", adminUsername);
+            return userRepository.findByUsername(adminUsername).orElse(null);
+        }
+    }
+
+    /**
+     * Demo: Regional Admin - Quản lý vùng Bắc
+     * Email: regionaladmin@retailchain.com / Password: 123
+     * Use Cases: Manage Store Managers, Create Store Manager, Assign Store Scope,
+     * Assign Warehouse Scope
+     */
+    private void createDemoRegionalAdmin(Role regionalAdminRole, User createdBy) {
+        String username = "regionaladmin";
+        String email = "regionaladmin@retailchain.com";
+
+        if (!userRepository.existsByUsername(username)) {
+            User user = User.builder()
+                    .username(username)
+                    .email(email)
+                    .password(passwordEncoder.encode("123"))
+                    .fullName("Nguyễn Văn Quản Lý Vùng")
+                    .phone("0901000001")
+                    .status(1)
+                    .region(Region.NORTH)
+                    .warehouseId(null)
+                    .storeId(null)
+                    .createdByUserId(createdBy != null ? createdBy.getId() : null)
+                    .roles(Set.of(regionalAdminRole))
+                    .build();
+
+            userRepository.save(user);
+            log.info("Created demo Regional Admin: {} (region=NORTH)", username);
+        } else {
+            log.info("Regional Admin already exists: {}", username);
+        }
+    }
+
+    /**
+     * Demo: Store Manager - Quản lý cửa hàng #1
+     * Email: storemanager@retailchain.com / Password: 123
+     * Use Cases: Manage Staff (CRUD), Assign Role, View my Info
+     */
+    private void createDemoStoreManager(Role storeManagerRole, User createdBy) {
+        String username = "storemanager";
+        String email = "storemanager@retailchain.com";
+
+        if (!userRepository.existsByUsername(username)) {
+            User user = User.builder()
+                    .username(username)
+                    .email(email)
+                    .password(passwordEncoder.encode("123"))
+                    .fullName("Trần Thị Quản Lý")
+                    .phone("0901000002")
+                    .status(1)
+                    .region(null)
+                    .warehouseId(null)
+                    .storeId(1L)
+                    .createdByUserId(createdBy != null ? createdBy.getId() : null)
+                    .roles(Set.of(storeManagerRole))
+                    .build();
+
+            userRepository.save(user);
+            log.info("Created demo Store Manager: {} (storeId=1)", username);
+        } else {
+            log.info("Store Manager already exists: {}", username);
+        }
+    }
+
+    /**
+     * Demo: Staff - Nhân viên cửa hàng #1
+     * Email: staff@retailchain.com / Password: 123
+     * Use Cases: View my Info, Update Info
+     */
+    private void createDemoStaff(Role staffRole, User createdBy) {
+        String username = "staff";
+        String email = "staff@retailchain.com";
+
+        if (!userRepository.existsByUsername(username)) {
+            User user = User.builder()
+                    .username(username)
+                    .email(email)
+                    .password(passwordEncoder.encode("123"))
+                    .fullName("Lê Văn Nhân Viên")
+                    .phone("0901000003")
+                    .status(1)
+                    .region(null)
+                    .warehouseId(null)
+                    .storeId(1L)
+                    .createdByUserId(createdBy != null ? createdBy.getId() : null)
+                    .roles(Set.of(staffRole))
+                    .build();
+
+            userRepository.save(user);
+            log.info("Created demo Staff: {} (storeId=1)", username);
+        } else {
+            log.info("Staff already exists: {}", username);
         }
     }
 
