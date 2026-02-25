@@ -2,28 +2,29 @@ import { axiosPrivate } from './api/axiosClient';
 import productService from './product.service';
 
 const inventoryService = {
-  // --- Real Backend APIs ---
+  // --- Warehouse APIs ---
   createWarehouse: async (data) => {
-    return axiosPrivate.post('/inventory/warehouse', data);
+    return axiosPrivate.post('/warehouse', data);
   },
 
   getAllWarehouses: async () => {
-    return axiosPrivate.get('/inventory/warehouse');
+    return axiosPrivate.get('/warehouse');
   },
 
-  // Wrapper for product service
+  updateWarehouse: async (id, data) => {
+    return axiosPrivate.put(`/warehouse/${id}`, data);
+  },
+
+  deleteWarehouse: async (id) => {
+    return axiosPrivate.delete(`/warehouse/${id}`);
+  },
+
+  // --- Product APIs ---
   getAllProducts: async () => {
     return productService.getAllProducts();
   },
 
-  updateWarehouse: async (id, data) => {
-    return axiosPrivate.put(`/inventory/warehouse/${id}`, data);
-  },
-
-  deleteWarehouse: async (id) => {
-    return axiosPrivate.delete(`/inventory/warehouse/${id}`);
-  },
-
+  // --- Inventory Stock APIs ---
   getStockByWarehouse: async (warehouseId) => {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
   },

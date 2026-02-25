@@ -1,5 +1,6 @@
+import { axiosPrivate } from './api/axiosClient';
 
-// Mock data for staff
+// Mock data fallback
 const MOCK_STAFF = [
   {
     id: "ST001",
@@ -36,88 +37,66 @@ const MOCK_STAFF = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ST003",
     department: "Warehouse",
     joinDate: "2023-03-10"
-  },
-  {
-    id: "ST004",
-    name: "Pham Thi D",
-    role: "Cashier",
-    store: "Store A",
-    email: "phamthid@example.com",
-    phone: "0901234570",
-    status: "Active",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ST004",
-    department: "Sales",
-    joinDate: "2023-04-05"
-  },
-  {
-    id: "ST005",
-    name: "Hoang Van E",
-    role: "Security",
-    store: "Store C",
-    email: "hoangvane@example.com",
-    phone: "0901234571",
-    status: "Active",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=ST005",
-    department: "Security",
-    joinDate: "2023-05-12"
-  }
-];
-
-const MOCK_SHIFTS = [
-  {
-    id: "SH001",
-    staffId: "ST002",
-    date: "2024-01-25",
-    shift: "Morning (8:00 - 16:00)",
-    store: "Store A",
-    status: "Scheduled"
-  },
-  {
-    id: "SH002",
-    staffId: "ST004",
-    date: "2024-01-25",
-    shift: "Afternoon (14:00 - 22:00)",
-    store: "Store A",
-    status: "Scheduled"
-  },
-  {
-    id: "SH003",
-    staffId: "ST001",
-    date: "2024-01-25",
-    shift: "Admin (9:00 - 17:00)",
-    store: "Store A",
-    status: "Scheduled"
   }
 ];
 
 const staffService = {
+  /**
+   * Lấy danh sách nhân viên của một cửa hàng
+   * GET /api/stores/{storeId}/staff
+   * @param {number|string} storeId - ID của cửa hàng
+   * @returns {Promise<Array>} Danh sách nhân viên
+   */
+  getStaffByStoreId: async (storeId) => {
+    try {
+      const response = await axiosPrivate.get(`/stores/${storeId}/staff`);
+      if (response && response.data) {
+        return response.data.map(staff => ({
+          id: staff.id,
+          username: staff.username,
+          fullName: staff.fullName,
+          name: staff.fullName || staff.username,
+          email: staff.email,
+          phone: staff.phone,
+          status: staff.status === 1 ? 'Active' : 'Inactive',
+          role: staff.roleName || 'Staff',
+          roleName: staff.roleName || 'Staff',
+          createdAt: staff.createdAt
+        }));
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching staff by store:', error);
+      // Fallback to empty array
+      return [];
+    }
+  },
+
   getAllStaff: async () => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return [...MOCK_STAFF];
+    // For now, return empty - needs backend endpoint
+    return [];
   },
 
   getStaffById: async (id) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return MOCK_STAFF.find(s => s.id === id);
+    // For now, return null - needs backend endpoint
+    return null;
   },
 
-  getShifts: async (date) => { // eslint-disable-line no-unused-vars
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return [...MOCK_SHIFTS]; // In real app, filter by date
+  getShifts: async (date) => {
+    // TODO: Implement when Shift API is available
+    return [];
   },
   
   updateStaff: async (id, data) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // TODO: Implement when backend has update staff endpoint
     console.log(`Updated staff ${id}`, data);
-    return { ...MOCK_STAFF.find(s => s.id === id), ...data };
+    throw new Error("Not implemented");
   },
 
   addStaff: async (data) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const newStaff = { ...data, id: `ST${Date.now()}` };
-      console.log('Added staff', newStaff);
-      return newStaff;
+    // TODO: Implement when backend has create staff endpoint
+    console.log('Add staff', data);
+    throw new Error("Not implemented");
   }
 };
 

@@ -37,4 +37,11 @@ public class Store {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "warehouse_id")
+    private Long warehouseId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", insertable = false, updatable = false)
+    private Warehouse warehouse;
 }

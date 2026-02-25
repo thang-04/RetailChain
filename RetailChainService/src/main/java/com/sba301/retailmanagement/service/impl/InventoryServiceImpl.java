@@ -3,10 +3,8 @@ package com.sba301.retailmanagement.service.impl;
 import com.sba301.retailmanagement.dto.request.InventoryItemRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
-import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
-import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.entity.*;
 import com.sba301.retailmanagement.enums.InventoryAction;
 import com.sba301.retailmanagement.enums.InventoryDocumentType;
@@ -35,50 +33,6 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
-
-    @Override
-    @Transactional
-    public WarehouseResponse createWarehouse(WarehouseRequest request) {
-        if (warehouseRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Warehouse code already exists");
-        }
-
-        Warehouse warehouse = new Warehouse();
-        warehouse.setCode(request.getCode());
-        warehouse.setName(request.getName());
-        warehouse.setWarehouseType(request.getWarehouseType());
-        warehouse.setStatus(1);
-        warehouse.setCreatedAt(LocalDateTime.now());
-        warehouse.setUpdatedAt(LocalDateTime.now());
-
-        if (request.getWarehouseType() == 2 && request.getStoreId() != null) {
-            warehouse.setStoreId(request.getStoreId());
-        }
-
-        Warehouse savedWarehouse = warehouseRepository.save(warehouse);
-
-        if (request.getWarehouseType() == 2 && request.getStoreId() != null) {
-            StoreWarehouse storeWarehouse = new StoreWarehouse();
-            StoreWarehouseId id = new StoreWarehouseId(request.getStoreId(), savedWarehouse.getId());
-            storeWarehouse.setId(id);
-
-            Store storeProxy = new Store();
-            storeProxy.setId(request.getStoreId());
-            storeWarehouse.setStore(storeProxy);
-            storeWarehouse.setWarehouse(savedWarehouse);
-
-            storeWarehouseRepository.save(storeWarehouse);
-        }
-
-        return mapToWarehouseResponse(savedWarehouse);
-    }
-
-    @Override
-    public List<WarehouseResponse> getAllWarehouses() {
-        return warehouseRepository.findAll().stream()
-                .map(this::mapToWarehouseResponse)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public List<InventoryStockResponse> getStockByWarehouse(Long warehouseId) {
@@ -111,11 +65,6 @@ public class InventoryServiceImpl implements InventoryService {
     public void importStock(StockRequest request) {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-        // Validate: Only Main Warehouse (Type 1) can import stock
-        if (warehouse.getWarehouseType() != 1) {
-            throw new RuntimeException("Import is only allowed for Central Warehouse (Main Warehouse)");
-        }
 
         if (request.getSupplierId() != null && !supplierRepository.existsById(request.getSupplierId())) {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
@@ -239,14 +188,16 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse targetWarehouse = warehouseRepository.findById(request.getTargetWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
 
-        // Validate: Source must be Central Warehouse (Type 1)
-        if (sourceWarehouse.getWarehouseType() != 1) {
-            throw new RuntimeException("Transfer source must be Central Warehouse");
+        // Validate: Source must NOT be linked to any store (Central Warehouse)
+        boolean sourceHasStore = storeWarehouseRepository.existsByWarehouseId(sourceWarehouse.getId());
+        if (sourceHasStore) {
+            throw new RuntimeException("Transfer source must be a Central Warehouse (not linked to any store)");
         }
 
-        // Validate: Target must be Store Warehouse (Type 2)
-        if (targetWarehouse.getWarehouseType() != 2) {
-            throw new RuntimeException("Transfer destination must be a Store Warehouse");
+        // Validate: Target MUST be linked to a store (Store Warehouse)
+        boolean targetHasStore = storeWarehouseRepository.existsByWarehouseId(targetWarehouse.getId());
+        if (!targetHasStore) {
+            throw new RuntimeException("Transfer destination must be a Store Warehouse (linked to a store)");
         }
 
         if (sourceWarehouse.getId().equals(targetWarehouse.getId())) {
@@ -339,63 +290,6 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryHistoryRepository.save(history);
     }
 
-    private WarehouseResponse mapToWarehouseResponse(Warehouse warehouse) {
-        return WarehouseResponse.builder()
-                .id(warehouse.getId())
-                .code(warehouse.getCode())
-                .name(warehouse.getName())
-                .warehouseType(warehouse.getWarehouseType())
-                .storeId(warehouse.getStoreId())
-                .status(warehouse.getStatus())
-                .createdAt(warehouse.getCreatedAt())
-                .updatedAt(warehouse.getUpdatedAt())
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public WarehouseResponse updateWarehouse(Long id, WarehouseRequest request) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-        if (request.getCode() != null && !request.getCode().equals(warehouse.getCode())) {
-            if (warehouseRepository.existsByCode(request.getCode())) {
-                throw new RuntimeException("Warehouse code already exists");
-            }
-            warehouse.setCode(request.getCode());
-        }
-
-        if (request.getName() != null) {
-            warehouse.setName(request.getName());
-        }
-
-        warehouse.setUpdatedAt(LocalDateTime.now());
-        Warehouse saved = warehouseRepository.save(warehouse);
-        return mapToWarehouseResponse(saved);
-    }
-
-    @Override
-    @Transactional
-    public void deleteWarehouse(Long id) {
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        
-        inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
-
-        try {
-            storeWarehouseRepository.deleteByWarehouseId(id); 
-        } catch (Exception e) {
-            // Ignore if method missing, assume handled or empty
-        }
-
-        try {
-            warehouseRepository.delete(warehouse);
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw new RuntimeException(
-                    "Cannot delete warehouse because it has associated documents or history. Soft delete (Deactivate) recommended instead.");
-        }
-    }
-
     @Override
     public List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String typeStr) {
         InventoryDocumentType type;
@@ -425,11 +319,11 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status("Completed") // Inventory transaction is immediate in this system logic
+                    .status("Completed")
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
-                    .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
+                    .totalValue(totalValue.longValue())
                     .supplier(supplierName)
                     .build();
         }).collect(Collectors.toList());

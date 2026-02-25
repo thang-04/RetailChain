@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,11 +27,39 @@ public class Warehouse {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "warehouse_type", nullable = false)
-    private Integer warehouseType;
+    @Column(name = "address", length = 500)
+    private String address;
 
-    @Column(name = "store_id")
-    private Long storeId;
+    @Column(name = "province", length = 100)
+    private String province;
+
+    @Column(name = "district", length = 100)
+    private String district;
+
+    @Column(name = "ward", length = 100)
+    private String ward;
+
+    @Column(name = "contact_name", length = 255)
+    private String contactName;
+
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "parent_id")
+    private Long parentId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
+    private Warehouse parentWarehouse;
+
+    @OneToMany(mappedBy = "parentWarehouse", fetch = FetchType.LAZY)
+    private List<Warehouse> childWarehouses;
+
+    @Column(name = "warehouse_level")
+    private Integer warehouseLevel = 1;
 
     @Column(name = "status", nullable = false)
     private Integer status = 1;

@@ -33,8 +33,7 @@ public class Supplier {
 
     private String address;
 
-    @Builder.Default
-    private Integer status = 1;
+    private Integer status;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

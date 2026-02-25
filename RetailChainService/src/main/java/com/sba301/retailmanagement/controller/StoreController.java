@@ -2,12 +2,15 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
+import com.sba301.retailmanagement.dto.response.StaffResponse;
 import com.sba301.retailmanagement.service.StoreService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 
@@ -95,8 +98,19 @@ public class StoreController {
 
     @GetMapping("/{id}/staff")
     public String getStoreStaff(@PathVariable Long id) {
-        // Mock response for now as User/Staff structure is complex
-        // In real impl, query User repo by storeId
-        return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success", java.util.Collections.emptyList());
+        String prefix = "[getStoreStaff]|storeId=" + id;
+        try {
+            log.info("{}|START", prefix);
+            List<StaffResponse> response = storeService.getStaffByStoreId(id);
+            if (response == null) {
+                log.error("{}|FAILED|Store not found", prefix);
+                return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, "Store not found");
+            }
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving store staff: " + e.getMessage());
+        }
     }
 }
