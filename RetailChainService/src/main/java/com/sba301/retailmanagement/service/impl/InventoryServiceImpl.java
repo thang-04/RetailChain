@@ -89,7 +89,24 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
 
-            // Calculate Value
+            // Calculate Value - use item unitPrice if provided, otherwise fallback to variant price
+            java.math.BigDecimal unitPrice = itemReq.getUnitPrice();
+            if (unitPrice == null && variant.getPrice() != null) {
+                unitPrice = variant.getPrice();
+            }
+            if (unitPrice != null) {
+                totalAmount = totalAmount.add(unitPrice.multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
+            }
+
+            // Save Document Item
+            InventoryDocumentItem docItem = new InventoryDocumentItem();
+            docItem.setDocumentId(savedDoc.getId());
+            docItem.setDocument(savedDoc);
+            docItem.setVariantId(itemReq.getVariantId());
+            docItem.setVariant(variant);
+            docItem.setQuantity(itemReq.getQuantity());
+            docItem.setUnitPrice(unitPrice);
+            docItem.setNote(itemReq.getNote());
             if (variant.getPrice() != null) {
                 totalAmount = totalAmount
                         .add(variant.getPrice().multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
