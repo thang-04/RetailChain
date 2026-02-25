@@ -10,6 +10,7 @@ import com.sba301.retailmanagement.entity.RefreshToken;
 import com.sba301.retailmanagement.entity.Role;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
+import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.repository.RoleRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.security.CustomUserDetails;
@@ -81,11 +82,11 @@ public class AuthServiceImpl implements AuthService {
                         throw new RuntimeException("Email already exists: " + request.getEmail());
                 }
 
-                // Find default role (USER)
-                Role userRole = roleRepository.findByCode("USER")
-                                .orElseGet(() -> roleRepository.findByName("USER")
+                // Find default role (STAFF - lowest privilege role)
+                Role userRole = roleRepository.findByCode(RoleConstant.STAFF.name())
+                                .orElseGet(() -> roleRepository.findByName(RoleConstant.STAFF.name())
                                                 .orElseThrow(() -> new ResourceNotFoundException(
-                                                                "Default role USER not found")));
+                                                                "Default role STAFF not found")));
 
                 Set<Role> roles = new HashSet<>();
                 roles.add(userRole);

@@ -2,9 +2,24 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import useAuth from "../../../hooks/useAuth";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  // Helper: Lấy tên vai trò hiển thị
+  const getRoleDisplay = (roles) => {
+    if (!roles || roles.length === 0) return "User";
+    const roleName = typeof roles[0] === 'string' ? roles[0] : roles[0].name || roles[0];
+    const roleMap = {
+      SUPER_ADMIN: "Super Admin",
+      REGIONAL_ADMIN: "Regional Admin",
+      STORE_MANAGER: "Store Manager",
+      STAFF: "Staff",
+    };
+    return roleMap[roleName] || roleName;
+  };
 
   const menuItems = [
     {
@@ -57,6 +72,11 @@ const Sidebar = () => {
       path: "/staff",
       label: "Human Resources",
       icon: "badge"
+    },
+    {
+      path: "/roles",
+      label: "Roles & Permissions",
+      icon: "admin_panel_settings"
     }
   ];
 
@@ -103,21 +123,24 @@ const Sidebar = () => {
         })}
       </nav>
 
-      {/* User Profile (Bottom Sidebar) */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-          <Avatar className="size-9 rounded-full">
-            <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdbf2TxRWWjUGEm2z54lsGHvOG-L9OXBhc_2WxceZlYziy1nGWgi52tuTZnefSanrBsk742y5p--5k-rkmcguWrcYDT04sGGMTUeDnc9MhKbYAw67yD-C7-Ufopkjw1DmJs1HGObtxWmIeF3-fiqw9FUyMjlnsLGxi9NGaXhJlTMEjM-a3vhvH9rneywwFJ_Di6CRzOSmLswugDjTwnI--uRsKzl_PZJU4IQAv_C5oJpyQhElWNJjtDwTyQkypAgNMAFXNSkJxgyM" alt="Alex Morgan" />
-            <AvatarFallback>AM</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col text-left">
-            <p className="text-sm font-semibold text-text-main dark:text-white">Alex Morgan</p>
-            <p className="text-xs text-text-muted dark:text-gray-400">Head of Operations</p>
-          </div>
+      {/* User Profile (Bottom Sidebar) - Hiển thị thông tin người dùng đăng nhập */}
+      {user && (
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <Link to={`/staff/profile/${user.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+            <Avatar className="size-9 rounded-full">
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.fullName || user.email}`} alt={user.fullName || user.email} />
+              <AvatarFallback>{(user.fullName || user.email || '').substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col text-left overflow-hidden">
+              <p className="text-sm font-semibold text-text-main dark:text-white truncate">{user.fullName || user.email}</p>
+              <p className="text-xs text-text-muted dark:text-gray-400">{getRoleDisplay(user.roles)}</p>
+            </div>
+          </Link>
         </div>
-      </div>
+      )}
     </aside>
   );
 };
 
 export default Sidebar;
+

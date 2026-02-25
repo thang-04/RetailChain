@@ -39,10 +39,27 @@ import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssign
 import WarehouseListPage from "../pages/Warehouse/WarehouseListPage";
 // import WarehouseDetail from "../pages/Warehouse/WarehouseDetail"; // Unused or replace if you have detail page
 
+// Auth
+import LoginPage from "../pages/Auth/LoginPage/LoginPage";
+import RegisterPage from "../pages/Auth/RegisterPage/RegisterPage";
+
+// Role & Permission
+import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
+
+// Route Protection
+import ProtectedRoute from "../components/common/ProtectedRoute/ProtectedRoute";
+
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      <Route element={
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      }>
         {/* Dashboard & Reports */}
         <Route path="/" element={<DashboardPage />} />
         <Route path="/reports" element={<ExecutiveReport />} />
@@ -80,6 +97,9 @@ const AppRoutes = () => {
         <Route path="/staff/attendance" element={<StaffAttendance />} />
         <Route path="/staff/profile/:id" element={<StaffProfile />} />
         <Route path="/staff/resource" element={<ResourceAssignment />} />
+
+        {/* Role & Permission Management (Super Admin) */}
+        <Route path="/roles" element={<RolePermissionPage />} />
       </Route>
     </Routes>
   );

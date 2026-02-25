@@ -17,6 +17,15 @@ export const axiosPublic = axios.create({
 axiosPublic.interceptors.response.use(
   (response) => {
     if (response && response.data) {
+      // Backend controllers return String type -> content-type is text/plain
+      // Axios won't auto-parse text/plain as JSON, so we parse it manually
+      if (typeof response.data === 'string') {
+        try {
+          return JSON.parse(response.data);
+        } catch (e) {
+          return response.data;
+        }
+      }
       return response.data;
     }
     return response;
@@ -37,7 +46,7 @@ export const axiosPrivate = axios.create({
   baseURL: baseURL,
   headers: defaultHeaders,
   timeout: 10000,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 // Request Interceptor: Attach Token
@@ -58,6 +67,14 @@ axiosPrivate.interceptors.request.use(
 axiosPrivate.interceptors.response.use(
   (response) => {
     if (response && response.data) {
+      // Backend controllers return String type -> content-type is text/plain
+      if (typeof response.data === 'string') {
+        try {
+          return JSON.parse(response.data);
+        } catch (e) {
+          return response.data;
+        }
+      }
       return response.data;
     }
     return response;
@@ -68,9 +85,9 @@ axiosPrivate.interceptors.response.use(
     // Handle 401 Unauthorized (Token expired or invalid)
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       console.warn("Unauthorized access - 401");
-      
+
       return Promise.reject(error);
     }
 
