@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -48,18 +47,8 @@ public class Warehouse {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "parent_id")
-    private Long parentId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
-    private Warehouse parentWarehouse;
-
-    @OneToMany(mappedBy = "parentWarehouse", fetch = FetchType.LAZY)
-    private List<Warehouse> childWarehouses;
-
-    @Column(name = "warehouse_level")
-    private Integer warehouseLevel = 1;
+    @Column(name = "is_default")
+    private Integer isDefault = 0;
 
     @Column(name = "status", nullable = false)
     private Integer status = 1;

@@ -26,4 +26,7 @@ public class StoreWarehouse {
     @MapsId("warehouseId")
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
+
+    @Column(name = "is_default", nullable = false)
+    private Integer isDefault = 0;
 }

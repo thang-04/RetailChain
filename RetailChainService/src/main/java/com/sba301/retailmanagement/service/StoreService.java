@@ -2,7 +2,6 @@ package com.sba301.retailmanagement.service;
 
 import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
-import com.sba301.retailmanagement.dto.response.StaffResponse;
 import com.sba301.retailmanagement.dto.response.StoreDetailResponse;
 import com.sba301.retailmanagement.dto.response.StoreResponse;
 
@@ -18,6 +17,4 @@ public interface StoreService {
     StoreResponse updateStore(String slug, UpdateStoreRequest request);
 
     Boolean deleteStore(String slug);
-    
-    List<StaffResponse> getStaffByStoreId(Long storeId);
 }

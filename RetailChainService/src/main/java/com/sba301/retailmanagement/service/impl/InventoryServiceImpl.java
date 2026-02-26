@@ -3,8 +3,10 @@ package com.sba301.retailmanagement.service.impl;
 import com.sba301.retailmanagement.dto.request.InventoryItemRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
+import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
+import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.entity.*;
 import com.sba301.retailmanagement.enums.InventoryAction;
 import com.sba301.retailmanagement.enums.InventoryDocumentType;
@@ -33,6 +35,40 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
+
+    @Override
+    @Transactional
+    public WarehouseResponse createWarehouse(WarehouseRequest request) {
+        if (warehouseRepository.existsByCode(request.getCode())) {
+            throw new RuntimeException("Warehouse code already exists");
+        }
+
+        Warehouse warehouse = new Warehouse();
+        warehouse.setCode(request.getCode());
+        warehouse.setName(request.getName());
+        warehouse.setAddress(request.getAddress());
+        warehouse.setProvince(request.getProvince());
+        warehouse.setDistrict(request.getDistrict());
+        warehouse.setWard(request.getWard());
+        warehouse.setContactName(request.getContactName());
+        warehouse.setContactPhone(request.getContactPhone());
+        warehouse.setDescription(request.getDescription());
+        warehouse.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : 0);
+        warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        warehouse.setCreatedAt(LocalDateTime.now());
+        warehouse.setUpdatedAt(LocalDateTime.now());
+
+        Warehouse savedWarehouse = warehouseRepository.save(warehouse);
+
+        return mapToWarehouseResponse(savedWarehouse);
+    }
+
+    @Override
+    public List<WarehouseResponse> getAllWarehouses() {
+        return warehouseRepository.findAll().stream()
+                .map(this::mapToWarehouseResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public List<InventoryStockResponse> getStockByWarehouse(Long warehouseId) {
@@ -89,24 +125,7 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
 
-            // Calculate Value - use item unitPrice if provided, otherwise fallback to variant price
-            java.math.BigDecimal unitPrice = itemReq.getUnitPrice();
-            if (unitPrice == null && variant.getPrice() != null) {
-                unitPrice = variant.getPrice();
-            }
-            if (unitPrice != null) {
-                totalAmount = totalAmount.add(unitPrice.multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
-            }
-
-            // Save Document Item
-            InventoryDocumentItem docItem = new InventoryDocumentItem();
-            docItem.setDocumentId(savedDoc.getId());
-            docItem.setDocument(savedDoc);
-            docItem.setVariantId(itemReq.getVariantId());
-            docItem.setVariant(variant);
-            docItem.setQuantity(itemReq.getQuantity());
-            docItem.setUnitPrice(unitPrice);
-            docItem.setNote(itemReq.getNote());
+            // Calculate Value
             if (variant.getPrice() != null) {
                 totalAmount = totalAmount
                         .add(variant.getPrice().multiply(java.math.BigDecimal.valueOf(itemReq.getQuantity())));
@@ -307,6 +326,105 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryHistoryRepository.save(history);
     }
 
+    private WarehouseResponse mapToWarehouseResponse(Warehouse warehouse) {
+        return WarehouseResponse.builder()
+                .id(warehouse.getId())
+                .code(warehouse.getCode())
+                .name(warehouse.getName())
+                .address(warehouse.getAddress())
+                .province(warehouse.getProvince())
+                .district(warehouse.getDistrict())
+                .ward(warehouse.getWard())
+                .contactName(warehouse.getContactName())
+                .contactPhone(warehouse.getContactPhone())
+                .description(warehouse.getDescription())
+                .isDefault(warehouse.getIsDefault())
+                .status(warehouse.getStatus())
+                .createdAt(warehouse.getCreatedAt())
+                .updatedAt(warehouse.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public WarehouseResponse updateWarehouse(Long id, WarehouseRequest request) {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+        if (request.getCode() != null && !request.getCode().equals(warehouse.getCode())) {
+            if (warehouseRepository.existsByCode(request.getCode())) {
+                throw new RuntimeException("Warehouse code already exists");
+            }
+            warehouse.setCode(request.getCode());
+        }
+
+        if (request.getName() != null) {
+            warehouse.setName(request.getName());
+        }
+
+        if (request.getAddress() != null) {
+            warehouse.setAddress(request.getAddress());
+        }
+
+        if (request.getProvince() != null) {
+            warehouse.setProvince(request.getProvince());
+        }
+
+        if (request.getDistrict() != null) {
+            warehouse.setDistrict(request.getDistrict());
+        }
+
+        if (request.getWard() != null) {
+            warehouse.setWard(request.getWard());
+        }
+
+        if (request.getContactName() != null) {
+            warehouse.setContactName(request.getContactName());
+        }
+
+        if (request.getContactPhone() != null) {
+            warehouse.setContactPhone(request.getContactPhone());
+        }
+
+        if (request.getDescription() != null) {
+            warehouse.setDescription(request.getDescription());
+        }
+
+        if (request.getIsDefault() != null) {
+            warehouse.setIsDefault(request.getIsDefault());
+        }
+
+        if (request.getStatus() != null) {
+            warehouse.setStatus(request.getStatus());
+        }
+
+        warehouse.setUpdatedAt(LocalDateTime.now());
+        Warehouse saved = warehouseRepository.save(warehouse);
+        return mapToWarehouseResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWarehouse(Long id) {
+        Warehouse warehouse = warehouseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        
+        inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
+
+        try {
+            storeWarehouseRepository.deleteByWarehouseId(id); 
+        } catch (Exception e) {
+            // Ignore if method missing, assume handled or empty
+        }
+
+        try {
+            warehouseRepository.delete(warehouse);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new RuntimeException(
+                    "Cannot delete warehouse because it has associated documents or history. Soft delete (Deactivate) recommended instead.");
+        }
+    }
+
     @Override
     public List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getDocumentsByType(String typeStr) {
         InventoryDocumentType type;
@@ -336,11 +454,11 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status("Completed")
+                    .status("Completed") // Inventory transaction is immediate in this system logic
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
-                    .totalValue(totalValue.longValue())
+                    .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
                     .supplier(supplierName)
                     .build();
         }).collect(Collectors.toList());

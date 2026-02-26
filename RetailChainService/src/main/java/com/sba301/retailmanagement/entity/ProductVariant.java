@@ -28,16 +28,16 @@ public class ProductVariant {
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 
-    @Column(name = "sku", nullable = false, unique = true, length = 80)
+    @Column(name = "sku", nullable = false, unique = true, length = 50)
     private String sku;
 
-    @Column(name = "barcode", length = 80)
+    @Column(name = "barcode", length = 50)
     private String barcode;
 
-    @Column(name = "size", length = 30)
+    @Column(name = "size", length = 20)
     private String size;
 
-    @Column(name = "color", length = 50)
+    @Column(name = "color", length = 20)
     private String color;
 
     @Column(name = "price", precision = 10, scale = 2)

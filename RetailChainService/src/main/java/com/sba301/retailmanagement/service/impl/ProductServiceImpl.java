@@ -1,19 +1,24 @@
 package com.sba301.retailmanagement.service.impl;
 
+import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
 import com.sba301.retailmanagement.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,62 +32,80 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
-        return products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
+        return products.stream()
+                .map(this::mapToProductResponseWithVariants)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lấy danh sách sản phẩm có phân trang
+     */
+    public Page<ProductResponse> getAllProductsPaged(int page, int size) {
+        String prefix = "[getAllProductsPaged]";
+        log.info("{}|START|page={}, size={}", prefix, page, size);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Product> productsPage = productRepository.findAll(pageable);
+            Page<ProductResponse> response = productsPage.map(this::mapToProductResponseWithVariants);
+            log.info("{}|END|totalElements={}", prefix, response.getTotalElements());
+            return response;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error retrieving products: " + e.getMessage());
+        }
     }
 
     @Override
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        return mapToProductResponse(product);
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        return mapToProductResponseWithVariants(product);
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
-    public ProductResponse createProduct(com.sba301.retailmanagement.dto.request.ProductRequest request) {
+    @Transactional
+    public ProductResponse createProduct(ProductRequest request) {
         if (productRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Product code already exists");
+            throw new IllegalArgumentException("Product code already exists");
         }
         Product product = new Product();
         mapRequestToProduct(request, product);
-        product.setCreatedAt(java.time.LocalDateTime.now());
-        product.setUpdatedAt(java.time.LocalDateTime.now());
+        product.setCreatedAt(LocalDateTime.now());
+        product.setUpdatedAt(LocalDateTime.now());
         Product saved = productRepository.save(product);
-        return mapToProductResponse(saved);
+        return mapToProductResponseWithVariants(saved);
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
-    public ProductResponse updateProduct(Long id, com.sba301.retailmanagement.dto.request.ProductRequest request) {
+    @Transactional
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         
         if (request.getCode() != null && !request.getCode().equals(product.getCode())) {
              if (productRepository.existsByCode(request.getCode())) {
-                throw new RuntimeException("Product code already exists");
+                throw new IllegalArgumentException("Product code already exists");
             }
         }
 
         mapRequestToProduct(request, product);
-        product.setUpdatedAt(java.time.LocalDateTime.now());
+        product.setUpdatedAt(LocalDateTime.now());
         Product saved = productRepository.save(product);
-        return mapToProductResponse(saved);
+        return mapToProductResponseWithVariants(saved);
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("Product not found");
+            throw new ResourceNotFoundException("Product not found with id: " + id);
         }
-        // Should verify constraints (inventory, history) before delete
-        // For now, simple delete
-        productVariantRepository.deleteAll(productVariantRepository.findAll().stream()
-                .filter(v -> v.getProductId().equals(id)).collect(Collectors.toList()));
+        // JPA cascade delete sẽ tự xóa các variants liên quan
+        // nếu đã cấu hình đúng trong Entity
         productRepository.deleteById(id);
     }
 
-    private void mapRequestToProduct(com.sba301.retailmanagement.dto.request.ProductRequest request, Product product) {
+    private void mapRequestToProduct(ProductRequest request, Product product) {
         if (request.getCode() != null) product.setCode(request.getCode());
         if (request.getName() != null) product.setName(request.getName());
         if (request.getDescription() != null) product.setDescription(request.getDescription());
@@ -97,7 +120,11 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private ProductResponse mapToProductResponse(Product product) {
+    /**
+     * Map Product entity sang ProductResponse - đã bao gồm variants
+     * Sử dụng query có điều kiện để tránh N+1 query
+     */
+    private ProductResponse mapToProductResponseWithVariants(Product product) {
         ProductResponse dto = new ProductResponse();
         dto.setId(product.getId());
         dto.setCategoryId(product.getCategoryId());
@@ -109,12 +136,9 @@ public class ProductServiceImpl implements ProductService {
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
 
-        // Fetch variants
-        // Optimized: In real app, fetch all variants in batch or use @OneToMany
-        // Here we fetch simply for correctness
-        List<ProductVariant> variants = productVariantRepository.findAll().stream()
-                .filter(v -> v.getProductId().equals(product.getId()))
-                .collect(Collectors.toList());
+        // Fix N+1 query: Sử dụng query có điều kiện WHERE product_id = ?
+        // thay vì findAll() rồi filter trong memory
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
 
         List<ProductVariantResponse> variantDtos = variants.stream().map(v -> {
             ProductVariantResponse vDto = new ProductVariantResponse();

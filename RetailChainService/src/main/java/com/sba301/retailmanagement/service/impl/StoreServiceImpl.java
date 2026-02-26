@@ -4,20 +4,21 @@ import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
 import com.sba301.retailmanagement.dto.response.*;
 import com.sba301.retailmanagement.entity.Store;
-import com.sba301.retailmanagement.entity.User;
+import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.mapper.StoreMapper;
 import com.sba301.retailmanagement.repository.StoreRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,26 @@ public class StoreServiceImpl implements StoreService {
             return response;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error retrieving stores: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách stores có phân trang
+     */
+    public Page<StoreResponse> getAllStoresPaged(int page, int size) {
+        String prefix = "[getAllStoresPaged]";
+        log.info("{}|START|page={}, size={}", prefix, page, size);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Store> storesPage = storeRepository.findAll(pageable);
+            Page<StoreResponse> response = storesPage.map(storeMapper::toResponse);
+            log.info("{}|END|totalElements={}, totalPages={}", 
+                prefix, response.getTotalElements(), response.getTotalPages());
+            return response;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error retrieving stores: " + e.getMessage());
         }
     }
 
@@ -51,42 +71,25 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
             StoreDetailResponse response = storeMapper.toDetailResponse(store);
 
-            // Mock Data
-            response.setManager("Manager " + store.getName());
-            response.setPhone("090123456" + store.getId());
-            response.setEmail("store" + store.getCode() + "@retailchain.com");
-            response.setType("Standard");
-
-            response.setKpi(StoreKpiDTO.builder()
-                    .dailyRevenue("15,000,000 VND")
-                    .orders("120")
-                    .lowStockCount(5)
-                    .activeStaff(3)
-                    .build());
-
-            List<StoreInventoryDTO> inventory = new ArrayList<>();
-            inventory.add(StoreInventoryDTO.builder().id(1L).name("Iphone 15").sku("IP15-128").category("Electronics")
-                    .stock(50).price("20,000,000").status("In Stock").build());
-            inventory.add(StoreInventoryDTO.builder().id(2L).name("Samsung S24").sku("SS-S24").category("Electronics")
-                    .stock(5).price("18,000,000").status("Low Stock").build());
-            response.setInventory(inventory);
-
-            List<StoreStaffDTO> staff = new ArrayList<>();
-            staff.add(StoreStaffDTO.builder().id(1L).name("Nguyen Van A").role("Store Manager").status("Active")
-                    .statusColor("text-emerald-700 bg-emerald-50").dotColor("bg-emerald-500").initials("NA")
-                    .initialsColor("bg-blue-100 text-blue-700").build());
-            response.setStaff(staff);
+            // TODO: Lấy dữ liệu thực từ các service tương ứng
+            // - Manager: từ User service
+            // - Phone/Email: từ Store entity hoặc contact info
+            // - KPI: từ báo cáo doanh thu
+            // - Inventory: từ Inventory service
+            // - Staff: từ User service
 
             log.info("{}|END", prefix);
             return response;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error retrieving store: " + e.getMessage());
         }
     }
 
@@ -97,11 +100,11 @@ public class StoreServiceImpl implements StoreService {
         try {
             if (request == null || request.getCode() == null) {
                 log.error("{}|FAILED|Request or code is null", prefix);
-                return null;
+                throw new IllegalArgumentException("Request or code cannot be null");
             }
             if (storeRepository.findByCode(request.getCode()).isPresent()) {
                 log.error("{}|Store code already exists", prefix);
-                return null;
+                throw new IllegalArgumentException("Store code already exists");
             }
 
             Store store = storeMapper.toEntity(request);
@@ -113,9 +116,11 @@ public class StoreServiceImpl implements StoreService {
 
             log.info("{}|END|id={}", prefix, savedStore.getId());
             return response;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error creating store: " + e.getMessage());
         }
     }
 
@@ -127,7 +132,7 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
 
@@ -139,9 +144,11 @@ public class StoreServiceImpl implements StoreService {
 
             log.info("{}|END", prefix);
             return response;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error updating store: " + e.getMessage());
         }
     }
 
@@ -153,16 +160,18 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
             storeRepository.delete(store);
 
             log.info("{}|END", prefix);
             return true;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error deleting store: " + e.getMessage());
         }
     }
 
@@ -171,13 +180,12 @@ public class StoreServiceImpl implements StoreService {
         String prefix = "[getStaffByStoreId]|storeId=" + storeId;
         log.info("{}|START", prefix);
         try {
-            // Check if store exists
             if (!storeRepository.existsById(storeId)) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with id: " + storeId);
             }
 
-            List<User> users = userRepository.findByStoreId(storeId);
+            var users = userRepository.findByStoreId(storeId);
             List<StaffResponse> staffList = users.stream()
                     .map(user -> StaffResponse.builder()
                             .id(user.getId())
@@ -191,13 +199,15 @@ public class StoreServiceImpl implements StoreService {
                                 : "Staff")
                             .createdAt(user.getCreatedAt())
                             .build())
-                    .collect(Collectors.toList());
+                    .toList();
 
             log.info("{}|END|size={}", prefix, staffList.size());
             return staffList;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error retrieving staff: " + e.getMessage());
         }
     }
 }

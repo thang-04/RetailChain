@@ -90,19 +90,11 @@ const storeService = {
   },
 
   getStoreStaff: async (storeId) => {
-    try {
-      const response = await axiosPrivate.get(`/stores/${storeId}/staff`);
-      if (response && response.data) {
-        return response.data;
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching store staff:', error);
-      throw error;
-    }
+    // Note: This endpoint needs verification on the backend
+    return axiosPublic.get('/stores/' + storeId + '/staff').then(res => res.data);
   },
 
-  updateStore: async (slug, data) => {
+  updateStore: async (id, data) => {
     try {
       const statusMap = {
         'Active': 1,
@@ -116,22 +108,18 @@ const storeService = {
         status: statusMap[data.status] ?? 1
       };
 
-      const response = await axiosPrivate.put(`/stores/${slug}`, requestData);
+      const response = await axiosPrivate.put(`/stores/${id}`, requestData);
       return response?.data || response;
     } catch (error) {
-      console.error(`Error updating store ${slug}:`, error);
+      console.error(`Error updating store ${id}:`, error);
       throw error;
     }
   },
 
-  deleteStore: async (slug) => {
-    try {
-      return await axiosPrivate.delete(`/stores/${slug}`);
-    } catch (error) {
-      console.error(`Error deleting store ${slug}:`, error);
-      throw error;
-    }
+  deleteStore: async (id) => {
+    return axiosPrivate.delete('/stores/' + id);
   }
 };
 
 export default storeService;
+

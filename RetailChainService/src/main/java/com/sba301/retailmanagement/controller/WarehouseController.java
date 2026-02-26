@@ -2,7 +2,7 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
-import com.sba301.retailmanagement.service.WarehouseService;
+import com.sba301.retailmanagement.service.InventoryService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +19,14 @@ import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 @RequiredArgsConstructor
 public class WarehouseController {
 
-    private final WarehouseService warehouseService;
+    private final InventoryService inventoryService;
 
     @PostMapping
     public String createWarehouse(@RequestBody WarehouseRequest request) {
         String prefix = "[createWarehouse]";
         log.info("{}|START|request={}", prefix, gson.toJson(request));
         try {
-            WarehouseResponse response = warehouseService.createWarehouse(request);
+            WarehouseResponse response = inventoryService.createWarehouse(request);
             log.info("{}|END|response={}", prefix, gson.toJson(response));
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouse created successfully", response);
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class WarehouseController {
         String prefix = "[getAllWarehouses]";
         log.info("{}|START", prefix);
         try {
-            List<WarehouseResponse> response = warehouseService.getAllWarehouses();
+            List<WarehouseResponse> response = inventoryService.getAllWarehouses();
             log.info("{}|END|size={}", prefix, response.size());
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouses retrieved successfully", response);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class WarehouseController {
         String prefix = "[updateWarehouse]|id=" + id;
         log.info("{}|START|request={}", prefix, gson.toJson(request));
         try {
-            WarehouseResponse response = warehouseService.updateWarehouse(id, request);
+            WarehouseResponse response = inventoryService.updateWarehouse(id, request);
             log.info("{}|END", prefix);
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouse updated successfully", response);
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class WarehouseController {
         String prefix = "[deleteWarehouse]|id=" + id;
         log.info("{}|START", prefix);
         try {
-            warehouseService.deleteWarehouse(id);
+            inventoryService.deleteWarehouse(id);
             log.info("{}|END", prefix);
             return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Warehouse deleted successfully");
         } catch (Exception e) {
