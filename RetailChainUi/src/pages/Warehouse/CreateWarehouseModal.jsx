@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Building2, MapPin, Phone, User, FileText, Box, Save, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 const CreateWarehouseModal = ({ isOpen, onClose, onSuccess, initialData = null }) => {
   const [formData, setFormData] = useState({
@@ -109,10 +110,11 @@ const CreateWarehouseModal = ({ isOpen, onClose, onSuccess, initialData = null }
         await inventoryService.createWarehouse(payload);
       }
 
+      toast.success(initialData ? "Cập nhật kho thành công!" : "Tạo kho thành công!");
       onSuccess();
     } catch (error) {
       console.error("Error saving warehouse:", error);
-      alert("Lỗi: " + (error.response?.data?.desc || error.message));
+      toast.error("Lỗi: " + (error.response?.data?.desc || error.message));
     } finally {
       setLoading(false);
     }
