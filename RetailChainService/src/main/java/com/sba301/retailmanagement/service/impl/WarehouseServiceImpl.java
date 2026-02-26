@@ -154,7 +154,6 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .description(warehouse.getDescription())
                 .warehouseLevel(warehouse.getWarehouseLevel())
                 .parentId(warehouse.getParentId())
-                .parentWarehouseName(parentName)
                 .status(warehouse.getStatus())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())

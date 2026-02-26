@@ -19,6 +19,8 @@ public class WarehouseResponse {
     private String contactPhone;
     private String description;
     private Integer isDefault;
+    private Integer warehouseLevel;
+    private Long parentId;
     private Integer status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
