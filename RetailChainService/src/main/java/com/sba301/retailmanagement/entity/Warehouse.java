@@ -50,6 +50,12 @@ public class Warehouse {
     @Column(name = "is_default")
     private Integer isDefault = 0;
 
+    @Column(name = "warehouse_level")
+    private Integer warehouseLevel;
+
+    @Column(name = "parent_id")
+    private Long parentId;
+
     @Column(name = "status", nullable = false)
     private Integer status = 1;
 

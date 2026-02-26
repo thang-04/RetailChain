@@ -15,4 +15,6 @@ public class WarehouseRequest {
     private String description;
     private Integer isDefault;
     private Integer status;
+    private Integer warehouseLevel;
+    private Long parentId;
 }
