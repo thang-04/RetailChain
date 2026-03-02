@@ -72,22 +72,27 @@ const ProductEditPage = () => {
 
     const fetchProduct = async () => {
         try {
+            console.log("Fetching product for Edit mode, slug:", slug);
             const res = await productService.getProductBySlug(slug);
+            console.log("Edit Page: Product response:", res);
             const data = res.data;
-            setFormData({
-                code: data.code || "",
-                name: data.name || "",
-                description: data.description || "",
-                gender: data.gender || "UNISEX",
-                status: data.status !== undefined ? data.status : 1,
-                categoryId: data.categoryId || 1,
-                image: data.image || ""
-            });
+            if (data) {
+                setFormData({
+                    code: data.code || "",
+                    name: data.name || "",
+                    description: data.description || "",
+                    gender: data.gender || "UNISEX",
+                    status: data.status !== undefined ? data.status : 1,
+                    categoryId: data.categoryId || 1,
+                    image: data.image || ""
+                });
 
-            // Fetch stock for this product
-            if (data.id) {
-                const stockRes = await inventoryService.getStockByProduct(data.id);
-                setChainStock(stockRes.data || []);
+                // Fetch stock for this product
+                if (data.id) {
+                    console.log("Edit Page: Fetching stock for product ID:", data.id);
+                    const stockRes = await inventoryService.getStockByProduct(data.id);
+                    setChainStock(stockRes.data || []);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch product", error);
@@ -210,9 +215,11 @@ const ProductEditPage = () => {
                             {isEdit && (
                                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${formData.status === 1
                                     ? "bg-green-100 text-green-700 border-green-200"
-                                    : "bg-slate-100 text-slate-600 border-slate-200"
+                                    : formData.status === 2
+                                        ? "bg-amber-100 text-amber-700 border-amber-200"
+                                        : "bg-slate-100 text-slate-600 border-slate-200"
                                     }`}>
-                                    {formData.status === 1 ? "Active" : "Inactive"}
+                                    {formData.status === 1 ? "Active" : formData.status === 2 ? "Out of Stock" : "Inactive"}
                                 </span>
                             )}
                         </div>
@@ -334,6 +341,7 @@ const ProductEditPage = () => {
                                                 <SelectContent>
                                                     <SelectItem value="1">Active</SelectItem>
                                                     <SelectItem value="0">Inactive</SelectItem>
+                                                    <SelectItem value="2">Out of Stock</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>

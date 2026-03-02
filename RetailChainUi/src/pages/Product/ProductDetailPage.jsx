@@ -31,19 +31,21 @@ const ProductDetailPage = () => {
         const loadPageData = async () => {
             setFetching(true);
             try {
+                console.log("Fetching product details for slug:", slug);
                 // Parallel fetch
-                const [productRes, catRes, stockRes] = await Promise.all([
+                const [productRes, catRes] = await Promise.all([
                     productService.getProductBySlug(slug),
-                    productService.getCategories(),
-                    inventoryService.getStockByProduct(0) // Will replace with actual ID below
+                    productService.getCategories()
                 ]);
 
+                console.log("Product details response:", productRes);
                 const productData = productRes.data;
                 setProduct(productData);
                 setCategories(catRes.data || []);
 
                 // Fetch stock with product ID now that we have it
-                if (productData.id) {
+                if (productData && productData.id) {
+                    console.log("Fetching stock for product ID:", productData.id);
                     const realStockRes = await inventoryService.getStockByProduct(productData.id);
                     setChainStock(realStockRes.data || []);
                 }
@@ -121,9 +123,11 @@ const ProductDetailPage = () => {
                                         <div className="mt-2 flex items-center gap-2">
                                             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${product.status === 1
                                                 ? "bg-green-100 text-green-700 border-green-200"
-                                                : "bg-slate-100 text-slate-600 border-slate-200"
+                                                : product.status === 2
+                                                    ? "bg-amber-100 text-amber-700 border-amber-200"
+                                                    : "bg-slate-100 text-slate-600 border-slate-200"
                                                 }`}>
-                                                {product.status === 1 ? "ACTIVE" : "INACTIVE"}
+                                                {product.status === 1 ? "ACTIVE" : product.status === 2 ? "OUT OF STOCK" : "INACTIVE"}
                                             </span>
                                             <span className="text-slate-400 font-mono text-xs">#{product.code}</span>
                                         </div>

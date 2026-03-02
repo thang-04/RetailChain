@@ -4,6 +4,7 @@ import com.sba301.retailmanagement.dto.request.InventoryItemRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
+import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.entity.*;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -198,6 +202,14 @@ public class InventoryServiceImpl implements InventoryService {
         // Update Total Amount
         savedDoc.setTotalAmount(totalAmount);
         inventoryDocumentRepository.save(savedDoc);
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -252,6 +264,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.OUT, itemReq.getQuantity(),
                     newQuantity);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -340,6 +360,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, targetWarehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
                     targetNewQty);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
@@ -360,6 +388,31 @@ public class InventoryServiceImpl implements InventoryService {
         history.setOccurredAt(LocalDateTime.now());
 
         inventoryHistoryRepository.save(history);
+    }
+
+    private void updateProductStatus(Long productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null)
+            return;
+
+        Integer totalQty = inventoryStockRepository.getTotalQuantityByProductId(productId);
+
+        if (totalQty <= 0) {
+            // Nếu hết hàng và đang ở trạng thái Hoạt động (1) -> Chuyển sang Hết hàng (2)
+            if (product.getStatus() == 1) {
+                product.setStatus(2);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        } else {
+            // Nếu có hàng và đang ở trạng thái Hết hàng (2) -> Quay lại Hoạt động (1)
+            // Nếu trạng thái đang là 0 (Tắt thủ công), giữ nguyên không đổi.
+            if (product.getStatus() == 2) {
+                product.setStatus(1);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        }
     }
 
     private WarehouseResponse mapToWarehouseResponse(Warehouse warehouse) {
@@ -474,5 +527,40 @@ public class InventoryServiceImpl implements InventoryService {
 
         // 3. Finally, delete the main document
         inventoryDocumentRepository.delete(document);
+    }
+
+    @Override
+    public InventoryOverviewResponse getInventoryOverview() {
+        List<InventoryStock> stocks = inventoryStockRepository.findAll();
+
+        long totalQuantity = 0L;
+        java.math.BigDecimal totalValue = java.math.BigDecimal.ZERO;
+        Set<Long> criticalWarehouses = new HashSet<>();
+
+        for (InventoryStock stock : stocks) {
+            int quantity = stock.getQuantity() != null ? stock.getQuantity() : 0;
+            totalQuantity += quantity;
+
+            if (stock.getVariant() != null && stock.getVariant().getPrice() != null) {
+                totalValue = totalValue.add(
+                        stock.getVariant().getPrice().multiply(java.math.BigDecimal.valueOf(quantity)));
+            }
+
+            // Đánh dấu kho "cần chú ý" nếu có bất kỳ mặt hàng nào tồn dưới 10
+            if (quantity < 10 && stock.getId() != null) {
+                criticalWarehouses.add(stock.getId().getWarehouseId());
+            }
+        }
+
+        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI
+        // demo
+        double growthPercentage = 2.4d;
+
+        return InventoryOverviewResponse.builder()
+                .totalStockQuantity(totalQuantity)
+                .totalChainValue(totalValue.longValue())
+                .criticalStoreCount((long) criticalWarehouses.size())
+                .growthPercentage(growthPercentage)
+                .build();
     }
 }

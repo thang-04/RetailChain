@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain';
+const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain') + '/api';
 
 const defaultHeaders = {
   'Content-Type': 'application/json',
@@ -16,10 +16,12 @@ export const axiosPublic = axios.create({
 // Response interceptor for public client 
 axiosPublic.interceptors.response.use(
   (response) => {
-    if (response && response.data) {
-      return response.data;
+    let data = response && response.data;
+    // Spring Boot đôi khi trả về JSON dạng String (text/plain) → tự parse
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch (_) { }
     }
-    return response;
+    return data ?? response;
   },
   (error) => {
     if (error.response) {
@@ -37,7 +39,7 @@ export const axiosPrivate = axios.create({
   baseURL: baseURL,
   headers: defaultHeaders,
   timeout: 10000,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 // Request Interceptor: Attach Token
@@ -57,10 +59,12 @@ axiosPrivate.interceptors.request.use(
 // Response Interceptor: Handle Token Expiration
 axiosPrivate.interceptors.response.use(
   (response) => {
-    if (response && response.data) {
-      return response.data;
+    let data = response && response.data;
+    // Spring Boot đôi khi trả về JSON dạng String (text/plain) → tự parse
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch (_) { }
     }
-    return response;
+    return data ?? response;
   },
   async (error) => {
     const originalRequest = error.config;
@@ -68,9 +72,9 @@ axiosPrivate.interceptors.response.use(
     // Handle 401 Unauthorized (Token expired or invalid)
     if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       console.warn("Unauthorized access - 401");
-      
+
       return Promise.reject(error);
     }
 

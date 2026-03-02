@@ -27,7 +27,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping(value = "/api/product", produces = "application/json")
 public class ProductController {
 
     private final ProductService productService;

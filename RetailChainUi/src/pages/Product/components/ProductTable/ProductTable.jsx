@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MoreVertical, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,11 +32,17 @@ const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
   };
 
   const getStatusBadge = (status) => {
-    // API returns 1 (Active) or 0 (Inactive)
+    // API returns: 1 (Active), 0 (Inactive), 2 (Out of Stock)
     if (status === 1 || status === "ACTIVE" || status === "Active") {
       return (
         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
           Active
+        </Badge>
+      );
+    } else if (status === 2 || status === "OUT_OF_STOCK" || status === "Out of Stock") {
+      return (
+        <Badge className="bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
+          Out of Stock
         </Badge>
       );
     } else {
@@ -87,7 +93,7 @@ const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4">
-                    <span className="text-slate-900 dark:text-white text-sm font-bold group-hover:text-primary transition-colors cursor-pointer" onClick={() => onEditClick(product)}>
+                    <span className="text-slate-900 dark:text-white text-sm font-bold group-hover:text-primary transition-colors cursor-pointer" onClick={() => onViewClick(product)}>
                       {product.name}
                     </span>
                   </TableCell>
@@ -115,15 +121,6 @@ const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
                         title="View Detail"
                       >
                         <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
-                        onClick={() => onEditClick(product)}
-                        title="Edit"
-                      >
-                        <MoreVertical className="w-5 h-5" />
                       </Button>
                     </div>
                   </TableCell>

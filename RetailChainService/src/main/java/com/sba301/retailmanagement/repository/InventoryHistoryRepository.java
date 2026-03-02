@@ -10,4 +10,5 @@ import java.util.List;
 public interface InventoryHistoryRepository extends JpaRepository<InventoryHistory, Long> {
     List<InventoryHistory> findByWarehouseId(Long warehouseId);
     List<InventoryHistory> findByDocumentId(Long documentId);
+    List<InventoryHistory> findAllByOrderByOccurredAtDesc();
 }

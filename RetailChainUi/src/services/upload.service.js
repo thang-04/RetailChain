@@ -1,6 +1,6 @@
 import { axiosPrivate } from './api/axiosClient';
 
-const API_PATH = '/api/product/upload';
+const API_PATH = '/product/upload';
 
 const uploadService = {
     uploadFile: async (file) => {

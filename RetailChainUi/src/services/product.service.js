@@ -1,8 +1,10 @@
 import { axiosPrivate } from './api/axiosClient';
 
-const API_PATH = '/api/product/upload';
+// Redundant variable removed or fixed if needed, but PRODUCT_API_PATH is the main concern.
+// Just removing the misleading unused variable.
+
 // Fix: Backend Product API path is /api/product, upload is /api/product/upload
-const PRODUCT_API_PATH = '/api/product';
+const PRODUCT_API_PATH = '/product';
 
 const productService = {
   getAllProducts: async (filters = {}) => {

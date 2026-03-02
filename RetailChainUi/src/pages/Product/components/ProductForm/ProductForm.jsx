@@ -21,7 +21,7 @@ import { Upload, X, Loader2 } from "lucide-react";
 import uploadService from "@/services/upload.service";
 import productService from "@/services/product.service";
 
-const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => {
+const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categories = [] }) => {
     const [formData, setFormData] = useState({
         code: "",
         name: "",
@@ -197,10 +197,17 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading }) => 
                                     <SelectValue placeholder="Select Category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="1">Fashion</SelectItem> {/* Mock category */}
-                                    <SelectItem value="2">Shirts</SelectItem>
-                                    <SelectItem value="3">Pants</SelectItem>
-                                    <SelectItem value="4">Bags</SelectItem>
+                                    {categories.length > 0 ? (
+                                        categories.map(cat => (
+                                            <SelectItem key={cat.id} value={String(cat.id)}>
+                                                {cat.name}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <SelectItem value="0" disabled>
+                                            Không có danh mục (backend offline?)
+                                        </SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>

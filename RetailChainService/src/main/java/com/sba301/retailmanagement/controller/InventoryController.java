@@ -4,6 +4,7 @@ import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 
+import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.service.InventoryService;
@@ -177,6 +178,22 @@ public class InventoryController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting document: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/overview")
+    public String getInventoryOverview() {
+        String prefix = "[getInventoryOverview]";
+        log.info("{}|START", prefix);
+        try {
+            InventoryOverviewResponse response = inventoryService.getInventoryOverview();
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Inventory overview retrieved successfully",
+                    response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving inventory overview: " + e.getMessage());
         }
     }
 }

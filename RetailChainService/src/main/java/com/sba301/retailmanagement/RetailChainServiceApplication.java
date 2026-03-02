@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RetailChainServiceApplication {
 
     public static void main(String[] args) {
+        System.out.println("DongLV Dep zai");
         SpringApplication.run(RetailChainServiceApplication.class, args);
     }
 
