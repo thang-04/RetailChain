@@ -3,19 +3,42 @@ import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import storeService from '../../../services/store.service';
+import inventoryService from '../../../services/inventory.service';
 
 const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     const [formData, setFormData] = useState({
         name: '',
         address: '',
         type: '',
-        warehouse: '',
+        warehouseId: '',
         status: 'Active'
     });
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [warehouses, setWarehouses] = useState([]);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
+
+    useEffect(() => {
+        if (isOpen) {
+            const fetchWarehouses = async () => {
+                try {
+                    const raw = await inventoryService.getAllWarehouses();
+                    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    if (res && (res.code === 200 || res.status === 200) && res.data) {
+                        setWarehouses(res.data);
+                    } else if (Array.isArray(res)) {
+                        setWarehouses(res);
+                    } else if (res?.data && Array.isArray(res.data)) {
+                        setWarehouses(res.data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching warehouses:', error);
+                }
+            };
+            fetchWarehouses();
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (storeData) {
@@ -23,11 +46,21 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                 name: storeData.name || '',
                 address: storeData.address || '',
                 type: storeData.type || '',
-                warehouse: storeData.warehouse || '',
+                warehouseId: storeData.warehouseId ? String(storeData.warehouseId) : '',
                 status: storeData.status || 'Active'
             });
+
+            if (storeData.address && isOpen) {
+                const initLocation = async () => {
+                    const result = await searchLocation(storeData.address);
+                    if (result) {
+                        setMapPosition({ lat: result.lat, lng: result.lng });
+                    }
+                };
+                initLocation();
+            }
         }
-    }, [storeData]);
+    }, [storeData, isOpen]);
 
     const handleSearch = async (e) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
@@ -162,13 +195,14 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                             <select
                                                 className="block w-full appearance-none rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 pr-10 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
                                                 id="warehouse"
-                                                name="warehouse"
-                                                value={formData.warehouse}
+                                                name="warehouseId"
+                                                value={formData.warehouseId}
                                                 onChange={handleInputChange}
                                             >
-                                                <option>Northwest Distribution</option>
-                                                <option>California Hub</option>
-                                                <option>East Coast Center</option>
+                                                <option value="">-- Select a predefined warehouse (Optional) --</option>
+                                                {warehouses.map(w => (
+                                                    <option key={w.id} value={String(w.id)}>{w.name}</option>
+                                                ))}
                                             </select>
                                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                                                 <span className="material-symbols-outlined text-[20px]">expand_more</span>

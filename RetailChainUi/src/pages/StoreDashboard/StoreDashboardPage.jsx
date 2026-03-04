@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import StoreKPIGrid from "./components/StoreKPIGrid";
-import StoreRevenueChart from "./components/StoreRevenueChart";
 import StoreInventoryTable from "./components/StoreInventoryTable";
 import StoreStaffWidget from "./components/StoreStaffWidget";
 import EditStoreModal from "./components/EditStoreModal";
@@ -98,17 +97,14 @@ const StoreDashboardPage = () => {
       {/* KPI Grid */}
       <StoreKPIGrid data={storeData.kpi} />
 
-      {/* Main Chart Section */}
-      <StoreRevenueChart />
-
       {/* Split Layout: Tables */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Recent Sales Orders (60%) */}
-        <div className="lg:w-3/5 flex flex-col gap-4">
+        {/* Recent Sales Orders (1/2) */}
+        <div className="lg:w-1/2 flex flex-col gap-4">
           <StoreInventoryTable inventory={storeData.inventory} />
         </div>
-        {/* Low Inventory Products (40%) */}
-        <div className="lg:w-2/5 flex flex-col gap-4">
+        {/* Staff Overview (1/2) */}
+        <div className="lg:w-1/2 flex flex-col gap-4">
           <StoreStaffWidget staff={storeData.staff} />
         </div>
       </div>

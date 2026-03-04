@@ -94,6 +94,12 @@ const Sidebar = () => {
       label: "User Management",
       icon: "manage_accounts",
       allowedRoles: ["SUPER_ADMIN", "REGIONAL_ADMIN", "STORE_MANAGER"]
+    },
+    {
+      path: "/staff/shifts",
+      label: "Staff Shifts",
+      icon: "calendar_month",
+      filledIcon: true
     }
   ];
 

@@ -41,6 +41,6 @@ yarn-error.log*
 
 # Other
 RetailChainUi/template/
-
 # bv (beads viewer) local config and caches
 .bv/
+.docs/

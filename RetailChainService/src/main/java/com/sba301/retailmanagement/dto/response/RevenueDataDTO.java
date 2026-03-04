@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StoreKpiDTO {
-    private Integer totalProductVariants;
-    private Long totalStockQuantity;
-    private Integer lowStockCount;
-    private Integer activeStaff;
+public class RevenueDataDTO {
+    private String label;
+    private Long amount;
 }

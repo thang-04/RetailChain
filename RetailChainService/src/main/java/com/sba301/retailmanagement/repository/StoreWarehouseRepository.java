@@ -16,4 +16,6 @@ public interface StoreWarehouseRepository extends JpaRepository<StoreWarehouse, 
     void deleteByWarehouseId(Long warehouseId);
 
     boolean existsByWarehouseId(Long warehouseId);
+
+    void deleteByStoreId(Long storeId);
 }

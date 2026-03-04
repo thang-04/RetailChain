@@ -41,14 +41,16 @@ const storeService = {
           size: storeData.size || "N/A",
           type: storeData.type || "Standard",
           status: storeData.status || "Active",
+          warehouseId: storeData.warehouseId || "",
           kpi: storeData.kpi || {
-            dailyRevenue: "0",
-            monthlyRevenue: "0",
-            orders: 0,
-            avgBasketSize: "0"
+            totalProductVariants: 0,
+            totalStockQuantity: 0,
+            lowStockCount: 0,
+            activeStaff: 0
           },
           inventory: storeData.inventory || [],
           staff: storeData.staff || [],
+          revenueData: storeData.revenueData || [],
           recentOrders: storeData.recentOrders || [],
           lowStock: storeData.lowStock || []
         };
@@ -65,7 +67,8 @@ const storeService = {
       const requestData = {
         code: data.code,
         name: data.name,
-        address: data.address
+        address: data.address,
+        warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };
 
       const response = await axiosPrivate.post('/stores', requestData);
@@ -105,7 +108,8 @@ const storeService = {
       const requestData = {
         name: data.name,
         address: data.address,
-        status: statusMap[data.status] ?? 1
+        status: statusMap[data.status] ?? 1,
+        warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };
 
       const response = await axiosPrivate.put(`/stores/${id}`, requestData);
