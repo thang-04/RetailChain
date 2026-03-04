@@ -11,8 +11,8 @@ const useGeoLocation = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            const data = await response.json();
+            let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            let data = await response.json();
             
             if (data && data.length > 0) {
                 const { lat, lon, display_name } = data[0];
@@ -22,6 +22,24 @@ const useGeoLocation = () => {
                     displayName: display_name
                 };
             }
+
+            // Fallback for custom formatted addresses: try searching broader terms
+            const parts = query.split(',').map(p => p.trim());
+            if (parts.length > 1) {
+                const broaderQuery = parts.slice(1).join(', ');
+                response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(broaderQuery)}&limit=1`);
+                data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const { lat, lon } = data[0];
+                    return {
+                        lat: parseFloat(lat),
+                        lng: parseFloat(lon),
+                        displayName: query // Keep original display name
+                    };
+                }
+            }
+
             return null;
         } catch (err) {
             console.error("Geocoding failed:", err);

@@ -31,6 +31,7 @@ import CreateStockOut from "../pages/StockOut/CreateStockOut";
 // Staff
 import StaffList from "../pages/Staff/StaffList/StaffList";
 import StaffCalendar from "../pages/Staff/ShiftCalendar/StaffCalendar";
+import StaffShiftsPage from "../pages/Staff/StaffShifts/StaffShiftsPage";
 import StaffAttendance from "../pages/Staff/Attendance/StaffAttendance";
 import StaffProfile from "../pages/Staff/Profile/StaffProfile";
 import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssignment";
@@ -76,6 +77,7 @@ const AppRoutes = () => {
 
         {/* Staff Module */}
         <Route path="/staff" element={<StaffList />} />
+        <Route path="/staff/shifts" element={<StaffShiftsPage />} />
         <Route path="/staff/calendar" element={<StaffCalendar />} />
         <Route path="/staff/attendance" element={<StaffAttendance />} />
         <Route path="/staff/profile/:id" element={<StaffProfile />} />

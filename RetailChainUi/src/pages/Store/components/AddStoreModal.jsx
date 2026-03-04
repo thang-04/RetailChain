@@ -1,15 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
 import storeService from '../../../services/store.service';
+import inventoryService from '../../../services/inventory.service';
 
 const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
     const [address, setAddress] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
-    const [formData, setFormData] = useState({ code: '', name: '' });
+    const [formData, setFormData] = useState({ code: '', name: '', warehouseId: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [warehouses, setWarehouses] = useState([]);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
+
+    useEffect(() => {
+        if (isOpen) {
+            const fetchWarehouses = async () => {
+                try {
+                    const raw = await inventoryService.getAllWarehouses();
+                    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    if (res && (res.code === 200 || res.status === 200) && res.data) {
+                        setWarehouses(res.data);
+                    } else if (Array.isArray(res)) {
+                        setWarehouses(res);
+                    } else if (res?.data && Array.isArray(res.data)) {
+                        setWarehouses(res.data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching warehouses:', error);
+                }
+            };
+            fetchWarehouses();
+        }
+    }, [isOpen]);
 
     const handleSearch = async (e) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
@@ -39,13 +62,14 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
             const newStore = await storeService.createStore({
                 code: formData.code,
                 name: formData.name,
-                address: address
+                address: address,
+                warehouseId: formData.warehouseId
             });
 
             console.log('Store created successfully:', newStore);
             alert('Tạo cửa hàng thành công!');
             // Reset form
-            setFormData({ code: '', name: '' });
+            setFormData({ code: '', name: '', warehouseId: '' });
             setAddress('');
             setSearchQuery('');
             setMapPosition(null);
@@ -159,10 +183,17 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
                                             Assigned Warehouse
                                         </label>
                                         <div className="relative">
-                                            <select className="block w-full appearance-none rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 pr-10 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary" id="warehouse" name="warehouse">
-                                                <option>Northwest Distribution</option>
-                                                <option>California Hub</option>
-                                                <option>East Coast Center</option>
+                                            <select
+                                                className="block w-full appearance-none rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 pr-10 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
+                                                id="warehouse"
+                                                name="warehouse"
+                                                value={formData.warehouseId}
+                                                onChange={(e) => setFormData({ ...formData, warehouseId: e.target.value })}
+                                            >
+                                                <option value="">-- Select a predefined warehouse (Optional) --</option>
+                                                {warehouses.map(w => (
+                                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                                ))}
                                             </select>
                                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                                                 <span className="material-symbols-outlined text-[20px]">expand_more</span>

@@ -57,6 +57,12 @@ const Sidebar = () => {
       path: "/staff",
       label: "Human Resources",
       icon: "badge"
+    },
+    {
+      path: "/staff/shifts",
+      label: "Staff Shifts",
+      icon: "calendar_month",
+      filledIcon: true
     }
   ];
 
