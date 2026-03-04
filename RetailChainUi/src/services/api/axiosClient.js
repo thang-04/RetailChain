@@ -16,12 +16,19 @@ export const axiosPublic = axios.create({
 // Response interceptor for public client 
 axiosPublic.interceptors.response.use(
   (response) => {
-    let data = response && response.data;
-    // Spring Boot đôi khi trả về JSON dạng String (text/plain) → tự parse
-    if (typeof data === 'string') {
-      try { data = JSON.parse(data); } catch (_) { }
+    if (response && response.data) {
+      // Backend controllers return String type -> content-type is text/plain
+      // Axios won't auto-parse text/plain as JSON, so we parse it manually
+      if (typeof response.data === 'string') {
+        try {
+          return JSON.parse(response.data);
+        } catch (e) {
+          return response.data;
+        }
+      }
+      return response.data;
     }
-    return data ?? response;
+    return response;
   },
   (error) => {
     if (error.response) {
@@ -59,12 +66,18 @@ axiosPrivate.interceptors.request.use(
 // Response Interceptor: Handle Token Expiration
 axiosPrivate.interceptors.response.use(
   (response) => {
-    let data = response && response.data;
-    // Spring Boot đôi khi trả về JSON dạng String (text/plain) → tự parse
-    if (typeof data === 'string') {
-      try { data = JSON.parse(data); } catch (_) { }
+    if (response && response.data) {
+      // Backend controllers return String type -> content-type is text/plain
+      if (typeof response.data === 'string') {
+        try {
+          return JSON.parse(response.data);
+        } catch (e) {
+          return response.data;
+        }
+      }
+      return response.data;
     }
-    return data ?? response;
+    return response;
   },
   async (error) => {
     const originalRequest = error.config;
@@ -87,6 +100,3 @@ axiosPrivate.interceptors.response.use(
     }
   }
 );
-
-
-
