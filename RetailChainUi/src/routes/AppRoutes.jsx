@@ -13,7 +13,8 @@ import StoreStaffPage from "../pages/StoreDashboard/StoreStaffPage";
 
 // Product
 import ProductPage from "../pages/Product/ProductPage";
-import ProductChainView from "../pages/Product/ProductDetail/ProductChainView";
+import ProductDetailPage from "../pages/Product/ProductDetailPage";
+import ProductEditPage from "../pages/Product/ProductEditPage";
 
 // Inventory
 import InventoryPage from "../pages/Inventory/InventoryPage";
@@ -40,10 +41,30 @@ import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssign
 import WarehouseListPage from "../pages/Warehouse/WarehouseListPage";
 // import WarehouseDetail from "../pages/Warehouse/WarehouseDetail"; // Unused or replace if you have detail page
 
+// Auth
+import LoginPage from "../pages/Auth/LoginPage/LoginPage";
+import RegisterPage from "../pages/Auth/RegisterPage/RegisterPage";
+
+// Role & Permission
+import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
+
+// User Management
+import UserManagementPage from "../pages/UserManagement/UserManagementPage";
+
+// Route Protection
+import ProtectedRoute from "../components/common/ProtectedRoute/ProtectedRoute";
+
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      <Route element={
+        <ProtectedRoute>
+          <MainLayout />
+        </ProtectedRoute>
+      }>
         {/* Dashboard & Reports */}
         <Route path="/" element={<DashboardPage />} />
         <Route path="/reports" element={<ExecutiveReport />} />
@@ -60,7 +81,9 @@ const AppRoutes = () => {
 
         {/* Product Module */}
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/products/:id" element={<ProductChainView />} />
+        <Route path="/products/create" element={<ProductEditPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="/products/:slug/edit" element={<ProductEditPage />} />
 
         {/* Inventory Module */}
         <Route path="/inventory" element={<InventoryPage />} />
@@ -82,6 +105,12 @@ const AppRoutes = () => {
         <Route path="/staff/attendance" element={<StaffAttendance />} />
         <Route path="/staff/profile/:id" element={<StaffProfile />} />
         <Route path="/staff/resource" element={<ResourceAssignment />} />
+
+        {/* User Management (Super Admin, Regional Admin, Store Manager) */}
+        <Route path="/users" element={<UserManagementPage />} />
+
+        {/* Role & Permission Management (Super Admin) */}
+        <Route path="/roles" element={<RolePermissionPage />} />
       </Route>
     </Routes>
   );

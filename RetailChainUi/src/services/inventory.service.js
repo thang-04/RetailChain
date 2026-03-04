@@ -1,4 +1,5 @@
 import { axiosPrivate } from './api/axiosClient';
+import productService from './product.service';
 
 const inventoryService = {
   // --- Real Backend APIs ---
@@ -8,6 +9,11 @@ const inventoryService = {
 
   getAllWarehouses: async () => {
     return axiosPrivate.get('/inventory/warehouse');
+  },
+
+  // Wrapper for product service
+  getAllProducts: async () => {
+    return productService.getAllProducts();
   },
 
   updateWarehouse: async (id, data) => {
@@ -20,6 +26,10 @@ const inventoryService = {
 
   getStockByWarehouse: async (warehouseId) => {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
+  },
+
+  getStockByProduct: async (productId) => {
+    return axiosPrivate.get(`/inventory/product/${productId}`);
   },
 
   importStock: async (data) => {
@@ -125,9 +135,7 @@ const inventoryService = {
 
   createTransfer: async (data) => {
     return inventoryService.transferStock(data);
-  }
-
-  ,
+  },
 
   /**
    * Lấy tổng quan tồn kho phục vụ dashboard Inventory.

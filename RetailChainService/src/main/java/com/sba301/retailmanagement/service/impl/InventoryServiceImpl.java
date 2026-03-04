@@ -35,6 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -46,29 +47,19 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse warehouse = new Warehouse();
         warehouse.setCode(request.getCode());
         warehouse.setName(request.getName());
-        warehouse.setWarehouseType(request.getWarehouseType());
-        warehouse.setStatus(1);
+        warehouse.setAddress(request.getAddress());
+        warehouse.setProvince(request.getProvince());
+        warehouse.setDistrict(request.getDistrict());
+        warehouse.setWard(request.getWard());
+        warehouse.setContactName(request.getContactName());
+        warehouse.setContactPhone(request.getContactPhone());
+        warehouse.setDescription(request.getDescription());
+        warehouse.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : 0);
+        warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
 
-        if (request.getWarehouseType() == 2 && request.getStoreId() != null) {
-            warehouse.setStoreId(request.getStoreId());
-        }
-
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
-
-        if (request.getWarehouseType() == 2 && request.getStoreId() != null) {
-            StoreWarehouse storeWarehouse = new StoreWarehouse();
-            StoreWarehouseId id = new StoreWarehouseId(request.getStoreId(), savedWarehouse.getId());
-            storeWarehouse.setId(id);
-
-            Store storeProxy = new Store();
-            storeProxy.setId(request.getStoreId());
-            storeWarehouse.setStore(storeProxy);
-            storeWarehouse.setWarehouse(savedWarehouse);
-
-            storeWarehouseRepository.save(storeWarehouse);
-        }
 
         return mapToWarehouseResponse(savedWarehouse);
     }
@@ -107,15 +98,36 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public List<InventoryStockResponse> getStockByProduct(Long productId) {
+        List<InventoryStock> stocks = inventoryStockRepository.findByVariant_ProductId(productId);
+        return stocks.stream().map(stock -> {
+            String sku = "UNKNOWN";
+            String productName = "UNKNOWN";
+
+            if (stock.getVariant() != null) {
+                sku = stock.getVariant().getSku();
+                if (stock.getVariant().getProduct() != null) {
+                    productName = stock.getVariant().getProduct().getName();
+                }
+            }
+
+            return InventoryStockResponse.builder()
+                    .warehouseId(stock.getId().getWarehouseId())
+                    .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
+                    .variantId(stock.getId().getVariantId())
+                    .sku(sku)
+                    .productName(productName)
+                    .quantity(stock.getQuantity())
+                    .lastUpdated(stock.getUpdatedAt())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void importStock(StockRequest request) {
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-        // Validate: Only Main Warehouse (Type 1) can import stock
-        if (warehouse.getWarehouseType() != 1) {
-            throw new RuntimeException("Import is only allowed for Central Warehouse (Main Warehouse)");
-        }
 
         if (request.getSupplierId() != null && !supplierRepository.existsById(request.getSupplierId())) {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
@@ -175,6 +187,14 @@ public class InventoryServiceImpl implements InventoryService {
         // Update Total Amount
         savedDoc.setTotalAmount(totalAmount);
         inventoryDocumentRepository.save(savedDoc);
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -229,6 +249,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.OUT, itemReq.getQuantity(),
                     newQuantity);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -239,14 +267,16 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse targetWarehouse = warehouseRepository.findById(request.getTargetWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
 
-        // Validate: Source must be Central Warehouse (Type 1)
-        if (sourceWarehouse.getWarehouseType() != 1) {
-            throw new RuntimeException("Transfer source must be Central Warehouse");
+        // Validate: Source must NOT be linked to any store (Central Warehouse)
+        boolean sourceHasStore = storeWarehouseRepository.existsByWarehouseId(sourceWarehouse.getId());
+        if (sourceHasStore) {
+            throw new RuntimeException("Transfer source must be a Central Warehouse (not linked to any store)");
         }
 
-        // Validate: Target must be Store Warehouse (Type 2)
-        if (targetWarehouse.getWarehouseType() != 2) {
-            throw new RuntimeException("Transfer destination must be a Store Warehouse");
+        // Validate: Target MUST be linked to a store (Store Warehouse)
+        boolean targetHasStore = storeWarehouseRepository.existsByWarehouseId(targetWarehouse.getId());
+        if (!targetHasStore) {
+            throw new RuntimeException("Transfer destination must be a Store Warehouse (linked to a store)");
         }
 
         if (sourceWarehouse.getId().equals(targetWarehouse.getId())) {
@@ -317,6 +347,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, targetWarehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
                     targetNewQty);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
@@ -339,13 +377,44 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryHistoryRepository.save(history);
     }
 
+    private void updateProductStatus(Long productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null)
+            return;
+
+        Integer totalQty = inventoryStockRepository.getTotalQuantityByProductId(productId);
+
+        if (totalQty <= 0) {
+            // Nếu hết hàng và đang ở trạng thái Hoạt động (1) -> Chuyển sang Hết hàng (2)
+            if (product.getStatus() == 1) {
+                product.setStatus(2);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        } else {
+            // Nếu có hàng và đang ở trạng thái Hết hàng (2) -> Quay lại Hoạt động (1)
+            // Nếu trạng thái đang là 0 (Tắt thủ công), giữ nguyên không đổi.
+            if (product.getStatus() == 2) {
+                product.setStatus(1);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        }
+    }
+
     private WarehouseResponse mapToWarehouseResponse(Warehouse warehouse) {
         return WarehouseResponse.builder()
                 .id(warehouse.getId())
                 .code(warehouse.getCode())
                 .name(warehouse.getName())
-                .warehouseType(warehouse.getWarehouseType())
-                .storeId(warehouse.getStoreId())
+                .address(warehouse.getAddress())
+                .province(warehouse.getProvince())
+                .district(warehouse.getDistrict())
+                .ward(warehouse.getWard())
+                .contactName(warehouse.getContactName())
+                .contactPhone(warehouse.getContactPhone())
+                .description(warehouse.getDescription())
+                .isDefault(warehouse.getIsDefault())
                 .status(warehouse.getStatus())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())
@@ -369,6 +438,42 @@ public class InventoryServiceImpl implements InventoryService {
             warehouse.setName(request.getName());
         }
 
+        if (request.getAddress() != null) {
+            warehouse.setAddress(request.getAddress());
+        }
+
+        if (request.getProvince() != null) {
+            warehouse.setProvince(request.getProvince());
+        }
+
+        if (request.getDistrict() != null) {
+            warehouse.setDistrict(request.getDistrict());
+        }
+
+        if (request.getWard() != null) {
+            warehouse.setWard(request.getWard());
+        }
+
+        if (request.getContactName() != null) {
+            warehouse.setContactName(request.getContactName());
+        }
+
+        if (request.getContactPhone() != null) {
+            warehouse.setContactPhone(request.getContactPhone());
+        }
+
+        if (request.getDescription() != null) {
+            warehouse.setDescription(request.getDescription());
+        }
+
+        if (request.getIsDefault() != null) {
+            warehouse.setIsDefault(request.getIsDefault());
+        }
+
+        if (request.getStatus() != null) {
+            warehouse.setStatus(request.getStatus());
+        }
+
         warehouse.setUpdatedAt(LocalDateTime.now());
         Warehouse saved = warehouseRepository.save(warehouse);
         return mapToWarehouseResponse(saved);
@@ -379,11 +484,11 @@ public class InventoryServiceImpl implements InventoryService {
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        
+
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
 
         try {
-            storeWarehouseRepository.deleteByWarehouseId(id); 
+            storeWarehouseRepository.deleteByWarehouseId(id);
         } catch (Exception e) {
             // Ignore if method missing, assume handled or empty
         }
@@ -467,8 +572,7 @@ public class InventoryServiceImpl implements InventoryService {
 
             if (stock.getVariant() != null && stock.getVariant().getPrice() != null) {
                 totalValue = totalValue.add(
-                        stock.getVariant().getPrice().multiply(java.math.BigDecimal.valueOf(quantity))
-                );
+                        stock.getVariant().getPrice().multiply(java.math.BigDecimal.valueOf(quantity)));
             }
 
             // Đánh dấu kho "cần chú ý" nếu có bất kỳ mặt hàng nào tồn dưới 10
@@ -477,7 +581,8 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
 
-        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI demo
+        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI
+        // demo
         double growthPercentage = 2.4d;
 
         return InventoryOverviewResponse.builder()
