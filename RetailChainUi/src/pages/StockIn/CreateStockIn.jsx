@@ -124,7 +124,7 @@ const CreateStockIn = () => {
             navigate('/stock-in');
         } catch (error) {
             console.error("Failed to create stock in:", error);
-             // TODO: Replace with a proper toast notification
+            // TODO: Replace with a proper toast notification
             alert("Đã có lỗi xảy ra khi tạo phiếu nhập. Vui lòng thử lại.");
         } finally {
             setSubmitting(false);
@@ -259,7 +259,7 @@ const CreateStockIn = () => {
                             <Link to="/stock-in">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                             <Button onClick={handleSubmit} disabled={submitting || isFormInvalid}>
+                            <Button onClick={handleSubmit} disabled={submitting || isFormInvalid}>
                                 {submitting ? "Đang xử lý..." : "Lưu Phiếu Nhập"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>
