@@ -69,15 +69,15 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`} alt={user.email} />
-                  <AvatarFallback>{user.email.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email || ''}`} alt={user.email || ''} />
+                  <AvatarFallback>{user.email ? user.email.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.fullName || user.email}</p>
+                  <p className="text-sm font-medium leading-none">{user.fullName || user.email || 'User'}</p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.roles && user.roles.length > 0
                       ? (typeof user.roles[0] === 'string' ? user.roles[0] : user.roles[0].name || 'User')
@@ -88,7 +88,7 @@ const Header = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to={`/staff/profile/${user.id}`}>
+                <Link to={user.id ? `/staff/profile/${user.id}` : '#'}>
                   Profile
                 </Link>
               </DropdownMenuItem>

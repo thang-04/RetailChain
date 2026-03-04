@@ -2,12 +2,14 @@ package com.sba301.retailmanagement.config;
 
 import com.sba301.retailmanagement.entity.Permission;
 import com.sba301.retailmanagement.entity.Role;
+import com.sba301.retailmanagement.entity.Store;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.enums.PermissionName;
 import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.enums.Region;
 import com.sba301.retailmanagement.repository.PermissionRepository;
 import com.sba301.retailmanagement.repository.RoleRepository;
+import com.sba301.retailmanagement.repository.StoreRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
+    private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -286,6 +289,8 @@ public class DataSeeder implements CommandLineRunner {
         String email = "storemanager@retailchain.com";
 
         if (!userRepository.existsByUsername(username)) {
+            Store store = getOrCreateDefaultStore();
+
             User user = User.builder()
                     .username(username)
                     .email(email)
@@ -295,13 +300,13 @@ public class DataSeeder implements CommandLineRunner {
                     .status(1)
                     .region(null)
                     .warehouseId(null)
-                    .storeId(1L)
+                    .storeId(store.getId())
                     .createdByUserId(createdBy != null ? createdBy.getId() : null)
                     .roles(Set.of(storeManagerRole))
                     .build();
 
             userRepository.save(user);
-            log.info("Created demo Store Manager: {} (storeId=1)", username);
+            log.info("Created demo Store Manager: {} (storeId={})", username, store.getId());
         } else {
             log.info("Store Manager already exists: {}", username);
         }
@@ -317,6 +322,8 @@ public class DataSeeder implements CommandLineRunner {
         String email = "staff@retailchain.com";
 
         if (!userRepository.existsByUsername(username)) {
+            Store store = getOrCreateDefaultStore();
+
             User user = User.builder()
                     .username(username)
                     .email(email)
@@ -326,16 +333,36 @@ public class DataSeeder implements CommandLineRunner {
                     .status(1)
                     .region(null)
                     .warehouseId(null)
-                    .storeId(1L)
+                    .storeId(store.getId())
                     .createdByUserId(createdBy != null ? createdBy.getId() : null)
                     .roles(Set.of(staffRole))
                     .build();
 
             userRepository.save(user);
-            log.info("Created demo Staff: {} (storeId=1)", username);
+            log.info("Created demo Staff: {} (storeId={})", username, store.getId());
         } else {
             log.info("Staff already exists: {}", username);
         }
+    }
+
+    /**
+     * Lấy store có sẵn hoặc tạo mới nếu chưa có
+     * Dùng để gán cho Store Manager và Staff
+     */
+    private Store getOrCreateDefaultStore() {
+        return storeRepository.findAll().stream().findFirst()
+                .orElseGet(() -> {
+                    log.info("No store found in database, creating default store...");
+                    Store store = Store.builder()
+                            .code("DEMO001")
+                            .name("Cửa Hàng Demo")
+                            .address("Địa chỉ mặc định")
+                            .status(1)
+                            .build();
+                    Store saved = storeRepository.save(store);
+                    log.info("Created default store: {} (id={})", saved.getName(), saved.getId());
+                    return saved;
+                });
     }
 
     /**
