@@ -9,10 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, Long> {
-    Optional<ProductVariant> findBySku(String sku);
     
-    /**
-     * Tìm tất cả variants theo productId - tránh N+1 query
-     */
+    Optional<ProductVariant> findBySku(String sku);
+
     List<ProductVariant> findByProductId(Long productId);
 }

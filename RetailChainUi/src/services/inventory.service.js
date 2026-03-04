@@ -28,6 +28,10 @@ const inventoryService = {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
   },
 
+  getStockByProduct: async (productId) => {
+    return axiosPrivate.get(`/inventory/product/${productId}`);
+  },
+
   importStock: async (data) => {
     // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
     return axiosPrivate.post('/inventory/import', data);

@@ -15,7 +15,7 @@ import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping(value = "/api/user", produces = "application/json")
 public class UserController {
 
     @Autowired
@@ -35,7 +35,8 @@ public class UserController {
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "User profile retrieved successfully", userResponse);
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving user profile: " + e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving user profile: " + e.getMessage());
         }
     }
 }

@@ -8,6 +8,7 @@ public class ProductRequest {
     private String code;
     private String name;
     private String description;
-    private String gender;
-    private Integer status;
+    private String image;
+    private String gender; // MEN, WOMEN, UNISEX, KIDS
+    private Integer status; // 1 = Active, 0 = Inactive
 }

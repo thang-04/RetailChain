@@ -4,21 +4,23 @@ import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
+import com.sba301.retailmanagement.entity.ProductCategory;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.enums.Gender;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
+import com.sba301.retailmanagement.repository.ProductCategoryRepository;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
 import com.sba301.retailmanagement.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,117 +30,139 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
     @Override
     public List<ProductResponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
+
+        List<ProductVariant> allVariants = productVariantRepository.findAll();
+        Map<Long, List<ProductVariant>> variantsByProduct = allVariants.stream()
+                .collect(Collectors.groupingBy(ProductVariant::getProductId));
+
         return products.stream()
-                .map(this::mapToProductResponseWithVariants)
+                .map(product -> mapToResponse(product,
+                        variantsByProduct.getOrDefault(product.getId(), Collections.emptyList())))
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Lấy danh sách sản phẩm có phân trang
-     */
-    public Page<ProductResponse> getAllProductsPaged(int page, int size) {
-        String prefix = "[getAllProductsPaged]";
-        log.info("{}|START|page={}, size={}", prefix, page, size);
-        try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<Product> productsPage = productRepository.findAll(pageable);
-            Page<ProductResponse> response = productsPage.map(this::mapToProductResponseWithVariants);
-            log.info("{}|END|totalElements={}", prefix, response.getTotalElements());
-            return response;
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            throw new RuntimeException("Error retrieving products: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public ProductResponse getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        return mapToProductResponseWithVariants(product);
     }
 
     @Override
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
-        if (productRepository.existsByCode(request.getCode())) {
-            throw new IllegalArgumentException("Product code already exists");
-        }
         Product product = new Product();
-        mapRequestToProduct(request, product);
+        mapRequestToEntity(request, product);
+
+        if (request.getCategoryId() != null) {
+            String newCode = generateProductCode(request.getCategoryId());
+            product.setCode(newCode);
+        } else {
+            throw new IllegalArgumentException("Category ID is required to generate product code");
+        }
+
+        product.setStatus(1);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
-        Product saved = productRepository.save(product);
-        return mapToProductResponseWithVariants(saved);
+
+        Product savedProduct = productRepository.save(product);
+        return mapToResponse(savedProduct, Collections.emptyList());
     }
 
     @Override
     @Transactional
-    public ProductResponse updateProduct(Long id, ProductRequest request) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        
-        if (request.getCode() != null && !request.getCode().equals(product.getCode())) {
-             if (productRepository.existsByCode(request.getCode())) {
-                throw new IllegalArgumentException("Product code already exists");
+    public ProductResponse updateProduct(String slug, ProductRequest request) {
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with slug: " + slug));
+
+        mapRequestToEntity(request, product);
+        product.setUpdatedAt(LocalDateTime.now());
+
+        Product savedProduct = productRepository.save(product);
+
+        List<ProductVariant> variants = productVariantRepository.findByProductId(savedProduct.getId());
+        return mapToResponse(savedProduct, variants);
+    }
+
+    @Override
+    public ProductResponse getProductBySlug(String slug) {
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with slug: " + slug));
+
+        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
+        return mapToResponse(product, variants);
+    }
+
+    @Override
+    public String getNextProductCode(Long categoryId) {
+        return generateProductCode(categoryId);
+    }
+
+    @Override
+    public List<ProductCategory> getAllCategories() {
+        return productCategoryRepository.findAll();
+    }
+
+    private String generateProductCode(Long categoryId) {
+        ProductCategory category = productCategoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        String prefix = category.getName().toUpperCase().replaceAll("[^A-Z0-9]", "");
+        if (prefix.isEmpty()) {
+            prefix = "PROD";
+        }
+
+        String searchPrefix = prefix + "-";
+        java.util.Optional<Product> lastProduct = productRepository
+                .findTopByCodeStartingWithOrderByCodeDesc(searchPrefix);
+
+        int nextId = 1;
+        if (lastProduct.isPresent()) {
+            String lastCode = lastProduct.get().getCode();
+            if (lastCode.length() > searchPrefix.length()) {
+                String numberPart = lastCode.substring(searchPrefix.length());
+                try {
+                    nextId = Integer.parseInt(numberPart) + 1;
+                } catch (NumberFormatException e) {
+                    nextId = 1;
+                }
             }
         }
 
-        mapRequestToProduct(request, product);
-        product.setUpdatedAt(LocalDateTime.now());
-        Product saved = productRepository.save(product);
-        return mapToProductResponseWithVariants(saved);
+        return String.format("%s-%03d", prefix, nextId);
     }
 
-    @Override
-    @Transactional
-    public void deleteProduct(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Product not found with id: " + id);
-        }
-        // JPA cascade delete sẽ tự xóa các variants liên quan
-        // nếu đã cấu hình đúng trong Entity
-        productRepository.deleteById(id);
-    }
+    private void mapRequestToEntity(ProductRequest request, Product product) {
+        product.setCategoryId(request.getCategoryId());
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setImage(request.getImage());
 
-    private void mapRequestToProduct(ProductRequest request, Product product) {
-        if (request.getCode() != null) product.setCode(request.getCode());
-        if (request.getName() != null) product.setName(request.getName());
-        if (request.getDescription() != null) product.setDescription(request.getDescription());
-        if (request.getCategoryId() != null) product.setCategoryId(request.getCategoryId());
-        if (request.getStatus() != null) product.setStatus(request.getStatus());
         if (request.getGender() != null) {
             try {
-                product.setGender(com.sba301.retailmanagement.enums.Gender.valueOf(request.getGender()));
-            } catch (Exception e) {
-                // Ignore invalid enum
+                product.setGender(Gender.valueOf(request.getGender().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid gender value: {}", request.getGender());
             }
+        }
+
+        if (request.getStatus() != null) {
+            product.setStatus(request.getStatus());
         }
     }
 
-    /**
-     * Map Product entity sang ProductResponse - đã bao gồm variants
-     * Sử dụng query có điều kiện để tránh N+1 query
-     */
-    private ProductResponse mapToProductResponseWithVariants(Product product) {
+    private ProductResponse mapToResponse(Product product, List<ProductVariant> variants) {
         ProductResponse dto = new ProductResponse();
         dto.setId(product.getId());
         dto.setCategoryId(product.getCategoryId());
         dto.setCode(product.getCode());
+        dto.setSlug(product.getSlug());
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
+        dto.setImage(product.getImage());
         dto.setGender(product.getGender() != null ? product.getGender().name() : null);
         dto.setStatus(product.getStatus());
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
-
-        // Fix N+1 query: Sử dụng query có điều kiện WHERE product_id = ?
-        // thay vì findAll() rồi filter trong memory
-        List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
 
         List<ProductVariantResponse> variantDtos = variants.stream().map(v -> {
             ProductVariantResponse vDto = new ProductVariantResponse();

@@ -35,6 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryDocumentItemRepository inventoryDocumentItemRepository;
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -73,6 +74,32 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public List<InventoryStockResponse> getStockByWarehouse(Long warehouseId) {
         List<InventoryStock> stocks = inventoryStockRepository.findByWarehouseId(warehouseId);
+        return stocks.stream().map(stock -> {
+            String sku = "UNKNOWN";
+            String productName = "UNKNOWN";
+
+            if (stock.getVariant() != null) {
+                sku = stock.getVariant().getSku();
+                if (stock.getVariant().getProduct() != null) {
+                    productName = stock.getVariant().getProduct().getName();
+                }
+            }
+
+            return InventoryStockResponse.builder()
+                    .warehouseId(stock.getId().getWarehouseId())
+                    .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
+                    .variantId(stock.getId().getVariantId())
+                    .sku(sku)
+                    .productName(productName)
+                    .quantity(stock.getQuantity())
+                    .lastUpdated(stock.getUpdatedAt())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryStockResponse> getStockByProduct(Long productId) {
+        List<InventoryStock> stocks = inventoryStockRepository.findByVariant_ProductId(productId);
         return stocks.stream().map(stock -> {
             String sku = "UNKNOWN";
             String productName = "UNKNOWN";
@@ -160,6 +187,14 @@ public class InventoryServiceImpl implements InventoryService {
         // Update Total Amount
         savedDoc.setTotalAmount(totalAmount);
         inventoryDocumentRepository.save(savedDoc);
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -214,6 +249,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.OUT, itemReq.getQuantity(),
                     newQuantity);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     @Override
@@ -304,6 +347,14 @@ public class InventoryServiceImpl implements InventoryService {
             createHistory(savedDoc, savedItem, targetWarehouse, variant, InventoryAction.IN, itemReq.getQuantity(),
                     targetNewQty);
         }
+
+        // Sync Product Status
+        request.getItems().stream()
+                .map(item -> productVariantRepository.findById(item.getVariantId()).map(ProductVariant::getProductId)
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .forEach(this::updateProductStatus);
     }
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
@@ -324,6 +375,31 @@ public class InventoryServiceImpl implements InventoryService {
         history.setOccurredAt(LocalDateTime.now());
 
         inventoryHistoryRepository.save(history);
+    }
+
+    private void updateProductStatus(Long productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null)
+            return;
+
+        Integer totalQty = inventoryStockRepository.getTotalQuantityByProductId(productId);
+
+        if (totalQty <= 0) {
+            // Nếu hết hàng và đang ở trạng thái Hoạt động (1) -> Chuyển sang Hết hàng (2)
+            if (product.getStatus() == 1) {
+                product.setStatus(2);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        } else {
+            // Nếu có hàng và đang ở trạng thái Hết hàng (2) -> Quay lại Hoạt động (1)
+            // Nếu trạng thái đang là 0 (Tắt thủ công), giữ nguyên không đổi.
+            if (product.getStatus() == 2) {
+                product.setStatus(1);
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+            }
+        }
     }
 
     private WarehouseResponse mapToWarehouseResponse(Warehouse warehouse) {
@@ -408,11 +484,11 @@ public class InventoryServiceImpl implements InventoryService {
     public void deleteWarehouse(Long id) {
         Warehouse warehouse = warehouseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        
+
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
 
         try {
-            storeWarehouseRepository.deleteByWarehouseId(id); 
+            storeWarehouseRepository.deleteByWarehouseId(id);
         } catch (Exception e) {
             // Ignore if method missing, assume handled or empty
         }
@@ -496,8 +572,7 @@ public class InventoryServiceImpl implements InventoryService {
 
             if (stock.getVariant() != null && stock.getVariant().getPrice() != null) {
                 totalValue = totalValue.add(
-                        stock.getVariant().getPrice().multiply(java.math.BigDecimal.valueOf(quantity))
-                );
+                        stock.getVariant().getPrice().multiply(java.math.BigDecimal.valueOf(quantity)));
             }
 
             // Đánh dấu kho "cần chú ý" nếu có bất kỳ mặt hàng nào tồn dưới 10
@@ -506,7 +581,8 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
 
-        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI demo
+        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI
+        // demo
         double growthPercentage = 2.4d;
 
         return InventoryOverviewResponse.builder()
