@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers("/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/users/**").authenticated()
-                        .anyRequest().authenticated());
+                        .anyRequest().permitAll());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
