@@ -8,6 +8,7 @@ import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.repository.RoleRepository;
+import com.sba301.retailmanagement.repository.StoreRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.security.CustomUserDetails;
 import com.sba301.retailmanagement.service.UserService;
@@ -27,10 +28,10 @@ import java.util.stream.Collectors;
  * UserService Implementation với hỗ trợ Scope-based Authorization
  * 
  * Quy tắc tạo user theo tầng:
- * - Super Admin → Tạo Regional Admin (gán region + warehouseId)
- * - Regional Admin → Tạo Store Manager (gán storeId trong vùng)
+ * - Super Admin → Tạo Store Manager (gán storeId)
  * - Store Manager → Tạo Staff (tự động gán storeId của manager)
  */
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,26 +41,26 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StoreRepository storeRepository;
 
+    // get user theo scope
     @Override
     public List<UserDTO> getAllUsers() {
         User currentUser = getCurrentUser();
         List<User> users;
-
-        // Lọc users theo scope của người đang đăng nhập
         if (isSuperAdmin(currentUser)) {
-            users = userRepository.findAll();
-        } else if (isRegionalAdmin(currentUser)) {
-            // Regional Admin chỉ thấy users trong vùng (cùng region hoặc cùng warehouseId)
-            users = userRepository.findByRegionOrWarehouseId(currentUser.getRegion(), currentUser.getWarehouseId());
+            // Super Admin sees all users EXCEPT other Super Admins
+            users = userRepository.findUsersNotHavingRole(RoleConstant.SUPER_ADMIN.name());
         } else if (isStoreManager(currentUser)) {
-            // Store Manager chỉ thấy users trong store
-            users = userRepository.findByStoreId(currentUser.getStoreId());
+            // Store Manager sees only Staff in their store
+            users = userRepository.findByStoreId(currentUser.getStoreId())
+                    .stream()
+                    .filter(this::isStaff)
+                    .collect(Collectors.toList());
         } else {
-            // Staff chỉ thấy chính mình
+            // Staff sees themselves
             users = List.of(currentUser);
         }
-
         return users.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -69,8 +70,6 @@ public class UserServiceImpl implements UserService {
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-
-        // Kiểm tra scope access
         User currentUser = getCurrentUser();
         validateScopeAccess(currentUser, user);
 
@@ -89,22 +88,25 @@ public class UserServiceImpl implements UserService {
     public UserDTO createUser(CreateUserRequest request) {
         log.info("Creating user: {}", request.getUsername());
 
-        // Validate unique constraints
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists: " + request.getUsername());
         }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists: " + request.getEmail());
         }
-
         User currentUser = getCurrentUser();
-
-        // Lấy roles được gán
         Set<Role> roles = new HashSet<>();
         if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
             roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
-            // Validate: Người tạo chỉ có thể gán role cấp dưới
             validateRoleAssignment(currentUser, roles);
+        } else {
+            if (isStoreManager(currentUser)) {
+                Role staffRole = roleRepository.findByCode(RoleConstant.STAFF.name())
+                        .orElseThrow(() -> new RuntimeException("STAFF role not found"));
+                roles.add(staffRole);
+            } else {
+                throw new RuntimeException("Role must be specified");
+            }
         }
 
         User user = User.builder()
@@ -118,12 +120,11 @@ public class UserServiceImpl implements UserService {
                 .createdByUserId(currentUser != null ? currentUser.getId() : null)
                 .build();
 
-        // Gán scope cho user mới dựa trên role
         assignScopeToUser(user, request, currentUser, roles);
 
         User savedUser = userRepository.save(user);
-        log.info("Created user {} with scope: region={}, warehouseId={}, storeId={}",
-                savedUser.getUsername(), savedUser.getRegion(), savedUser.getWarehouseId(), savedUser.getStoreId());
+        log.info("Created user {} with scope: storeId={}",
+                savedUser.getUsername(), savedUser.getStoreId());
 
         return toDTO(savedUser);
     }
@@ -134,12 +135,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Không cho xóa Super Admin
-        if (user.hasRole(RoleConstant.SUPER_ADMIN.name())) {
+        if (isSuperAdmin(user)) {
             throw new RuntimeException("Cannot delete Super Admin account");
         }
 
-        // Validate scope access
         User currentUser = getCurrentUser();
         validateScopeAccess(currentUser, user);
 
@@ -153,11 +152,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Không cho sửa Super Admin (trừ khi mình là Super Admin)
         User currentUser = getCurrentUser();
         validateScopeAccess(currentUser, user);
 
-        // Cập nhật thông tin cơ bản
         if (request.getFullName() != null) {
             user.setFullName(request.getFullName());
         }
@@ -165,20 +162,12 @@ public class UserServiceImpl implements UserService {
             user.setPhone(request.getPhoneNumber());
         }
 
-        // Cập nhật roles
         if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
             Set<Role> newRoles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
             validateRoleAssignment(currentUser, newRoles);
             user.setRoles(newRoles);
         }
 
-        // Cập nhật scope
-        if (request.getRegion() != null) {
-            user.setRegion(request.getRegion());
-        }
-        if (request.getWarehouseId() != null) {
-            user.setWarehouseId(request.getWarehouseId());
-        }
         if (request.getStoreId() != null) {
             user.setStoreId(request.getStoreId());
         }
@@ -194,15 +183,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Không cho block Super Admin
-        if (user.hasRole(RoleConstant.SUPER_ADMIN.name())) {
+        if (isSuperAdmin(user)) {
             throw new RuntimeException("Cannot block Super Admin account");
         }
 
         User currentUser = getCurrentUser();
         validateScopeAccess(currentUser, user);
 
-        // Toggle status: 1 (active) <-> 0 (blocked)
         int newStatus = (user.getStatus() != null && user.getStatus() == 1) ? 0 : 1;
         user.setStatus(newStatus);
 
@@ -211,47 +198,24 @@ public class UserServiceImpl implements UserService {
         return toDTO(savedUser);
     }
 
-    /**
-     * Gán scope cho user mới dựa trên role được gán
-     */
     private void assignScopeToUser(User user, CreateUserRequest request, User currentUser, Set<Role> roles) {
-        boolean isCreatingRegionalAdmin = roles.stream()
-                .anyMatch(r -> r.getCode().equals(RoleConstant.REGIONAL_ADMIN.name()));
         boolean isCreatingStoreManager = roles.stream()
-                .anyMatch(r -> r.getCode().equals(RoleConstant.STORE_MANAGER.name()));
-        boolean isCreatingStaff = roles.stream().anyMatch(r -> r.getCode().equals(RoleConstant.STAFF.name()));
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STORE_MANAGER.name()));
+        boolean isCreatingStaff = roles.stream().anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STAFF.name()));
 
-        if (isCreatingRegionalAdmin) {
-            // Super Admin tạo Regional Admin: Phải có region + warehouseId
-            if (request.getRegion() == null) {
-                throw new RuntimeException("Region is required when creating Regional Admin");
-            }
-            user.setRegion(request.getRegion());
-            user.setWarehouseId(request.getWarehouseId());
-            user.setStoreId(null);
-            log.debug("Assigned Regional Admin scope: region={}, warehouseId={}", request.getRegion(),
-                    request.getWarehouseId());
-
-        } else if (isCreatingStoreManager) {
-            // Regional Admin tạo Store Manager: Phải có storeId
+        if (isCreatingStoreManager) {
             if (request.getStoreId() == null) {
                 throw new RuntimeException("Store ID is required when creating Store Manager");
             }
-            // TODO: Validate storeId thuộc region của currentUser (Regional Admin)
-            user.setRegion(currentUser != null ? currentUser.getRegion() : null);
             user.setStoreId(request.getStoreId());
-            user.setWarehouseId(null);
             log.debug("Assigned Store Manager scope: storeId={}", request.getStoreId());
 
         } else if (isCreatingStaff) {
-            // Store Manager tạo Staff: Tự động kế thừa storeId
             if (currentUser != null && currentUser.getStoreId() != null) {
                 user.setStoreId(currentUser.getStoreId());
-                user.setRegion(currentUser.getRegion());
             } else if (request.getStoreId() != null) {
                 user.setStoreId(request.getStoreId());
             }
-            user.setWarehouseId(null);
             log.debug("Assigned Staff scope: storeId={} (inherited from creator)", user.getStoreId());
         }
     }
@@ -266,21 +230,17 @@ public class UserServiceImpl implements UserService {
         for (Role role : rolesToAssign) {
             String roleCode = role.getCode();
 
-            if (roleCode.equals(RoleConstant.SUPER_ADMIN.name())) {
+            if (roleCode.equalsIgnoreCase(RoleConstant.SUPER_ADMIN.name())) {
                 throw new RuntimeException("Cannot assign SUPER_ADMIN role");
             }
 
-            if (roleCode.equals(RoleConstant.REGIONAL_ADMIN.name()) && !isSuperAdmin(currentUser)) {
-                throw new RuntimeException("Only Super Admin can create Regional Admin");
+            if (roleCode.equalsIgnoreCase(RoleConstant.STORE_MANAGER.name()) &&
+                    !isSuperAdmin(currentUser)) {
+                throw new RuntimeException("Only Super Admin can create Store Manager");
             }
 
-            if (roleCode.equals(RoleConstant.STORE_MANAGER.name()) &&
-                    !isSuperAdmin(currentUser) && !isRegionalAdmin(currentUser)) {
-                throw new RuntimeException("Only Super Admin or Regional Admin can create Store Manager");
-            }
-
-            if (roleCode.equals(RoleConstant.STAFF.name()) &&
-                    !isSuperAdmin(currentUser) && !isRegionalAdmin(currentUser) && !isStoreManager(currentUser)) {
+            if (roleCode.equalsIgnoreCase(RoleConstant.STAFF.name()) &&
+                    !isSuperAdmin(currentUser) && !isStoreManager(currentUser)) {
                 throw new RuntimeException("You don't have permission to create Staff");
             }
         }
@@ -294,12 +254,7 @@ public class UserServiceImpl implements UserService {
         if (currentUser == null || isSuperAdmin(currentUser))
             return;
 
-        if (isRegionalAdmin(currentUser)) {
-            // Regional Admin chỉ truy cập users trong vùng
-            if (targetUser.getRegion() != null && !targetUser.getRegion().equals(currentUser.getRegion())) {
-                throw new RuntimeException("Access denied: User not in your region");
-            }
-        } else if (isStoreManager(currentUser) || isStaff(currentUser)) {
+        if (isStoreManager(currentUser) || isStaff(currentUser)) {
             // Store Manager/Staff chỉ truy cập users trong store
             if (targetUser.getStoreId() != null && !targetUser.getStoreId().equals(currentUser.getStoreId())) {
                 throw new RuntimeException("Access denied: User not in your store");
@@ -321,19 +276,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isSuperAdmin(User user) {
-        return user != null && user.hasRole(RoleConstant.SUPER_ADMIN.name());
-    }
-
-    private boolean isRegionalAdmin(User user) {
-        return user != null && user.hasRole(RoleConstant.REGIONAL_ADMIN.name());
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.SUPER_ADMIN.name()));
     }
 
     private boolean isStoreManager(User user) {
-        return user != null && user.hasRole(RoleConstant.STORE_MANAGER.name());
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STORE_MANAGER.name()));
     }
 
     private boolean isStaff(User user) {
-        return user != null && user.hasRole(RoleConstant.STAFF.name());
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STAFF.name()));
     }
 
     private UserDTO toDTO(User user) {
@@ -341,7 +295,7 @@ public class UserServiceImpl implements UserService {
                 ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                 : List.of();
 
-        return UserDTO.builder()
+        UserDTO dto = UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
@@ -350,9 +304,16 @@ public class UserServiceImpl implements UserService {
                 .status(user.getStatus())
                 .roles(roleNames)
                 // Scope info
-                .region(user.getRegion())
-                .warehouseId(user.getWarehouseId())
                 .storeId(user.getStoreId())
                 .build();
+                
+        if (user.getStoreId() != null) {
+            storeRepository.findById(user.getStoreId()).ifPresent(store -> {
+                dto.setStoreCode(store.getCode());
+                dto.setStoreName(store.getName());
+            });
+        }
+        
+        return dto;
     }
 }

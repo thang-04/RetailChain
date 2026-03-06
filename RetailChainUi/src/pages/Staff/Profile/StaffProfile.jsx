@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import authService from '../../../services/auth.service';
+import { userService } from '../../../services/user.service';
 
 const StaffProfile = () => {
     const { id } = useParams();
@@ -17,10 +17,8 @@ const StaffProfile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                // If it's the current user's profile, fetch 'me'. 
-                // Or you could fetch by ID if your backend exposes /user/{id} 
-                // Currently just using getCurrentUser for demonstration
-                const response = await authService.getCurrentUser();
+                // TODO: Replace with proper user fetch by ID when auth is re-implemented
+                const response = await userService.getUserById(id);
                 if (response && response.data) {
                     setStaff({
                         ...response.data,

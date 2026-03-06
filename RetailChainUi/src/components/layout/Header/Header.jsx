@@ -7,21 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import useAuth from "../../../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import useAuth from "../../../contexts/AuthContext/useAuth";
 
 const Header = () => {
   const { user, logout } = useAuth();
-
   return (
     <header className="h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 z-10 flex-shrink-0">
       {/* Left: Context Switcher */}
@@ -64,49 +54,14 @@ const Header = () => {
           <span className="material-symbols-outlined">settings</span>
         </Button>
 
-        {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email || ''}`} alt={user.email || ''} />
-                  <AvatarFallback>{user.email ? user.email.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.fullName || user.email || 'User'}</p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user.roles && user.roles.length > 0
-                      ? (typeof user.roles[0] === 'string' ? user.roles[0] : user.roles[0].name || 'User')
-                        .replace('_', ' ')
-                      : "User"}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={user.id ? `/staff/profile/${user.id}` : '#'}>
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={logout}>
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link to="/login">Login</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/register">Register</Link>
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 border-l pl-4 ml-2">
+          <span className="text-sm font-medium hidden md:block">{user?.fullName || user?.username || 'User'}</span>
+          <Avatar className="h-8 w-8 cursor-pointer" onClick={() => {
+            if (window.confirm("Are you sure you want to logout?")) logout();
+          }} title="Click to logout">
+            <AvatarFallback>{(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </div>
       </div>
     </header>
   );

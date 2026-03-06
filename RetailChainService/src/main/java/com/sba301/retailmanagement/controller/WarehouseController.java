@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -21,6 +23,7 @@ public class WarehouseController {
 
     private final InventoryService inventoryService;
 
+    @PreAuthorize("hasAuthority('" + WAREHOUSE_CREATE + "')")
     @PostMapping
     public String createWarehouse(@RequestBody WarehouseRequest request) {
         String prefix = "[createWarehouse]";
@@ -35,6 +38,7 @@ public class WarehouseController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + WAREHOUSE_VIEW + "')")
     @GetMapping
     public String getAllWarehouses() {
         String prefix = "[getAllWarehouses]";
@@ -49,6 +53,7 @@ public class WarehouseController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + WAREHOUSE_UPDATE + "')")
     @PutMapping("/{id}")
     public String updateWarehouse(@PathVariable Long id, @RequestBody WarehouseRequest request) {
         String prefix = "[updateWarehouse]|id=" + id;
@@ -63,6 +68,7 @@ public class WarehouseController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + WAREHOUSE_DELETE + "')")
     @DeleteMapping("/{id}")
     public String deleteWarehouse(@PathVariable Long id) {
         String prefix = "[deleteWarehouse]|id=" + id;

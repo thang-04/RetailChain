@@ -11,6 +11,7 @@ import com.sba301.retailmanagement.entity.InventoryStock;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.entity.Product;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.mapper.StoreMapper;
 import com.sba301.retailmanagement.repository.StoreRepository;
@@ -24,12 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +52,17 @@ public class StoreServiceImpl implements StoreService {
         String prefix = "[getAllStores]";
         log.info("{}|START", prefix);
         try {
-            List<Store> stores = storeRepository.findAll();
+            User currentUser = getCurrentUser();
+            List<Store> stores;
+
+            if (currentUser != null && !isSuperAdmin(currentUser) && currentUser.getStoreId() != null) {
+                // If not Super Admin, return only their own store
+                Optional<Store> myStore = storeRepository.findById(currentUser.getStoreId());
+                stores = myStore.map(Collections::singletonList).orElse(Collections.emptyList());
+            } else {
+                stores = storeRepository.findAll();
+            }
+
             List<StoreResponse> response = stores.stream().map(storeMapper::toResponse).toList();
             log.info("{}|END|size={}", prefix, response.size());
             return response;
@@ -65,11 +79,22 @@ public class StoreServiceImpl implements StoreService {
         String prefix = "[getAllStoresPaged]";
         log.info("{}|START|page={}, size={}", prefix, page, size);
         try {
+            User currentUser = getCurrentUser();
             Pageable pageable = PageRequest.of(page, size);
-            Page<Store> storesPage = storeRepository.findAll(pageable);
+            Page<Store> storesPage;
+
+            if (currentUser != null && !isSuperAdmin(currentUser) && currentUser.getStoreId() != null) {
+                // Return only their own store
+                Optional<Store> myStore = storeRepository.findById(currentUser.getStoreId());
+                List<Store> storeList = myStore.map(Collections::singletonList).orElse(Collections.emptyList());
+                storesPage = new org.springframework.data.domain.PageImpl<>(storeList, pageable, storeList.size());
+            } else {
+                storesPage = storeRepository.findAll(pageable);
+            }
+
             Page<StoreResponse> response = storesPage.map(storeMapper::toResponse);
-            log.info("{}|END|totalElements={}, totalPages={}", 
-                prefix, response.getTotalElements(), response.getTotalPages());
+            log.info("{}|END|totalElements={}, totalPages={}",
+                    prefix, response.getTotalElements(), response.getTotalPages());
             return response;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
@@ -327,9 +352,9 @@ public class StoreServiceImpl implements StoreService {
                             .phone(user.getPhone())
                             .email(user.getEmail())
                             .status(user.getStatus())
-                            .roleName(user.getRoles() != null && !user.getRoles().isEmpty() 
-                                ? user.getRoles().iterator().next().getName() 
-                                : "Staff")
+                            .roleName(user.getRoles() != null && !user.getRoles().isEmpty()
+                                    ? user.getRoles().iterator().next().getName()
+                                    : "Staff")
                             .createdAt(user.getCreatedAt())
                             .build())
                     .toList();
@@ -342,5 +367,23 @@ public class StoreServiceImpl implements StoreService {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             throw new RuntimeException("Error retrieving staff: " + e.getMessage());
         }
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String email = ((UserDetails) principal).getUsername();
+                return userRepository.findByEmail(email).orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("No authenticated user found");
+        }
+        return null;
+    }
+
+    private boolean isSuperAdmin(User user) {
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getCode().equals(RoleConstant.SUPER_ADMIN.name()));
     }
 }

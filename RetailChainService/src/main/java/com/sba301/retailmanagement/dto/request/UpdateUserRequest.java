@@ -1,6 +1,5 @@
 package com.sba301.retailmanagement.dto.request;
 
-import com.sba301.retailmanagement.enums.Region;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,16 +20,7 @@ public class UpdateUserRequest {
 
     private String phoneNumber;
 
-    /**
-     * Role IDs để gán cho user (thay thế toàn bộ roles hiện tại)
-     */
     private Set<Long> roleIds;
-
-    // ==================== SCOPE FIELDS ====================
-
-    private Region region;
-
-    private Long warehouseId;
 
     private Long storeId;
 }

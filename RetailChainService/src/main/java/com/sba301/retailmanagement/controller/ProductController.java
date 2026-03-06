@@ -24,6 +24,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -45,6 +47,7 @@ public class ProductController {
 
     // --- File Upload Logic ---
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @PostMapping("/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file) {
         try {
@@ -77,6 +80,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping("/uploads/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         try {
@@ -96,6 +100,7 @@ public class ProductController {
 
     // --- Product Endpoints ---
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping
     public String getAllProducts() {
         try {
@@ -107,6 +112,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping("/{slug}")
     public String getProductBySlug(@PathVariable String slug) {
         try {
@@ -118,6 +124,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_CREATE + "')")
     @PostMapping
     public String createProduct(@RequestBody ProductRequest request) {
         try {
@@ -129,6 +136,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_UPDATE + "')")
     @PutMapping("/{slug}")
     public String updateProduct(@PathVariable String slug, @RequestBody ProductRequest request) {
         try {
@@ -140,6 +148,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping("/next-code")
     public String getNextCode(@RequestParam Long categoryId) {
         try {
@@ -151,6 +160,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping("/categories")
     public String getCategories() {
         try {

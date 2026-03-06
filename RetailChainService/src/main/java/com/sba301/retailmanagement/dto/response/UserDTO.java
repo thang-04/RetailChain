@@ -1,7 +1,6 @@
 package com.sba301.retailmanagement.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sba301.retailmanagement.enums.Region;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,37 +28,10 @@ public class UserDTO implements Serializable {
     String phoneNumber;
     String avatarUrl;
     Integer status;
-
-    // Roles
     List<String> roles;
-
-    // ==================== SCOPE INFO ====================
-    /**
-     * Region cho Regional Admin
-     */
-    Region region;
-
-    /**
-     * Warehouse ID - Kho tổng vùng (cho Regional Admin)
-     */
-    Long warehouseId;
-
-    /**
-     * Store ID - Cửa hàng (cho Store Manager/Staff)
-     */
     Long storeId;
-
-    /**
-     * Tên cửa hàng (để hiển thị)
-     */
+    String storeCode;
     String storeName;
-
-    /**
-     * Tên kho (để hiển thị)
-     */
-    String warehouseName;
-
-    // ==================== AUDIT INFO ====================
     LocalDateTime createdDate;
     LocalDateTime modifiedDate;
     String createdBy;

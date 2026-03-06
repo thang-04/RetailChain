@@ -3,7 +3,7 @@ import { axiosPublic, axiosPrivate } from './api/axiosClient';
 const storeService = {
   getAllStores: async () => {
     try {
-      const response = await axiosPublic.get('/stores');
+      const response = await axiosPrivate.get('/stores');
       if (response && response.data) {
         return response.data.map(store => ({
           id: store.code,
@@ -26,7 +26,7 @@ const storeService = {
 
   getStoreById: async (slug) => {
     try {
-      const response = await axiosPublic.get(`/stores/${slug}`);
+      const response = await axiosPrivate.get(`/stores/${slug}`);
       if (response && response.data) {
         const storeData = response.data;
 
@@ -94,7 +94,7 @@ const storeService = {
 
   getStoreStaff: async (storeId) => {
     // Note: This endpoint needs verification on the backend
-    return axiosPublic.get('/stores/' + storeId + '/staff').then(res => res.data);
+    return axiosPrivate.get('/stores/' + storeId + '/staff').then(res => res.data);
   },
 
   updateStore: async (id, data) => {

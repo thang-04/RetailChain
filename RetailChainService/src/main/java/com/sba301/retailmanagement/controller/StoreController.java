@@ -8,8 +8,9 @@ import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -19,6 +20,7 @@ public class StoreController {
 
     private final StoreService storeService;
 
+    @PreAuthorize("hasAuthority('" + STORE_VIEW + "')")
     @GetMapping
     public String getAllStores() {
         String prefix = "[getAllStores]";
@@ -37,6 +39,7 @@ public class StoreController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + STORE_VIEW + "')")
     @GetMapping("/{slug}")
     public String getStoreBySlug(@PathVariable String slug) {
         String prefix = "[getStoreBySlug]|slug=" + slug;
@@ -56,6 +59,7 @@ public class StoreController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + STORE_CREATE + "')")
     @PostMapping
     public String createStore(@RequestBody CreateStoreRequest request) {
         String prefix = "[createStore]|code=" + (request != null ? request.getCode() : "null");
@@ -74,6 +78,7 @@ public class StoreController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + STORE_UPDATE + "')")
     @PutMapping("/{slug}")
     public String updateStore(@PathVariable String slug,
             @RequestBody UpdateStoreRequest request) {
@@ -93,10 +98,12 @@ public class StoreController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + STORE_VIEW + "')")
     @GetMapping("/{id}/staff")
     public String getStoreStaff(@PathVariable Long id) {
         // Mock response for now as User/Staff structure is complex
         // In real impl, query User repo by storeId
-        return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success", java.util.Collections.emptyList());
+        return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success",
+                java.util.Collections.emptyList());
     }
 }

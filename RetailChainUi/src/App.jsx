@@ -1,17 +1,17 @@
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
 import { Sonner } from "./components/ui/sonner";
-import { AuthProvider } from "./context/AuthContext/AuthProvider";
+import { AuthProvider } from "./contexts/AuthContext/AuthProvider";
 import './App.css'
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <AuthProvider>
+      <BrowserRouter>
         <AppRoutes />
         <Sonner />
-      </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

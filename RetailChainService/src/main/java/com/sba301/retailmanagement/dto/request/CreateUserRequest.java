@@ -1,6 +1,5 @@
 package com.sba301.retailmanagement.dto.request;
 
-import com.sba301.retailmanagement.enums.Region;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -15,8 +14,8 @@ import java.util.Set;
  * DTO cho việc tạo User mới
  * 
  * Quy tắc tạo theo tầng:
- * - Super Admin tạo Regional Admin: Phải có region + warehouseId
- * - Regional Admin tạo Store Manager: Phải có storeId (trong vùng của mình)
+ * Quy tắc tạo theo tầng:
+ * - Super Admin tạo Store Manager: Phải gán storeId
  * - Store Manager tạo Staff: storeId tự động kế thừa, không cần truyền
  */
 @Data
@@ -44,30 +43,7 @@ public class CreateUserRequest {
 
     private String avatarUrl;
 
-    /**
-     * Role IDs để gán cho user
-     * Validate: Người tạo chỉ có thể gán role cấp dưới của mình
-     */
     private Set<Long> roleIds;
 
-    // ==================== SCOPE FIELDS ====================
-
-    /**
-     * Region cho Regional Admin
-     * Bắt buộc khi tạo Regional Admin
-     */
-    private Region region;
-
-    /**
-     * Warehouse ID - Kho tổng vùng
-     * Bắt buộc khi tạo Regional Admin
-     */
-    private Long warehouseId;
-
-    /**
-     * Store ID - Cửa hàng cụ thể
-     * Bắt buộc khi tạo Store Manager
-     * Optional khi tạo Staff (tự động kế thừa từ người tạo)
-     */
     private Long storeId;
 }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -23,6 +25,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/stock/{warehouseId}")
     public String getStockByWarehouse(@PathVariable Long warehouseId) {
         String prefix = "[getStockByWarehouse]|warehouseId=" + warehouseId;
@@ -37,6 +40,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/product/{productId}")
     public String getStockByProduct(@PathVariable Long productId) {
         String prefix = "[getStockByProduct]|productId=" + productId;
@@ -51,6 +55,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/import")
     public String importStock(@RequestBody StockRequest request) {
         String prefix = "[importStock]";
@@ -65,6 +70,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/export")
     public String exportStock(@RequestBody StockRequest request) {
         String prefix = "[exportStock]";
@@ -79,6 +85,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/transfer")
     public String transferStock(@RequestBody TransferRequest request) {
         String prefix = "[transferStock]";
@@ -93,6 +100,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/documents")
     public String getDocuments(@RequestParam String type) {
         String prefix = "[getDocuments]|type=" + type;
@@ -108,6 +116,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_UPDATE + "')")
     @DeleteMapping("/documents/{id}")
     public String deleteDocument(@PathVariable Long id) {
         String prefix = "[deleteDocument]|id=" + id;
@@ -122,6 +131,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/overview")
     public String getInventoryOverview() {
         String prefix = "[getInventoryOverview]";

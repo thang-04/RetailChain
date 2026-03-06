@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -27,6 +29,7 @@ public class InventoryHistoryController {
     private final UserRepository userRepository;
 
     // get list inventory history
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/record")
     public String getAllInventoryHistory(
             @RequestParam(required = false) String search,
@@ -45,11 +48,13 @@ public class InventoryHistoryController {
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get all inventory history success", response);
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving inventory history: " + e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving inventory history: " + e.getMessage());
         }
     }
 
     // get inventory history detail
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/record/{id}")
     public String getInventoryHistoryDetail(@PathVariable Long id) {
         String prefix = "[getInventoryHistoryDetail]|id=" + id;
@@ -64,11 +69,13 @@ public class InventoryHistoryController {
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get inventory history detail success", response);
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving inventory history detail: " + e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving inventory history detail: " + e.getMessage());
         }
     }
 
     // ghi nhận thay đổi inventory history
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/record/add")
     public String recordInventoryHistory(
             @RequestParam Long actorUserId,
@@ -87,10 +94,12 @@ public class InventoryHistoryController {
             return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Ghi nhận lịch sử tồn kho thành công");
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Lỗi khi ghi nhận lịch sử tồn kho: " + e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Lỗi khi ghi nhận lịch sử tồn kho: " + e.getMessage());
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/record/export")
     public ResponseEntity<String> exportInventoryHistory(
             @RequestParam(required = false) String search,

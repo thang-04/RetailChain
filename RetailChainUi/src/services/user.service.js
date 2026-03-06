@@ -1,6 +1,6 @@
 import { axiosPrivate } from './api/axiosClient';
 
-const USER_API_URL = '/api/user';
+const USER_API_URL = '/user';
 
 export const userService = {
     /**

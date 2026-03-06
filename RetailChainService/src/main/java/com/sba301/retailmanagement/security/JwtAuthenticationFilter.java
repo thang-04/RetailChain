@@ -33,24 +33,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt)) {
+                if (tokenProvider.validateToken(jwt)) {
+                    String email = tokenProvider.getEmailFromToken(jwt);
+                    Long userId = tokenProvider.getUserIdFromToken(jwt);
+                    List<GrantedAuthority> authorities = tokenProvider.getAuthoritiesFromToken(jwt);
 
-                String email = tokenProvider.getEmailFromToken(jwt);
-                Long userId = tokenProvider.getUserIdFromToken(jwt);
-                List<GrantedAuthority> authorities = tokenProvider.getAuthoritiesFromToken(jwt);
+                    log.debug("JWT validated for user: {}, authorities: {}", email, authorities);
 
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) { // true
-                    CustomUserDetails userDetails = new CustomUserDetails(
-                            userId,
-                            email,
-                            null,
-                            new java.util.HashSet<>(),
-                            true);
+                    if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        CustomUserDetails userDetails = new CustomUserDetails(
+                                userId,
+                                email,
+                                null,
+                                new java.util.HashSet<>(),
+                                true);
 
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, authorities);
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, authorities);
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("Security context set for user: {}", email);
+                    }
+                } else {
+                    log.warn("Invalid JWT token provided");
                 }
             }
         } catch (Exception ex) {

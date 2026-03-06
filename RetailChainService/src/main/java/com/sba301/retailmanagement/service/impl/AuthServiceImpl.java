@@ -12,6 +12,7 @@ import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.repository.RoleRepository;
+import com.sba301.retailmanagement.repository.StoreRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.security.CustomUserDetails;
 import com.sba301.retailmanagement.security.JwtTokenProvider;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -45,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
         private final JwtTokenProvider tokenProvider;
         private final RefreshTokenService refreshTokenService;
         private final JwtProperties jwtProperties;
+        private final StoreRepository storeRepository;
 
         @Override
         @Transactional
@@ -161,13 +164,23 @@ public class AuthServiceImpl implements AuthService {
                                 ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                                 : List.of();
 
-                return UserDTO.builder()
+                UserDTO dto = UserDTO.builder()
                                 .id(user.getId())
                                 .email(user.getEmail())
                                 .fullName(user.getFullName())
                                 .phoneNumber(user.getPhone())
                                 .status(user.getStatus())
                                 .roles(roleNames)
+                                .storeId(user.getStoreId())
                                 .build();
+                                
+                if (user.getStoreId() != null) {
+                        storeRepository.findById(user.getStoreId()).ifPresent(store -> {
+                                dto.setStoreCode(store.getCode());
+                                dto.setStoreName(store.getName());
+                        });
+                }
+                
+                return dto;
         }
 }

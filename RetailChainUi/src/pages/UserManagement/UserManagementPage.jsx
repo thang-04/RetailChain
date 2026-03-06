@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '../../services/user.service';
 import roleService from '../../services/role.service';
 import storeService from '../../services/store.service';
-import useAuth from '../../hooks/useAuth';
+
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import CreateUserDialog from './CreateUserDialog';
 import EditUserDialog from './EditUserDialog';
 
 const UserManagementPage = () => {
-    const { user: currentUser } = useAuth();
+
 
     // State for data
     const [users, setUsers] = useState([]);
@@ -46,9 +46,7 @@ const UserManagementPage = () => {
         setLoading(true);
         try {
             const response = await userService.getAllUsers();
-            // Filter out the current user from the list
-            const otherUsers = response.data?.filter(u => u.id !== currentUser?.id) || [];
-            setUsers(otherUsers);
+            setUsers(response.data || []);
         } catch (err) {
             console.error('Error fetching users:', err);
             setError('Failed to load users');
@@ -67,10 +65,7 @@ const UserManagementPage = () => {
         }
     };
 
-    const isSuperAdmin = currentUser?.roles?.some(r => {
-        const roleName = typeof r === 'string' ? r : (r.name || r.code);
-        return roleName === 'SUPER_ADMIN';
-    });
+
 
     const formatRole = (roleString) => {
         if (!roleString) return 'Unknown';
@@ -157,16 +152,10 @@ const UserManagementPage = () => {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex flex-col gap-1 text-sm">
-                                            {user.region && (
-                                                <span className="text-muted-foreground">Region: <span className="text-foreground font-medium">{user.region}</span></span>
-                                            )}
-                                            {user.warehouseId && (
-                                                <span className="text-muted-foreground">Warehouse ID: <span className="text-foreground font-medium">{user.warehouseId}</span></span>
-                                            )}
                                             {user.storeId && (
                                                 <span className="text-muted-foreground">Store ID: <span className="text-foreground font-medium">{user.storeId}</span></span>
                                             )}
-                                            {!user.region && !user.warehouseId && !user.storeId && (
+                                            {!user.storeId && (
                                                 <span className="text-muted-foreground italic">Global Access</span>
                                             )}
                                         </div>
@@ -190,17 +179,15 @@ const UserManagementPage = () => {
                                                 <Edit2 className="h-4 w-4" />
                                             </Button>
 
-                                            {isSuperAdmin && (
-                                                <Button
-                                                    variant={user.status === 1 ? "outline" : "default"}
-                                                    size="icon"
-                                                    title={user.status === 1 ? "Block User" : "Unblock User"}
-                                                    onClick={() => handleToggleBlock(user.id, user.status)}
-                                                    className={user.status === 1 ? "text-red-500 hover:text-red-600 hover:bg-red-50" : "bg-green-600 hover:bg-green-700"}
-                                                >
-                                                    {user.status === 1 ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
-                                                </Button>
-                                            )}
+                                            <Button
+                                                variant={user.status === 1 ? "outline" : "default"}
+                                                size="icon"
+                                                title={user.status === 1 ? "Block User" : "Unblock User"}
+                                                onClick={() => handleToggleBlock(user.id, user.status)}
+                                                className={user.status === 1 ? "text-red-500 hover:text-red-600 hover:bg-red-50" : "bg-green-600 hover:bg-green-700"}
+                                            >
+                                                {user.status === 1 ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
