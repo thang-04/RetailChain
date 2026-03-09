@@ -20,7 +20,7 @@ const InventoryFilter = ({ filters, onChange }) => {
         </div>
         <Input 
           className="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-slate-50 dark:bg-[#1a2c2e] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus-visible:ring-2 focus-visible:ring-primary shadow-none" 
-          placeholder="Search by document, warehouse or variant..." 
+          placeholder="Tìm kiếm theo mã chứng từ, kho hoặc phiên bản sản phẩm..." 
           value={filters?.search ?? ""}
           onChange={(e) => onChange?.({ search: e.target.value })}
         />
@@ -36,7 +36,7 @@ const InventoryFilter = ({ filters, onChange }) => {
             <SelectValue placeholder="Action" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Actions</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
             <SelectItem value="IN">IN</SelectItem>
             <SelectItem value="OUT">OUT</SelectItem>
             <SelectItem value="TRANSFER">TRANSFER</SelectItem>
@@ -48,7 +48,7 @@ const InventoryFilter = ({ filters, onChange }) => {
             <SelectValue placeholder="Store Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
             <SelectItem value="healthy">Healthy</SelectItem>
             <SelectItem value="warning">Warning</SelectItem>
             <SelectItem value="critical">Critical</SelectItem>

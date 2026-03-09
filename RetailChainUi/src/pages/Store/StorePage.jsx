@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import StoreFilter from "./components/StoreFilter";
 import StoreList from "./components/StoreList";
 import AddStoreModal from "./components/AddStoreModal";
+import useAuth from "../../contexts/AuthContext/useAuth";
 import storeService from "../../services/store.service";
 
 const StorePage = () => {
+  const { hasPermission } = useAuth();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,13 +75,15 @@ const StorePage = () => {
                 Store Management
               </h2>
             </div>
-            <Button
-              className="gap-2 shadow-sm shadow-primary/30 hover:translate-y-[-1px] transition-all"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Store</span>
-            </Button>
+            {hasPermission('STORE_CREATE') && (
+              <Button
+                className="gap-2 shadow-sm shadow-primary/30 hover:translate-y-[-1px] transition-all"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Store</span>
+              </Button>
+            )}
           </div>
 
           {/* Filter Bar */}
@@ -103,13 +107,15 @@ const StorePage = () => {
               <p className="text-slate-500 dark:text-slate-400 mb-8 text-center max-w-sm px-4">
                 Hiện tại hệ thống chưa ghi nhận cửa hàng nào. Hãy thêm cửa hàng đầu tiên để bắt đầu quản lý.
               </p>
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                className="gap-2 h-12 px-8 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
-              >
-                <Plus className="w-5 h-5 font-bold" />
-                <span>Thêm Cửa Hàng Ngay</span>
-              </Button>
+              {hasPermission('STORE_CREATE') && (
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  className="gap-2 h-12 px-8 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
+                >
+                  <Plus className="w-5 h-5 font-bold" />
+                  <span>Thêm Cửa Hàng Ngay</span>
+                </Button>
+              )}
             </div>
           ) : (
             <StoreList stores={currentStores} />

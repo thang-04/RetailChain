@@ -42,74 +42,80 @@ import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
 // User Management
 import UserManagementPage from "../pages/UserManagement/UserManagementPage";
 
+// Profile
+import ProfilePage from "../pages/Profile/ProfilePage";
+
 // Auth
 import LoginPage from "../pages/Auth/LoginPage";
 import ForbiddenPage from "../pages/Auth/ForbiddenPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 
 const AppRoutes = () => {
-  return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/403" element={<ForbiddenPage />} />
+    return (
+        <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/403" element={<ForbiddenPage />} />
 
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
-          {/* Dashboard & Reports */}
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/reports" element={<ExecutiveReport />} />
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+                <Route element={<MainLayout />}>
+                    {/* Dashboard & Reports */}
+                    <Route path="/" element={<DashboardPage />} />
+                    <Route path="/reports" element={<ExecutiveReport />} />
 
-          {/* Store Module */}
-          <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-            <Route path="/store" element={<StorePage />} />
-          </Route>
-          <Route path="/store/:id" element={<StoreDashboardPage />} />
-          <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
-          <Route path="/store/:id/staff" element={<StoreStaffPage />} />
+                    {/* Store Module */}
+                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                        <Route path="/store" element={<StorePage />} />
+                    </Route>
+                    <Route path="/store/:id" element={<StoreDashboardPage />} />
+                    <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
+                    <Route path="/store/:id/staff" element={<StoreStaffPage />} />
 
-          <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-            {/* Warehouse Module */}
-            <Route path="/warehouse" element={<WarehouseListPage />} />
-          </Route>
+                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                        {/* Warehouse Module */}
+                        <Route path="/warehouse" element={<WarehouseListPage />} />
+                    </Route>
 
-          {/* Product Module */}
-          <Route path="/products" element={<ProductPage />} />
-          <Route path="/products/create" element={<ProductEditPage />} />
-          <Route path="/products/:slug" element={<ProductDetailPage />} />
-          <Route path="/products/:slug/edit" element={<ProductEditPage />} />
+                    {/* Product Module */}
+                    <Route path="/products" element={<ProductPage />} />
+                    <Route path="/products/create" element={<ProductEditPage />} />
+                    <Route path="/products/:slug" element={<ProductDetailPage />} />
+                    <Route path="/products/:slug/edit" element={<ProductEditPage />} />
 
-          {/* Inventory Module */}
-          <Route path="/inventory" element={<InventoryPage />} />
-          <Route path="/inventory/ledger" element={<StockLedger />} />
+                    {/* Inventory Module */}
+                    <Route path="/inventory" element={<InventoryPage />} />
+                    <Route path="/inventory/ledger" element={<StockLedger />} />
 
-          {/* Stock In, Out */}
-          <Route path="/stock-in" element={<StockInList />} />
-          <Route path="/stock-in/create" element={<CreateStockIn />} />
+                    {/* Stock In, Out */}
+                    <Route path="/stock-in" element={<StockInList />} />
+                    <Route path="/stock-in/create" element={<CreateStockIn />} />
 
-          <Route path="/stock-out" element={<StockOutList />} />
-          <Route path="/stock-out/create" element={<CreateStockOut />} />
+                    <Route path="/stock-out" element={<StockOutList />} />
+                    <Route path="/stock-out/create" element={<CreateStockOut />} />
 
-          {/* Staff Module */}
-          <Route path="/staff" element={<StaffList />} />
-          <Route path="/staff/shifts" element={<StaffShiftsPage />} />
-          <Route path="/staff/calendar" element={<StaffCalendar />} />
-          <Route path="/staff/attendance" element={<StaffAttendance />} />
-          <Route path="/staff/profile/:id" element={<StaffProfile />} />
-          <Route path="/staff/resource" element={<ResourceAssignment />} />
+                    {/* Staff Module */}
+                    <Route path="/staff" element={<StaffList />} />
+                    <Route path="/staff/shifts" element={<StaffShiftsPage />} />
+                    <Route path="/staff/calendar" element={<StaffCalendar />} />
+                    <Route path="/staff/attendance" element={<StaffAttendance />} />
+                    <Route path="/staff/profile/:id" element={<StaffProfile />} />
+                    <Route path="/staff/resource" element={<ResourceAssignment />} />
 
-          {/* User Management */}
-          <Route path="/users" element={<UserManagementPage />} />
+                    {/* User Management */}
+                    <Route path="/users" element={<UserManagementPage />} />
 
-          <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-            {/* Role & Permission Management */}
-            <Route path="/roles" element={<RolePermissionPage />} />
-          </Route>
-        </Route>
-      </Route>
-    </Routes>
-  );
+                    {/* Profile */}
+                    <Route path="/profile" element={<ProfilePage />} />
+
+                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                        {/* Role & Permission Management */}
+                        <Route path="/roles" element={<RolePermissionPage />} />
+                    </Route>
+                </Route>
+            </Route>
+        </Routes>
+    );
 };
 
 export default AppRoutes;

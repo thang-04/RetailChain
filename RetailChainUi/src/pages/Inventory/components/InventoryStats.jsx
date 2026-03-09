@@ -39,7 +39,7 @@ const InventoryStats = ({ overview }) => {
             {growthPercentage >= 0 ? `+${growthPercentage}%` : `${growthPercentage}%`}
           </span>
         </div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Chain Value</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng giá trị toàn chuỗi</p>
         <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
           {formatCurrency(totalChainValue)}
         </p>
@@ -52,10 +52,10 @@ const InventoryStats = ({ overview }) => {
             <Layers className="w-6 h-6" />
           </div>
         </div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Stock Quantity</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng số lượng tồn kho</p>
         <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
           {formatNumber(totalStockQuantity)}{" "}
-          <span className="text-sm font-normal text-slate-400 ml-1">units</span>
+          <span className="text-sm font-normal text-slate-400 ml-1">đơn vị</span>
         </p>
       </Card>
 
@@ -69,12 +69,12 @@ const InventoryStats = ({ overview }) => {
             <AlertTriangle className="w-6 h-6" />
           </div>
           <span className="flex items-center text-xs font-medium text-red-600 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-full">
-            Needs Attention
+            Cần chú ý
           </span>
         </div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 relative z-10">Critical Alerts</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 relative z-10">Cảnh báo nghiêm trọng</p>
         <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1 relative z-10">
-          {formatNumber(criticalStores)} Stores
+          {formatNumber(criticalStores)} Cửa hàng
         </p>
       </Card>
     </div>

@@ -85,7 +85,8 @@ public class RoleServiceImpl implements RoleService {
                 throw new RuntimeException("Role name already exists: " + request.getName());
             }
             role.setName(request.getName());
-            role.setCode(request.getName().toUpperCase().replace(" ", "_"));
+            // DO NOT update code manually: 
+            // role.setCode(request.getName().toUpperCase().replace(" ", "_"));
         }
 
         if (request.getDescription() != null) {
