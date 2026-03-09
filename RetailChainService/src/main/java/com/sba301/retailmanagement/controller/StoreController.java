@@ -2,12 +2,19 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
+import com.sba301.retailmanagement.dto.response.UserResponse;
+import com.sba301.retailmanagement.entity.User;
+import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.service.StoreService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 
@@ -18,6 +25,9 @@ import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 public class StoreController {
 
     private final StoreService storeService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public String getAllStores() {
@@ -93,10 +103,33 @@ public class StoreController {
         }
     }
 
+    @GetMapping("/{id}/staff-list")
+    public String getStoreStaffList(@PathVariable Long id) {
+        String prefix = "[getStoreStaffList]|storeId=" + id;
+        log.info("{}|START", prefix);
+        try {
+            List<User> users = userRepository.findByStoreId(id);
+            List<UserResponse> result = users.stream()
+                    .map(u -> new UserResponse(
+                            u.getId(),
+                            u.getStoreId(),
+                            u.getUsername(),
+                            u.getFullName(),
+                            u.getPhone(),
+                            u.getEmail(),
+                            u.getStatus()))
+                    .collect(Collectors.toList());
+            log.info("{}|END|size={}", prefix, result.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff list success", result);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving staff list: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}/staff")
     public String getStoreStaff(@PathVariable Long id) {
-        // Mock response for now as User/Staff structure is complex
-        // In real impl, query User repo by storeId
-        return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success", java.util.Collections.emptyList());
+        // Giữ lại endpoint cũ cho tương thích
+        return getStoreStaffList(id);
     }
 }

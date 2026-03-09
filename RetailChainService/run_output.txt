@@ -1,0 +1,1225 @@
+﻿[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml
+Progress (1): 234 B
+Progress (2): 234 B | 255 B
+Progress (3): 234 B | 255 B | 398 B
+Progress (4): 234 B | 255 B | 398 B | 249 B
+                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/io/github/git-commit-id/maven-metadata.xml (255 B at 270 B/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jooq/maven-metadata.xml (398 B at 422 B/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/flywaydb/maven-metadata.xml (234 B at 248 B/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/maven-metadata.xml (249 B at 263 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml
+Progress (1): 3.8 kB
+Progress (1): 9.3 kB
+Progress (1): 14 kB 
+Progress (2): 14 kB | 242 B
+Progress (3): 14 kB | 242 B | 243 B
+Progress (4): 14 kB | 242 B | 243 B | 375 B
+                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-metadata.xml (14 kB at 188 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml
+Downloaded from central: https://repo.maven.apache.org/maven2/org/graalvm/buildtools/maven-metadata.xml (242 B at 3.0 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/maven-metadata.xml (375 B at 4.6 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/liquibase/maven-metadata.xml (243 B at 2.9 kB/s)
+Progress (1): 3.1 kB
+Progress (1): 7.7 kB
+Progress (1): 12 kB 
+Progress (1): 17 kB
+Progress (1): 20 kB
+Progress (1): 21 kB
+                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/mojo/maven-metadata.xml (21 kB at 118 kB/s)
+[INFO] 
+[INFO] -------------------< com.example:RetailChainService >-------------------
+[INFO] Building RetailChainService 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.1:run (default-cli) > test-compile @ RetailChainService >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ RetailChainService ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ RetailChainService ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ RetailChainService ---
+[INFO] skip non existing resourceDirectory D:\Inteliji-Project\RetailChainManagement\RetailChainService\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ RetailChainService ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.2.1:run (default-cli) < test-compile @ RetailChainService <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.1:run (default-cli) @ RetailChainService ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.1/spring-boot-buildpack-platform-3.2.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.14.2/jackson-databind-2.14.2.jar
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.14.2/jackson-annotations-2.14.2.jar
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-core/2.14.2/jackson-core-2.14.2.jar
+Downloading from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/module/jackson-module-parameter-names/2.14.2/jackson-module-parameter-names-2.14.2.jar
+Progress (1): 0.9/459 kB
+Progress (1): 2.3/459 kB
+Progress (1): 3.6/459 kB
+Progress (2): 3.6/459 kB | 0.9/77 kB
+Progress (2): 5.0/459 kB | 0.9/77 kB
+Progress (2): 5.0/459 kB | 2.3/77 kB
+Progress (2): 5.0/459 kB | 3.6/77 kB
+Progress (2): 6.4/459 kB | 3.6/77 kB
+Progress (2): 6.4/459 kB | 5.0/77 kB
+Progress (2): 6.4/459 kB | 6.4/77 kB
+Progress (2): 6.4/459 kB | 7.7/77 kB
+Progress (2): 6.4/459 kB | 9.1/77 kB
+Progress (2): 6.4/459 kB | 10/77 kB 
+Progress (2): 6.4/459 kB | 12/77 kB
+Progress (2): 6.4/459 kB | 13/77 kB
+Progress (2): 6.4/459 kB | 14/77 kB
+Progress (2): 6.4/459 kB | 16/77 kB
+Progress (3): 6.4/459 kB | 16/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 16/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 17/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 17/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 18/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 18/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 18/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 20/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 20/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 21/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 21/77 kB | 0/1.6 MB
+Progress (3): 6.4/459 kB | 23/77 kB | 0/1.6 MB
+Progress (4): 6.4/459 kB | 23/77 kB | 0/1.6 MB | 0.9/272 kB
+Progress (4): 6.4/459 kB | 23/77 kB | 0/1.6 MB | 0.9/272 kB
+Progress (4): 6.4/459 kB | 24/77 kB | 0/1.6 MB | 0.9/272 kB
+Progress (4): 6.4/459 kB | 24/77 kB | 0/1.6 MB | 0.9/272 kB
+Progress (4): 6.4/459 kB | 24/77 kB | 0/1.6 MB | 2.3/272 kB
+Progress (4): 6.4/459 kB | 25/77 kB | 0/1.6 MB | 2.3/272 kB
+Progress (4): 6.4/459 kB | 25/77 kB | 0/1.6 MB | 3.6/272 kB
+Progress (4): 6.4/459 kB | 25/77 kB | 0/1.6 MB | 3.6/272 kB
+Progress (4): 6.4/459 kB | 25/77 kB | 0/1.6 MB | 5.0/272 kB
+Progress (4): 6.4/459 kB | 27/77 kB | 0/1.6 MB | 5.0/272 kB
+Progress (4): 6.4/459 kB | 28/77 kB | 0/1.6 MB | 5.0/272 kB
+Progress (4): 6.4/459 kB | 28/77 kB | 0/1.6 MB | 5.0/272 kB
+Progress (4): 6.4/459 kB | 29/77 kB | 0/1.6 MB | 5.0/272 kB
+Progress (4): 6.4/459 kB | 29/77 kB | 0/1.6 MB | 6.4/272 kB
+Progress (4): 6.4/459 kB | 29/77 kB | 0/1.6 MB | 6.4/272 kB
+Progress (4): 6.4/459 kB | 29/77 kB | 0/1.6 MB | 7.7/272 kB
+Progress (4): 6.4/459 kB | 29/77 kB | 0/1.6 MB | 7.7/272 kB
+Progress (4): 6.4/459 kB | 31/77 kB | 0/1.6 MB | 7.7/272 kB
+Progress (4): 6.4/459 kB | 31/77 kB | 0/1.6 MB | 9.1/272 kB
+Progress (4): 6.4/459 kB | 31/77 kB | 0/1.6 MB | 9.1/272 kB
+Progress (4): 6.4/459 kB | 31/77 kB | 0/1.6 MB | 9.1/272 kB
+Progress (4): 6.4/459 kB | 32/77 kB | 0/1.6 MB | 9.1/272 kB
+Progress (4): 6.4/459 kB | 32/77 kB | 0/1.6 MB | 10/272 kB 
+Progress (4): 6.4/459 kB | 32/77 kB | 0/1.6 MB | 10/272 kB
+Progress (4): 6.4/459 kB | 33/77 kB | 0/1.6 MB | 10/272 kB
+Progress (4): 6.4/459 kB | 33/77 kB | 0/1.6 MB | 12/272 kB
+Progress (4): 6.4/459 kB | 35/77 kB | 0/1.6 MB | 12/272 kB
+Progress (4): 6.4/459 kB | 35/77 kB | 0/1.6 MB | 13/272 kB
+Progress (4): 6.4/459 kB | 36/77 kB | 0/1.6 MB | 13/272 kB
+Progress (4): 6.4/459 kB | 36/77 kB | 0/1.6 MB | 13/272 kB
+Progress (4): 6.4/459 kB | 38/77 kB | 0/1.6 MB | 13/272 kB
+Progress (4): 6.4/459 kB | 38/77 kB | 0/1.6 MB | 15/272 kB
+Progress (4): 6.4/459 kB | 38/77 kB | 0/1.6 MB | 15/272 kB
+Progress (4): 6.4/459 kB | 39/77 kB | 0/1.6 MB | 15/272 kB
+Progress (4): 6.4/459 kB | 39/77 kB | 0/1.6 MB | 16/272 kB
+Progress (4): 6.4/459 kB | 39/77 kB | 0/1.6 MB | 16/272 kB
+Progress (4): 6.4/459 kB | 39/77 kB | 0/1.6 MB | 16/272 kB
+Progress (4): 6.4/459 kB | 40/77 kB | 0/1.6 MB | 16/272 kB
+Progress (4): 6.4/459 kB | 40/77 kB | 0/1.6 MB | 17/272 kB
+Progress (4): 6.4/459 kB | 40/77 kB | 0/1.6 MB | 19/272 kB
+Progress (4): 6.4/459 kB | 40/77 kB | 0/1.6 MB | 19/272 kB
+Progress (4): 6.4/459 kB | 42/77 kB | 0/1.6 MB | 19/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 19/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 19/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 20/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 20/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 21/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 23/272 kB
+Progress (4): 6.4/459 kB | 43/77 kB | 0/1.6 MB | 23/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 23/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 24/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 24/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 26/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 44/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 46/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 46/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 47/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 47/77 kB | 0/1.6 MB | 27/272 kB
+Progress (4): 6.4/459 kB | 47/77 kB | 0/1.6 MB | 28/272 kB
+Progress (4): 6.4/459 kB | 47/77 kB | 0/1.6 MB | 28/272 kB
+Progress (4): 6.4/459 kB | 49/77 kB | 0/1.6 MB | 28/272 kB
+Progress (4): 6.4/459 kB | 49/77 kB | 0/1.6 MB | 29/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 29/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 31/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 31/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 32/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 32/272 kB
+Progress (4): 6.4/459 kB | 50/77 kB | 0/1.6 MB | 33/272 kB
+Progress (4): 6.4/459 kB | 54/77 kB | 0/1.6 MB | 33/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 33/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 35/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 36/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 36/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 38/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 39/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 40/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 42/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 42/272 kB
+Progress (4): 6.4/459 kB | 58/77 kB | 0/1.6 MB | 43/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0/1.6 MB | 43/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0/1.6 MB | 44/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0/1.6 MB | 46/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0/1.6 MB | 47/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0/1.6 MB | 49/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 49/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 50/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 50/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 54/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 54/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 58/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 58/272 kB
+Progress (4): 6.4/459 kB | 63/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 6.4/459 kB | 67/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 6.4/459 kB | 71/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 7.7/459 kB | 71/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 9.1/459 kB | 71/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 10/459 kB | 71/77 kB | 0.1/1.6 MB | 63/272 kB 
+Progress (4): 12/459 kB | 71/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 12/459 kB | 75/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 13/459 kB | 75/77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 13/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB   
+Progress (4): 15/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 16/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 17/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 19/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 20/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 21/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 23/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 24/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 26/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 27/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 28/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 30/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 31/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 32/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 34/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 35/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 36/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 38/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 39/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 41/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 42/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 43/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 45/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+Progress (4): 46/459 kB | 77 kB | 0.1/1.6 MB | 63/272 kB
+                                                        
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-annotations/2.14.2/jackson-annotations-2.14.2.jar (77 kB at 608 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar
+Progress (3): 47/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 49/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 53/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 57/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 61/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 66/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 63/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 67/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 67/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 71/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 71/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 75/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 79/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 79/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 84/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 84/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 84/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 88/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 92/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 96/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 96/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 101/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 101/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 101/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 101/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 101/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 105/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 105/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 105/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 105/272 kB
+Progress (3): 70/459 kB | 0.1/1.6 MB | 109/272 kB
+Progress (3): 74/459 kB | 0.1/1.6 MB | 109/272 kB
+Progress (3): 78/459 kB | 0.1/1.6 MB | 109/272 kB
+Progress (3): 78/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 78/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 83/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 87/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 87/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 91/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 91/459 kB | 0.1/1.6 MB | 113/272 kB
+Progress (3): 91/459 kB | 0.1/1.6 MB | 118/272 kB
+Progress (3): 95/459 kB | 0.1/1.6 MB | 118/272 kB
+Progress (3): 100/459 kB | 0.1/1.6 MB | 118/272 kB
+Progress (3): 104/459 kB | 0.1/1.6 MB | 118/272 kB
+Progress (3): 104/459 kB | 0.1/1.6 MB | 122/272 kB
+Progress (3): 104/459 kB | 0.1/1.6 MB | 122/272 kB
+Progress (3): 104/459 kB | 0.1/1.6 MB | 126/272 kB
+Progress (3): 108/459 kB | 0.1/1.6 MB | 126/272 kB
+Progress (3): 108/459 kB | 0.1/1.6 MB | 126/272 kB
+Progress (3): 108/459 kB | 0.1/1.6 MB | 130/272 kB
+Progress (3): 108/459 kB | 0.1/1.6 MB | 134/272 kB
+Progress (3): 112/459 kB | 0.1/1.6 MB | 134/272 kB
+Progress (3): 112/459 kB | 0.1/1.6 MB | 139/272 kB
+Progress (3): 116/459 kB | 0.1/1.6 MB | 139/272 kB
+Progress (3): 116/459 kB | 0.1/1.6 MB | 139/272 kB
+Progress (3): 121/459 kB | 0.1/1.6 MB | 139/272 kB
+Progress (3): 125/459 kB | 0.1/1.6 MB | 139/272 kB
+Progress (3): 125/459 kB | 0.1/1.6 MB | 143/272 kB
+Progress (3): 125/459 kB | 0.1/1.6 MB | 143/272 kB
+Progress (3): 129/459 kB | 0.1/1.6 MB | 143/272 kB
+Progress (3): 131/459 kB | 0.1/1.6 MB | 143/272 kB
+Progress (3): 131/459 kB | 0.2/1.6 MB | 143/272 kB
+Progress (4): 131/459 kB | 0.2/1.6 MB | 143/272 kB | 0/1.1 MB
+Progress (4): 131/459 kB | 0.2/1.6 MB | 147/272 kB | 0/1.1 MB
+Progress (4): 131/459 kB | 0.2/1.6 MB | 147/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 147/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 147/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 151/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 151/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 156/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 156/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 159/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 159/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 163/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 168/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 168/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 172/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 172/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 172/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 176/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 176/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 176/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 176/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 180/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 180/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 184/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 189/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 193/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 197/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 201/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 206/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 210/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 210/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 210/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 210/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 210/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 214/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB
+Progress (4): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 0.9/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 2.3/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 3.6/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 3.6/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 5.0/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 5.0/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 6.4/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 7.5/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 8.8/9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB    
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 135/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 139/459 kB | 0.2/1.6 MB | 218/272 kB | 0/1.1 MB | 9.5 kB
+Progress (5): 139/459 kB | 0.2/1.6 MB | 218/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 139/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 143/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 147/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 147/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 152/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+Progress (5): 156/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB | 9.5 kB
+                                                                        
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/module/jackson-module-parameter-names/2.14.2/jackson-module-parameter-names-2.14.2.jar (9.5 kB at 41 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.jar
+Progress (4): 156/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 235/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 251/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 267/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 267/272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 272 kB | 0.1/1.1 MB    
+Progress (4): 156/459 kB | 0.2/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.2/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.3/1.6 MB | 272 kB | 0.1/1.1 MB
+Progress (4): 156/459 kB | 0.4/1.6 MB | 272 kB | 0.1/1.1 MB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-buildpack-platform/3.2.1/spring-boot-buildpack-platform-3.2.1.jar (272 kB at 1.0 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.2.4/httpcore5-5.2.4.jar
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.1/1.1 MB
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.1/1.1 MB
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.1/1.1 MB
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.1/1.1 MB
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.1/1.1 MB
+Progress (3): 156/459 kB | 0.4/1.6 MB | 0.2/1.1 MB
+Progress (3): 160/459 kB | 0.4/1.6 MB | 0.2/1.1 MB
+Progress (3): 160/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 164/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 164/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 169/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 173/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 173/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 177/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 177/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 181/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 181/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 186/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 186/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 190/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 194/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 194/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 198/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 202/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 207/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 207/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 211/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 215/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 215/459 kB | 0.5/1.6 MB | 0.2/1.1 MB
+Progress (3): 215/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 232/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 248/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 248/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 262/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 262/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 262/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.3/1.1 MB
+Progress (3): 278/459 kB | 0.5/1.6 MB | 0.4/1.1 MB
+Progress (4): 278/459 kB | 0.5/1.6 MB | 0.4/1.1 MB | 0.9/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 0.9/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 2.3/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 2.3/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 3.6/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 5.0/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 6.4/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 7.7/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 9.1/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 9.1/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 10/843 kB 
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 12/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 13/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 15/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 16/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 17/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 17/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 19/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 20/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 21/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 23/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 24/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 26/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 26/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 27/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 28/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 29/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 30/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 31/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 33/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 34/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 34/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 36/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 37/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 38/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 40/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 41/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 41/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 42/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 44/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 48/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 52/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 56/843 kB
+Progress (4): 278/459 kB | 0.6/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (4): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB
+Progress (5): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB | 7.7/855 kB
+Progress (5): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB | 7.7/855 kB
+Progress (5): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB | 16/855 kB 
+Progress (5): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB | 16/855 kB
+Progress (5): 278/459 kB | 0.7/1.6 MB | 0.4/1.1 MB | 61/843 kB | 32/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 32/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 48/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 48/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 48/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 65/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 65/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 81/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 81/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 98/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 98/855 kB
+Progress (5): 278/459 kB | 0.8/1.6 MB | 0.4/1.1 MB | 61/843 kB | 114/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 114/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 130/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 147/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 147/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 163/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 179/855 kB
+Progress (5): 278/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 179/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 179/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 196/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 212/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 229/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.4/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 294/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 311/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 327/459 kB | 0.9/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 327/459 kB | 1.0/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 327/459 kB | 1.0/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.5/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 61/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 65/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 65/843 kB | 245/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 65/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 69/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 73/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 78/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 82/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 82/843 kB | 261/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 82/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 86/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 86/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 90/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 94/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 99/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 99/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.6/1.1 MB | 103/843 kB | 278/855 kB
+Progress (5): 344/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 278/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 278/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 294/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 294/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 311/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 311/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 327/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 103/843 kB | 327/855 kB
+Progress (5): 360/459 kB | 1.0/1.6 MB | 0.7/1.1 MB | 107/843 kB | 327/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 107/843 kB | 327/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 107/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 111/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 116/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 116/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 120/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 120/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 124/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 128/843 kB | 343/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 128/843 kB | 360/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 360/855 kB
+Progress (5): 360/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 360/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 360/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 376/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 376/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 133/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 137/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.1/1.6 MB | 0.7/1.1 MB | 141/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 141/843 kB | 392/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 141/843 kB | 409/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 141/843 kB | 409/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 145/843 kB | 409/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 145/843 kB | 409/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 149/843 kB | 409/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 149/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 154/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 154/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 425/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 442/855 kB
+Progress (5): 376/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 442/855 kB
+Progress (5): 393/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 442/855 kB
+Progress (5): 393/459 kB | 1.2/1.6 MB | 0.7/1.1 MB | 158/843 kB | 458/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 458/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 458/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 474/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 474/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 474/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.3/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 393/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.4/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 409/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.7/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.5/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6/1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 425/459 kB | 1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB    
+Progress (5): 425/459 kB | 1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.8/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 158/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 160/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 164/843 kB | 491/855 kB
+Progress (5): 442/459 kB | 1.6 MB | 0.9/1.1 MB | 164/843 kB | 491/855 kB
+Progress (5): 458/459 kB | 1.6 MB | 0.9/1.1 MB | 164/843 kB | 491/855 kB
+Progress (5): 459 kB | 1.6 MB | 0.9/1.1 MB | 164/843 kB | 491/855 kB    
+Progress (5): 459 kB | 1.6 MB | 0.9/1.1 MB | 164/843 kB | 491/855 kB
+Progress (5): 459 kB | 1.6 MB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+Progress (5): 459 kB | 1.6 MB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+                                                                    
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-databind/2.14.2/jackson-databind-2.14.2.jar (1.6 MB at 3.2 MB/s)
+Progress (4): 459 kB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+                                                           
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.2.4/httpcore5-h2-5.2.4.jar
+Progress (4): 459 kB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+Progress (4): 459 kB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+Progress (4): 459 kB | 1.0/1.1 MB | 164/843 kB | 491/855 kB
+                                                           
+Downloaded from central: https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-core/2.14.2/jackson-core-2.14.2.jar (459 kB at 901 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.0.10/spring-core-6.0.10.jar
+Progress (3): 1.0/1.1 MB | 164/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 168/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 172/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 177/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 181/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 185/843 kB | 491/855 kB
+Progress (3): 1.0/1.1 MB | 189/843 kB | 491/855 kB
+Progress (3): 1.1 MB | 189/843 kB | 491/855 kB    
+Progress (3): 1.1 MB | 194/843 kB | 491/855 kB
+Progress (3): 1.1 MB | 198/843 kB | 491/855 kB
+                                              
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar (1.1 MB at 2.0 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.0.10/spring-jcl-6.0.10.jar
+Progress (2): 202/843 kB | 491/855 kB
+Progress (2): 206/843 kB | 491/855 kB
+Progress (2): 210/843 kB | 491/855 kB
+Progress (2): 227/843 kB | 491/855 kB
+Progress (2): 243/843 kB | 491/855 kB
+Progress (2): 243/843 kB | 507/855 kB
+Progress (2): 243/843 kB | 524/855 kB
+Progress (2): 243/843 kB | 540/855 kB
+Progress (2): 243/843 kB | 556/855 kB
+Progress (2): 243/843 kB | 573/855 kB
+Progress (2): 243/843 kB | 589/855 kB
+Progress (2): 260/843 kB | 589/855 kB
+Progress (2): 260/843 kB | 605/855 kB
+Progress (2): 260/843 kB | 622/855 kB
+Progress (2): 260/843 kB | 638/855 kB
+Progress (2): 260/843 kB | 655/855 kB
+Progress (2): 260/843 kB | 671/855 kB
+Progress (2): 260/843 kB | 687/855 kB
+Progress (2): 260/843 kB | 704/855 kB
+Progress (2): 276/843 kB | 704/855 kB
+Progress (2): 276/843 kB | 720/855 kB
+Progress (2): 276/843 kB | 737/855 kB
+Progress (2): 276/843 kB | 753/855 kB
+Progress (2): 276/843 kB | 769/855 kB
+Progress (2): 276/843 kB | 786/855 kB
+Progress (2): 276/843 kB | 802/855 kB
+Progress (2): 276/843 kB | 818/855 kB
+Progress (2): 276/843 kB | 835/855 kB
+Progress (2): 276/843 kB | 851/855 kB
+Progress (2): 276/843 kB | 855 kB    
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.2.4/httpcore5-5.2.4.jar (855 kB at 1.6 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.1/spring-boot-loader-tools-3.2.1.jar
+Progress (1): 291/843 kB
+Progress (1): 307/843 kB
+Progress (1): 324/843 kB
+Progress (1): 340/843 kB
+Progress (1): 348/843 kB
+Progress (1): 364/843 kB
+Progress (2): 364/843 kB | 7.7/237 kB
+Progress (2): 364/843 kB | 16/237 kB 
+Progress (2): 381/843 kB | 16/237 kB
+Progress (3): 381/843 kB | 16/237 kB | 0/1.8 MB
+Progress (3): 381/843 kB | 16/237 kB | 0/1.8 MB
+Progress (3): 397/843 kB | 16/237 kB | 0/1.8 MB
+Progress (3): 397/843 kB | 16/237 kB | 0/1.8 MB
+Progress (3): 397/843 kB | 16/237 kB | 0/1.8 MB
+Progress (3): 397/843 kB | 16/237 kB | 0.1/1.8 MB
+Progress (3): 397/843 kB | 16/237 kB | 0.1/1.8 MB
+Progress (3): 397/843 kB | 32/237 kB | 0.1/1.8 MB
+Progress (4): 397/843 kB | 32/237 kB | 0.1/1.8 MB | 7.7/24 kB
+Progress (4): 397/843 kB | 32/237 kB | 0.1/1.8 MB | 16/24 kB 
+Progress (4): 397/843 kB | 32/237 kB | 0.1/1.8 MB | 24 kB   
+Progress (4): 397/843 kB | 32/237 kB | 0.1/1.8 MB | 24 kB
+Progress (4): 397/843 kB | 32/237 kB | 0.1/1.8 MB | 24 kB
+                                                         
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-jcl/6.0.10/spring-jcl-6.0.10.jar (24 kB at 40 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/1.5.8/plexus-utils-1.5.8.jar
+Progress (3): 397/843 kB | 32/237 kB | 0.1/1.8 MB
+Progress (3): 413/843 kB | 32/237 kB | 0.1/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.1/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.1/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 32/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 49/237 kB | 0.2/1.8 MB
+Progress (3): 430/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 446/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 446/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 463/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.3/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.4/1.8 MB
+Progress (3): 479/843 kB | 49/237 kB | 0.5/1.8 MB
+Progress (3): 479/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 495/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 495/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 495/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 495/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 512/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 528/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 544/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 561/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 577/843 kB | 65/237 kB | 0.5/1.8 MB
+Progress (3): 577/843 kB | 81/237 kB | 0.5/1.8 MB
+Progress (3): 594/843 kB | 81/237 kB | 0.5/1.8 MB
+Progress (3): 594/843 kB | 98/237 kB | 0.5/1.8 MB
+Progress (3): 610/843 kB | 98/237 kB | 0.5/1.8 MB
+Progress (3): 626/843 kB | 98/237 kB | 0.5/1.8 MB
+Progress (3): 643/843 kB | 98/237 kB | 0.5/1.8 MB
+Progress (3): 659/843 kB | 98/237 kB | 0.5/1.8 MB
+Progress (3): 659/843 kB | 114/237 kB | 0.5/1.8 MB
+Progress (3): 676/843 kB | 114/237 kB | 0.5/1.8 MB
+Progress (3): 692/843 kB | 114/237 kB | 0.5/1.8 MB
+Progress (3): 692/843 kB | 131/237 kB | 0.5/1.8 MB
+Progress (3): 708/843 kB | 131/237 kB | 0.5/1.8 MB
+Progress (3): 725/843 kB | 131/237 kB | 0.5/1.8 MB
+Progress (4): 725/843 kB | 131/237 kB | 0.5/1.8 MB | 7.7/433 kB
+Progress (4): 725/843 kB | 131/237 kB | 0.5/1.8 MB | 16/433 kB 
+Progress (4): 725/843 kB | 131/237 kB | 0.5/1.8 MB | 32/433 kB
+Progress (4): 725/843 kB | 131/237 kB | 0.5/1.8 MB | 49/433 kB
+Progress (4): 725/843 kB | 131/237 kB | 0.5/1.8 MB | 65/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 65/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 81/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 98/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 114/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 131/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 147/433 kB
+Progress (4): 741/843 kB | 131/237 kB | 0.5/1.8 MB | 163/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 163/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 180/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 196/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 212/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 229/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 245/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 262/433 kB
+Progress (4): 741/843 kB | 147/237 kB | 0.5/1.8 MB | 278/433 kB
+Progress (4): 757/843 kB | 147/237 kB | 0.5/1.8 MB | 278/433 kB
+Progress (4): 757/843 kB | 147/237 kB | 0.5/1.8 MB | 294/433 kB
+Progress (4): 757/843 kB | 147/237 kB | 0.5/1.8 MB | 311/433 kB
+Progress (4): 757/843 kB | 163/237 kB | 0.5/1.8 MB | 311/433 kB
+Progress (4): 757/843 kB | 163/237 kB | 0.5/1.8 MB | 327/433 kB
+Progress (4): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 327/433 kB
+Progress (4): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 344/433 kB
+Progress (4): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 360/433 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 360/433 kB | 7.7/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 360/433 kB | 16/268 kB 
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 376/433 kB | 16/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 393/433 kB | 16/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 393/433 kB | 32/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 32/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 49/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 57/268 kB
+Progress (5): 774/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 73/268 kB
+Progress (5): 790/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 73/268 kB
+Progress (5): 790/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 90/268 kB
+Progress (5): 807/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 90/268 kB
+Progress (5): 807/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 106/268 kB
+Progress (5): 807/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 122/268 kB
+Progress (5): 823/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 122/268 kB
+Progress (5): 823/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 139/268 kB
+Progress (5): 823/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 155/268 kB
+Progress (5): 839/843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 155/268 kB
+Progress (5): 843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 155/268 kB    
+Progress (5): 843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 172/268 kB
+Progress (5): 843 kB | 163/237 kB | 0.5/1.8 MB | 409/433 kB | 188/268 kB
+                                                                        
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.2.3/httpclient5-5.2.3.jar (843 kB at 1.2 MB/s)
+Progress (4): 163/237 kB | 0.5/1.8 MB | 409/433 kB | 204/268 kB
+Progress (4): 163/237 kB | 0.5/1.8 MB | 409/433 kB | 221/268 kB
+Progress (4): 180/237 kB | 0.5/1.8 MB | 409/433 kB | 221/268 kB
+Progress (4): 180/237 kB | 0.5/1.8 MB | 409/433 kB | 221/268 kB
+Progress (4): 180/237 kB | 0.5/1.8 MB | 409/433 kB | 237/268 kB
+Progress (4): 180/237 kB | 0.5/1.8 MB | 409/433 kB | 237/268 kB
+Progress (4): 180/237 kB | 0.5/1.8 MB | 409/433 kB | 254/268 kB
+Progress (4): 196/237 kB | 0.5/1.8 MB | 409/433 kB | 254/268 kB
+Progress (4): 196/237 kB | 0.5/1.8 MB | 425/433 kB | 254/268 kB
+Progress (4): 196/237 kB | 0.5/1.8 MB | 425/433 kB | 268 kB    
+Progress (4): 196/237 kB | 0.5/1.8 MB | 433 kB | 268 kB    
+Progress (4): 196/237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 212/237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 212/237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 229/237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 229/237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.6/1.8 MB | 433 kB | 268 kB    
+Progress (4): 237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.6/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.7/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.8/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.9/1.8 MB | 433 kB | 268 kB
+Progress (4): 237 kB | 0.9/1.8 MB | 433 kB | 268 kB
+                                                   
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.2.4/httpcore5-h2-5.2.4.jar (237 kB at 317 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/1.5.8/plexus-utils-1.5.8.jar (268 kB at 358 kB/s)
+Progress (2): 0.9/1.8 MB | 433 kB
+                                 
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-loader-tools/3.2.1/spring-boot-loader-tools-3.2.1.jar (433 kB at 578 kB/s)
+Progress (1): 0.9/1.8 MB
+Progress (1): 0.9/1.8 MB
+Progress (1): 0.9/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.0/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.1/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.2/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.3/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.4/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.5/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.6/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.7/1.8 MB
+Progress (1): 1.8/1.8 MB
+Progress (1): 1.8/1.8 MB
+Progress (1): 1.8/1.8 MB
+Progress (1): 1.8/1.8 MB
+Progress (1): 1.8 MB    
+                    
+Downloaded from central: https://repo.maven.apache.org/maven2/org/springframework/spring-core/6.0.10/spring-core-6.0.10.jar (1.8 MB at 2.2 MB/s)
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.1)
+
+2026-03-05T12:53:37.409+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] c.s.r.RetailChainServiceApplication      : Starting RetailChainServiceApplication using Java 21.0.9 with PID 30916 (D:\Inteliji-Project\RetailChainManagement\RetailChainService\target\classes started by thangnd04 in D:\Inteliji-Project\RetailChainManagement\RetailChainService)
+2026-03-05T12:53:37.411+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] c.s.r.RetailChainServiceApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-03-05T12:53:37.530+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-03-05T12:53:37.530+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-03-05T12:53:38.929+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-05T12:53:38.930+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
+2026-03-05T12:53:38.966+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.InventoryDocumentItemRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.967+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.InventoryDocumentRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.967+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.InventoryHistoryRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.968+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.InventoryStockRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.970+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.ProductRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.971+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.ProductVariantRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.972+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.StoreRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.973+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.StoreWarehouseRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.973+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.SupplierRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.980+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.UserRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.980+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .RepositoryConfigurationExtensionSupport : Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.sba301.retailmanagement.repository.WarehouseRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table.
+2026-03-05T12:53:38.981+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 47 ms. Found 0 JDBC repository interfaces.
+2026-03-05T12:53:38.993+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-03-05T12:53:38.993+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-05T12:53:39.076+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 80 ms. Found 11 JPA repository interfaces.
+2026-03-05T12:53:39.712+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-03-05T12:53:39.729+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-03-05T12:53:39.729+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.17]
+2026-03-05T12:53:39.803+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.a.c.c.C.[.[localhost].[/retail-chain]  : Initializing Spring embedded WebApplicationContext
+2026-03-05T12:53:39.806+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2272 ms
+2026-03-05T12:53:39.932+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-05T12:53:39.993+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-03-05T12:53:40.029+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-03-05T12:53:40.233+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-05T12:53:40.259+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-05T12:53:41.634+07:00 ERROR 30916 --- [RetailChainService] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Exception during pool initialization.
+
+java.sql.SQLException: Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:428) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.delegateWork(JdbcIsolationDelegate.java:61) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.getJdbcEnvironmentUsingJdbcMetadata(JdbcEnvironmentInitiator.java:276) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:107) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:68) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:129) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:238) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.model.relational.Database.<init>(Database.java:45) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.getDatabase(InFlightMetadataCollectorImpl.java:223) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.<init>(InFlightMetadataCollectorImpl.java:191) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:170) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:1432) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1503) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347) ~[spring-boot-3.2.1.jar:3.2.1]
+	at com.sba301.retailmanagement.RetailChainServiceApplication.main(RetailChainServiceApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.2.1.jar:3.2.1]
+
+2026-03-05T12:53:41.643+07:00  WARN 30916 --- [RetailChainService] [  restartedMain] o.h.e.j.e.i.JdbcEnvironmentInitiator     : HHH000342: Could not obtain connection to query metadata
+
+java.lang.NullPointerException: Cannot invoke "org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(java.sql.SQLException, String)" because the return value of "org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.sqlExceptionHelper()" is null
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.delegateWork(JdbcIsolationDelegate.java:116) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.getJdbcEnvironmentUsingJdbcMetadata(JdbcEnvironmentInitiator.java:276) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:107) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:68) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:129) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:238) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.model.relational.Database.<init>(Database.java:45) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.getDatabase(InFlightMetadataCollectorImpl.java:223) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.<init>(InFlightMetadataCollectorImpl.java:191) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:170) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:1432) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1503) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347) ~[spring-boot-3.2.1.jar:3.2.1]
+	at com.sba301.retailmanagement.RetailChainServiceApplication.main(RetailChainServiceApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.2.1.jar:3.2.1]
+
+2026-03-05T12:53:41.670+07:00  WARN 30916 --- [RetailChainService] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-05T12:53:43.351+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-05T12:53:43.380+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-03-05T12:53:44.406+07:00 ERROR 30916 --- [RetailChainService] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Exception during pool initialization.
+
+java.sql.SQLException: Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:428) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:46) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:39) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcConnection(ImprovedExtractionContextImpl.java:63) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcDatabaseMetaData(ImprovedExtractionContextImpl.java:70) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.InformationExtractorJdbcDatabaseMetaDataImpl.processTableResultSet(InformationExtractorJdbcDatabaseMetaDataImpl.java:64) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.AbstractInformationExtractorImpl.getTables(AbstractInformationExtractorImpl.java:570) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.getTablesInformation(DatabaseInformationImpl.java:122) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:72) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:232) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:117) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:286) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:145) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429) ~[na:na]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:142) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:315) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:450) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1507) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347) ~[spring-boot-3.2.1.jar:3.2.1]
+	at com.sba301.retailmanagement.RetailChainServiceApplication.main(RetailChainServiceApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.2.1.jar:3.2.1]
+
+2026-03-05T12:53:44.417+07:00  WARN 30916 --- [RetailChainService] [  restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 1045, SQLState: 28000
+2026-03-05T12:53:44.417+07:00 ERROR 30916 --- [RetailChainService] [  restartedMain] o.h.engine.jdbc.spi.SqlExceptionHelper   : Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)
+2026-03-05T12:53:44.425+07:00 ERROR 30916 --- [RetailChainService] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Failed to initialize JPA EntityManagerFactory: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.GenericJDBCException: Unable to open JDBC Connection for DDL execution [Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)] [n/a]
+2026-03-05T12:53:44.425+07:00  WARN 30916 --- [RetailChainService] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.GenericJDBCException: Unable to open JDBC Connection for DDL execution [Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)] [n/a]
+2026-03-05T12:53:44.427+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-03-05T12:53:44.442+07:00  INFO 30916 --- [RetailChainService] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-03-05T12:53:44.469+07:00 ERROR 30916 --- [RetailChainService] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.GenericJDBCException: Unable to open JDBC Connection for DDL execution [Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)] [n/a]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1773) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1232) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.2.jar:6.1.2]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:762) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:464) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1358) ~[spring-boot-3.2.1.jar:3.2.1]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1347) ~[spring-boot-3.2.1.jar:3.2.1]
+	at com.sba301.retailmanagement.RetailChainServiceApplication.main(RetailChainServiceApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.2.1.jar:3.2.1]
+Caused by: jakarta.persistence.PersistenceException: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.GenericJDBCException: Unable to open JDBC Connection for DDL execution [Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)] [n/a]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:421) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.2.jar:6.1.2]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.2.jar:6.1.2]
+	... 19 common frames omitted
+Caused by: org.hibernate.exception.GenericJDBCException: Unable to open JDBC Connection for DDL execution [Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)] [n/a]
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:63) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:74) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:39) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcConnection(ImprovedExtractionContextImpl.java:63) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcDatabaseMetaData(ImprovedExtractionContextImpl.java:70) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.InformationExtractorJdbcDatabaseMetaDataImpl.processTableResultSet(InformationExtractorJdbcDatabaseMetaDataImpl.java:64) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.AbstractInformationExtractorImpl.getTables(AbstractInformationExtractorImpl.java:570) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.getTablesInformation(DatabaseInformationImpl.java:122) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:72) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:232) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:117) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:286) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:145) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429) ~[na:na]
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:142) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:315) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:450) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1507) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376) ~[spring-orm-6.1.2.jar:6.1.2]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409) ~[spring-orm-6.1.2.jar:6.1.2]
+	... 23 common frames omitted
+Caused by: java.sql.SQLException: Access denied for user '${DB_USERNAME}'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188) ~[mysql-connector-j-8.1.0.jar:8.1.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:na]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:428) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:46) ~[hibernate-core-6.4.1.Final.jar:6.4.1.Final]
+	... 44 common frames omitted
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.446 s
+[INFO] Finished at: 2026-03-05T12:53:44+07:00
+[INFO] ------------------------------------------------------------------------
