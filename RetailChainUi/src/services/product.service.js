@@ -22,6 +22,11 @@ const productService = {
     return response;
   },
 
+  createProductVariant: async (productId, data) => {
+    const response = await axiosPrivate.post(`${PRODUCT_API_PATH}/${productId}/variants`, data);
+    return response;
+  },
+
   updateProduct: async (slug, data) => {
     const response = await axiosPrivate.put(`${PRODUCT_API_PATH}/${slug}`, data);
     return response;

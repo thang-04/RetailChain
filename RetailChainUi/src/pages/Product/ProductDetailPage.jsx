@@ -13,10 +13,13 @@ import {
     Calendar,
     Hash,
     Layers,
-    UserCircle2
+    UserCircle2,
+    Plus,
+    CircleDollarSign
 } from "lucide-react";
 import productService from "@/services/product.service";
 import inventoryService from "@/services/inventory.service";
+import ProductVariantForm from "./components/ProductVariantForm/ProductVariantForm";
 
 const ProductDetailPage = () => {
     const { slug } = useParams();
@@ -26,6 +29,10 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [chainStock, setChainStock] = useState([]);
+
+    // Variant states
+    const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
+    const [savingVariant, setSavingVariant] = useState(false);
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -62,6 +69,28 @@ const ProductDetailPage = () => {
     const getCategoryName = (id) => {
         const cat = categories.find(c => c.id === id);
         return cat ? cat.name : "Unknown";
+    };
+
+    const handleCreateVariant = async (formData) => {
+        if (!product?.id) return;
+        setSavingVariant(true);
+        try {
+            await productService.createProductVariant(product.id, formData);
+            // Refresh product details to get new variants
+            const productRes = await productService.getProductBySlug(slug);
+            setProduct(productRes.data);
+
+            // Refresh stock table if an initial quantity was added
+            const realStockRes = await inventoryService.getStockByProduct(product.id);
+            setChainStock(realStockRes.data || []);
+
+            setIsVariantFormOpen(false);
+        } catch (error) {
+            console.error("Failed to add variant", error);
+            alert("Failed to add variant: " + (error.response?.data?.desc || error.message));
+        } finally {
+            setSavingVariant(false);
+        }
     };
 
     if (fetching) {
@@ -172,6 +201,58 @@ const ProductDetailPage = () => {
                             <div className="space-y-4">
                                 <div className="flex items-end justify-between px-1">
                                     <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Package className="w-5 h-5 text-primary" /> Product Variants
+                                        </h3>
+                                        <p className="text-sm text-slate-500">Different colors and sizes available.</p>
+                                    </div>
+                                    <Button onClick={() => setIsVariantFormOpen(true)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white">
+                                        <Plus className="w-4 h-4 mr-2" /> Add Variant
+                                    </Button>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                                    <table className="w-full text-left border-collapse text-sm">
+                                        <thead>
+                                            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
+                                                <th className="px-6 py-4">SKU</th>
+                                                <th className="px-6 py-4">Color</th>
+                                                <th className="px-6 py-4">Size</th>
+                                                <th className="px-6 py-4 text-right">Price</th>
+                                                <th className="px-6 py-4 text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {product.variants && product.variants.length > 0 ? product.variants.map((v, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="px-6 py-4 font-mono font-medium text-slate-900 dark:text-white">
+                                                        {v.sku}
+                                                    </td>
+                                                    <td className="px-6 py-4">{v.color}</td>
+                                                    <td className="px-6 py-4">{v.size}</td>
+                                                    <td className="px-6 py-4 text-right font-bold text-green-600 dark:text-green-400">
+                                                        ${v.price?.toLocaleString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        {v.status === 1 ? (
+                                                            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">ACTIVE</span>
+                                                        ) : (
+                                                            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">INACTIVE</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">No variants exist for this product. Add one above!</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                <div className="flex items-end justify-between px-1">
+                                    <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Chain Inventory</h3>
                                         <p className="text-sm text-slate-500">Stock availability across all locations.</p>
                                     </div>
@@ -225,6 +306,14 @@ const ProductDetailPage = () => {
             <div className="h-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Nexus Retail Systems • Enterprise Management</p>
             </div>
+
+            <ProductVariantForm
+                open={isVariantFormOpen}
+                onOpenChange={setIsVariantFormOpen}
+                onSubmit={handleCreateVariant}
+                loading={savingVariant}
+                product={product}
+            />
         </div>
     );
 };
