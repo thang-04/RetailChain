@@ -1,19 +1,27 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
+import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
 import com.sba301.retailmanagement.entity.ProductCategory;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.entity.InventoryStock;
+import com.sba301.retailmanagement.entity.InventoryStockId;
+import com.sba301.retailmanagement.entity.Warehouse;
 import com.sba301.retailmanagement.enums.Gender;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
+import com.sba301.retailmanagement.repository.ProductCategoryRepository;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
+import com.sba301.retailmanagement.repository.InventoryStockRepository;
+import com.sba301.retailmanagement.repository.WarehouseRepository;
 import com.sba301.retailmanagement.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -29,7 +37,9 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final com.sba301.retailmanagement.repository.ProductCategoryRepository productCategoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final InventoryStockRepository inventoryStockRepository;
+    private final WarehouseRepository warehouseRepository;
 
     @Override
     public List<ProductResponse> getAllProducts() {
@@ -133,6 +143,76 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return String.format("%s-%03d", prefix, nextId);
+    }
+
+    @Override
+    @Transactional
+    public ProductVariantResponse createProductVariant(Long productId, ProductVariantRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        ProductVariant variant = new ProductVariant();
+        variant.setProductId(productId);
+
+        // Use provided SKU or generate one: PRODCODE-COLOR-SIZE
+        if (request.getSku() != null && !request.getSku().trim().isEmpty()) {
+            variant.setSku(request.getSku());
+        } else {
+            String colorStr = request.getColor() != null ? request.getColor().toUpperCase().replaceAll("\\s+", "")
+                    : "NOCLR";
+            String sizeStr = request.getSize() != null ? request.getSize().toUpperCase().replaceAll("\\s+", "")
+                    : "NOSIZE";
+            variant.setSku(product.getCode() + "-" + colorStr + "-" + sizeStr);
+        }
+
+        variant.setBarcode(request.getBarcode());
+        variant.setSize(request.getSize());
+        variant.setColor(request.getColor());
+        variant.setPrice(request.getPrice());
+        variant.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        variant.setCreatedAt(LocalDateTime.now());
+        variant.setUpdatedAt(LocalDateTime.now());
+
+        ProductVariant savedVariant = productVariantRepository.save(variant);
+
+        if (request.getInitialQuantity() != null && request.getInitialQuantity() > 0) {
+            Long warehouseId = request.getWarehouseId();
+            Warehouse warehouse;
+            if (warehouseId == null) {
+                // If not provided, try to find the very first warehouse
+                List<Warehouse> warehouses = warehouseRepository.findAll();
+                if (warehouses.isEmpty()) {
+                    throw new ResourceNotFoundException("No warehouses exist to store initial stock");
+                }
+                warehouse = warehouses.get(0);
+            } else {
+                warehouse = warehouseRepository.findById(warehouseId)
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Warehouse not found with id: " + warehouseId));
+            }
+
+            InventoryStock stock = new InventoryStock();
+            stock.setId(new InventoryStockId(warehouse.getId(), savedVariant.getId()));
+            stock.setWarehouse(warehouse);
+            stock.setVariant(savedVariant);
+            stock.setQuantity(request.getInitialQuantity());
+            stock.setUpdatedAt(LocalDateTime.now());
+            inventoryStockRepository.save(stock);
+        }
+
+        ProductVariantResponse vDto = new ProductVariantResponse();
+        vDto.setId(savedVariant.getId());
+        vDto.setProductId(savedVariant.getProductId());
+        vDto.setSku(savedVariant.getSku());
+        vDto.setBarcode(savedVariant.getBarcode());
+        vDto.setSize(savedVariant.getSize());
+        vDto.setColor(savedVariant.getColor());
+        vDto.setPrice(savedVariant.getPrice());
+        vDto.setStatus(savedVariant.getStatus());
+        vDto.setCreatedAt(savedVariant.getCreatedAt());
+        vDto.setUpdatedAt(savedVariant.getUpdatedAt());
+
+        return vDto;
     }
 
     @Override
