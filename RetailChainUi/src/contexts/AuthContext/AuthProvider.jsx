@@ -62,6 +62,11 @@ export const AuthProvider = ({ children }) => {
     const isStoreManager = () => hasRole('STORE_MANAGER');
     const isStaff = () => hasRole('STAFF');
 
+    const hasPermission = (permission) => {
+        if (!user || !user.permissions) return false;
+        return user.permissions.includes(permission);
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -71,7 +76,8 @@ export const AuthProvider = ({ children }) => {
             isSuperAdmin,
             isStoreManager,
             isStaff,
-            hasRole
+            hasRole,
+            hasPermission
         }}>
             {!loading && children}
         </AuthContext.Provider>

@@ -29,6 +29,7 @@ public class UserDTO implements Serializable {
     String avatarUrl;
     Integer status;
     List<String> roles;
+    List<String> permissions;
     Long storeId;
     String storeCode;
     String storeName;

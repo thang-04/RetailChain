@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain') + '/api';
 
@@ -83,9 +84,8 @@ axiosPrivate.interceptors.response.use(
 
     // Catch 403 Forbidden from Backend @PreAuthorize 
     if (error.response?.status === 403) {
-      if (window.location.pathname !== '/403') {
-        window.location.href = '/403';
-      }
+      toast.error('Bạn không có quyền thực hiện hành động này!');
+      return Promise.reject(error);
     }
 
     if (error.response) return Promise.reject(error);
