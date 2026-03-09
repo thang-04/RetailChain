@@ -5,7 +5,7 @@ import useAuth from "../../../contexts/AuthContext/useAuth";
 
 const Sidebar = () => {
   const location = useLocation();
-  const { user, isSuperAdmin, isStoreManager, isStaff, hasRole } = useAuth();
+  const { user, isSuperAdmin, isStoreManager, isStaff, hasRole, hasPermission } = useAuth();
 
   const menuItems = [
     {
@@ -19,74 +19,74 @@ const Sidebar = () => {
       path: isSuperAdmin() ? "/store" : (user?.storeCode ? `/store/${user.storeCode}` : (user?.storeId ? `/store/${user.storeId}` : "#")),
       label: isSuperAdmin() ? "Stores" : "My Store",
       icon: "storefront",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('STORE_VIEW') || isStoreManager(),
     },
     {
       path: "/warehouse",
       label: "Central Warehouse",
       icon: "warehouse",
-      show: isSuperAdmin(),
+      show: hasPermission('WAREHOUSE_VIEW'),
     },
     {
       path: "/products",
       label: "Products",
       icon: "inventory_2",
-      show: true,
+      show: hasPermission('PRODUCT_VIEW') || isStoreManager() || isStaff(), // Defaulting to true for now since previous was true, but enforcing permission
     },
     {
       path: "/inventory",
       label: "Inventory",
       icon: "inventory",
-      show: true,
+      show: hasPermission('INVENTORY_VIEW') || isStoreManager() || isStaff(),
     },
     {
       path: "/stock-in",
       label: "Stock In",
       icon: "input_circle",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('INVENTORY_CREATE'),
     },
     {
       path: "/stock-out",
       label: "Stock Out",
       icon: "output_circle",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('INVENTORY_CREATE'),
     },
     {
       path: "/inventory/ledger",
       label: "Stock Ledger",
       icon: "history",
-      show: true,
+      show: hasPermission('INVENTORY_VIEW') || isStoreManager() || isStaff(),
     },
     {
       path: "/reports",
       label: "Reports",
       icon: "bar_chart",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('REPORT_SYSTEM_VIEW') || hasPermission('REPORT_STORE_VIEW') || isStoreManager(),
     },
     {
       path: "/staff",
       label: "Human Resources",
       icon: "badge",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('STAFF_VIEW'),
     },
     {
       path: "/roles",
       label: "Roles & Permissions",
       icon: "admin_panel_settings",
-      show: isSuperAdmin(),
+      show: hasPermission('ROLE_VIEW'),
     },
     {
       path: "/users",
       label: "User Management",
       icon: "manage_accounts",
-      show: isSuperAdmin() || isStoreManager(),
+      show: hasPermission('STAFF_VIEW'),
     },
     {
       path: "/staff/shifts",
       label: "Staff Shifts",
       icon: "calendar_month",
       filledIcon: true,
-      show: isStoreManager(),
+      show: hasPermission('STAFF_VIEW') || isStoreManager(),
     }
   ];
 

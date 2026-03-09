@@ -295,6 +295,19 @@ public class UserServiceImpl implements UserService {
                 ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                 : List.of();
 
+        List<String> permissions = user.getRoles() != null
+                ? user.getRoles().stream()
+                        .flatMap(role -> {
+                                if (role.getPermissions() != null) {
+                                        return role.getPermissions().stream();
+                                }
+                                return java.util.stream.Stream.empty();
+                        })
+                        .map(com.sba301.retailmanagement.entity.Permission::getName)
+                        .distinct()
+                        .collect(Collectors.toList())
+                : List.of();
+
         UserDTO dto = UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -303,6 +316,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(user.getPhone())
                 .status(user.getStatus())
                 .roles(roleNames)
+                .permissions(permissions)
                 // Scope info
                 .storeId(user.getStoreId())
                 .build();

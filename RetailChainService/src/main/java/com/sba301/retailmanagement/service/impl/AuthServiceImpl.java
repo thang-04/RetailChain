@@ -164,6 +164,19 @@ public class AuthServiceImpl implements AuthService {
                                 ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
                                 : List.of();
 
+                List<String> permissions = user.getRoles() != null
+                                ? user.getRoles().stream()
+                                        .flatMap(role -> {
+                                                if (role.getPermissions() != null) {
+                                                        return role.getPermissions().stream();
+                                                }
+                                                return java.util.stream.Stream.empty();
+                                        })
+                                        .map(com.sba301.retailmanagement.entity.Permission::getName)
+                                        .distinct()
+                                        .collect(Collectors.toList())
+                                : List.of();
+
                 UserDTO dto = UserDTO.builder()
                                 .id(user.getId())
                                 .email(user.getEmail())
@@ -171,6 +184,7 @@ public class AuthServiceImpl implements AuthService {
                                 .phoneNumber(user.getPhone())
                                 .status(user.getStatus())
                                 .roles(roleNames)
+                                .permissions(permissions)
                                 .storeId(user.getStoreId())
                                 .build();
                                 
