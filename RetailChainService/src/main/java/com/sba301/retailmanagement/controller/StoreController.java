@@ -2,12 +2,17 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
+import com.sba301.retailmanagement.dto.response.UserResponse;
+import com.sba301.retailmanagement.entity.User;
+import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.service.StoreService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 import org.springframework.security.access.prepost.PreAuthorize;
 import static com.sba301.retailmanagement.security.SecurityConstants.*;
@@ -19,6 +24,9 @@ import static com.sba301.retailmanagement.security.SecurityConstants.*;
 public class StoreController {
 
     private final StoreService storeService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PreAuthorize("hasAuthority('" + STORE_VIEW + "')")
     @GetMapping
@@ -95,6 +103,30 @@ public class StoreController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating store: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/staff-list")
+    public String getStoreStaffList(@PathVariable Long id) {
+        String prefix = "[getStoreStaffList]|storeId=" + id;
+        log.info("{}|START", prefix);
+        try {
+            List<User> users = userRepository.findByStoreId(id);
+            List<UserResponse> result = users.stream()
+                    .map(u -> new UserResponse(
+                            u.getId(),
+                            u.getStoreId(),
+                            u.getUsername(),
+                            u.getFullName(),
+                            u.getPhone(),
+                            u.getEmail(),
+                            u.getStatus()))
+                    .collect(Collectors.toList());
+            log.info("{}|END|size={}", prefix, result.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff list success", result);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving staff list: " + e.getMessage());
         }
     }
 
