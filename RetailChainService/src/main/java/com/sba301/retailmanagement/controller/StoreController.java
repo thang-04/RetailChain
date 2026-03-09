@@ -2,7 +2,7 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
-import com.sba301.retailmanagement.dto.response.UserResponse;
+import com.sba301.retailmanagement.dto.response.UserDTO;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.service.StoreService;
@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 import org.springframework.security.access.prepost.PreAuthorize;
 import static com.sba301.retailmanagement.security.SecurityConstants.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -112,15 +115,16 @@ public class StoreController {
         log.info("{}|START", prefix);
         try {
             List<User> users = userRepository.findByStoreId(id);
-            List<UserResponse> result = users.stream()
-                    .map(u -> new UserResponse(
-                            u.getId(),
-                            u.getStoreId(),
-                            u.getUsername(),
-                            u.getFullName(),
-                            u.getPhone(),
-                            u.getEmail(),
-                            u.getStatus()))
+            List<UserDTO> result = users.stream()
+                    .map(u -> UserDTO.builder()
+                            .id(u.getId())
+                            .storeId(u.getStoreId())
+                            .username(u.getUsername())
+                            .fullName(u.getFullName())
+                            .phoneNumber(u.getPhone())
+                            .email(u.getEmail())
+                            .status(u.getStatus())
+                            .build())
                     .collect(Collectors.toList());
             log.info("{}|END|size={}", prefix, result.size());
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff list success", result);
