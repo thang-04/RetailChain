@@ -36,12 +36,29 @@ public class CustomUserDetails implements UserDetails {
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 
         if (roles != null) {
-            roles.forEach(role -> {
-                if (role.getPermissions() != null) {
-                    role.getPermissions()
-                            .forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getName())));
+            boolean isSuperAdmin = roles.stream()
+                    .anyMatch(r -> "super_admin".equalsIgnoreCase(r.getCode()));
+
+            if (isSuperAdmin) {
+                try {
+                    for (java.lang.reflect.Field field : SecurityConstants.class.getDeclaredFields()) {
+                        if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                                && field.getType() == String.class) {
+                            authorities.add(new SimpleGrantedAuthority((String) field.get(null)));
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore reflection errors mapping constants
                 }
-            });
+            } else {
+                roles.forEach(role -> {
+                    if (role.getPermissions() != null) {
+                        role.getPermissions()
+                                .forEach(permission -> authorities
+                                        .add(new SimpleGrantedAuthority(permission.getName())));
+                    }
+                });
+            }
         }
 
         return authorities;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '../../contexts/AuthContext/useAuth';
 
-const ProtectedRoute = ({ allowedRoles }) => {
+const ProtectedRoute = ({ allowedRoles, children }) => {
     const { user, loading, hasRole } = useAuth();
 
     if (loading) return <div>Loading...</div>;
@@ -18,7 +18,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
         }
     }
 
-    return <Outlet />;
+    return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

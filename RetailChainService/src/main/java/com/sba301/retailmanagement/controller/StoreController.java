@@ -142,4 +142,20 @@ public class StoreController {
         return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get store staff success",
                 java.util.Collections.emptyList());
     }
+
+    @PreAuthorize("hasAuthority('" + STORE_UPDATE + "')")
+    @PostMapping("/{id}/staff")
+    public String assignStaffToStore(@PathVariable Long id, @RequestBody List<Long> staffIds) {
+        String prefix = "[assignStaffToStore]|storeId=" + id;
+        try {
+            log.info("{}|START", prefix);
+            storeService.assignStaffToStore(id, staffIds);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Assign staff to store successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error assigning staff to store: " + e.getMessage());
+        }
+    }
 }

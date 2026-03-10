@@ -15,17 +15,19 @@ const StoreStaffPage = () => {
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("All");
 
+    const fetchStaff = async () => {
+        setLoading(true);
+        try {
+            const data = await storeService.getStoreById(id);
+            setStaffList(data.staff || []);
+        } catch (error) {
+            console.error("Failed to fetch staff list:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchStaff = async () => {
-            try {
-                const data = await storeService.getStoreById(id);
-                setStaffList(data.staff || []);
-            } catch (error) {
-                console.error("Failed to fetch staff list:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStaff();
     }, [id]);
 
@@ -194,6 +196,11 @@ const StoreStaffPage = () => {
             <AddStaffModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
+                storeId={id}
+                onSuccess={() => {
+                    setIsAddModalOpen(false);
+                    fetchStaff();
+                }}
             />
         </div>
     );

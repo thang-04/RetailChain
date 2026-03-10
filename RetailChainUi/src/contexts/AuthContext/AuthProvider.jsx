@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     const hasRole = (role) => {
         if (!user || (!user.roles && !user.role)) return false;
         const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
-        return userRoles.includes(role);
+        return userRoles.some(r => r && typeof r === 'string' && r.toUpperCase() === role.toUpperCase());
     };
 
     const isSuperAdmin = () => hasRole('SUPER_ADMIN');
@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
     const isStaff = () => hasRole('STAFF');
 
     const hasPermission = (permission) => {
+        if (isSuperAdmin()) return true;
         if (!user || !user.permissions) return false;
         return user.permissions.includes(permission);
     };

@@ -5,9 +5,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import storeService from '@/services/store.service';
+import useAuth from '@/contexts/AuthContext/useAuth';
 
 const StoreInventoryDetail = () => {
     const { id } = useParams();
+    const { isSuperAdmin } = useAuth();
     const [store, setStore] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -41,10 +43,12 @@ const StoreInventoryDetail = () => {
                     <h2 className="text-3xl font-bold tracking-tight">Store Inventory: {store.name}</h2>
                     <p className="text-muted-foreground">Real-time stock levels at {store.address}</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">Request Stock</Button>
-                    <Button variant="destructive">Report Loss</Button>
-                </div>
+                {!isSuperAdmin() && (
+                    <div className="flex gap-2">
+                        <Button variant="outline">Request Stock</Button>
+                        <Button variant="destructive">Report Loss</Button>
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">

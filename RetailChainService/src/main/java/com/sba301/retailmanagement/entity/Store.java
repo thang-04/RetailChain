@@ -31,6 +31,7 @@ public class Store {
     @Column(name = "address", length = 500)
     private String address;
 
+    @Builder.Default
     @Column(name = "status", nullable = false)
     private Integer status = 1;
 
@@ -39,6 +40,10 @@ public class Store {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
     @PrePersist
     protected void onCreate() {
