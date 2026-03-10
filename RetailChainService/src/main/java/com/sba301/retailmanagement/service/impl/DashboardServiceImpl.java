@@ -1,29 +1,25 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.response.DashboardKpiItemDTO;
-import com.sba301.retailmanagement.dto.response.DashboardStoreRankingDTO;
-import com.sba301.retailmanagement.dto.response.DashboardStoreRowDTO;
 import com.sba301.retailmanagement.dto.response.DashboardSummaryResponse;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.RevenueDataDTO;
-import com.sba301.retailmanagement.entity.Store;
+import com.sba301.retailmanagement.repository.DashboardRepository;
 import com.sba301.retailmanagement.repository.InventoryDocumentRepository;
-import com.sba301.retailmanagement.repository.InventoryStockRepository;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
 import com.sba301.retailmanagement.repository.StoreRepository;
-import com.sba301.retailmanagement.repository.StoreWarehouseRepository;
 import com.sba301.retailmanagement.service.DashboardService;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +32,9 @@ public class DashboardServiceImpl implements DashboardService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final StoreRepository storeRepository;
-    private final StoreWarehouseRepository storeWarehouseRepository;
-    private final InventoryStockRepository inventoryStockRepository;
     private final InventoryDocumentRepository inventoryDocumentRepository;
     private final InventoryService inventoryService;
+    private final DashboardRepository dashboardRepository;
 
     @Override
     public DashboardSummaryResponse getSummary(String timeRange) {
@@ -106,41 +101,10 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<RevenueDataDTO> revenueSeries = buildRevenueSeries(from, to);
 
-        List<Store> stores = storeRepository.findAll();
-        Map<Long, StoreAgg> storeAggMap = aggregateStoreInventory(stores);
+        var storeTable = dashboardRepository.getStoreTable();
+        var ranking = dashboardRepository.getStoreRanking(PageRequest.of(0, 5));
 
-        List<DashboardStoreRankingDTO> ranking = storeAggMap.entrySet().stream()
-                .map(e -> {
-                    Store store = e.getValue().store;
-                    return DashboardStoreRankingDTO.builder()
-                            .storeId(store.getId())
-                            .storeCode(store.getCode())
-                            .storeName(store.getName())
-                            .stockQuantity(e.getValue().stockQuantity)
-                            .build();
-                })
-                .sorted(Comparator.comparing(DashboardStoreRankingDTO::getStockQuantity).reversed())
-                .limit(5)
-                .toList();
-
-        List<DashboardStoreRowDTO> storeTable = storeAggMap.entrySet().stream()
-                .map(e -> {
-                    StoreAgg agg = e.getValue();
-                    Store store = agg.store;
-                    return DashboardStoreRowDTO.builder()
-                            .storeId(store.getId())
-                            .storeCode(store.getCode())
-                            .storeName(store.getName())
-                            .address(store.getAddress())
-                            .status(store.getStatus())
-                            .stockQuantity(agg.stockQuantity)
-                            .lowStockCount(agg.lowStockCount)
-                            .build();
-                })
-                .sorted(Comparator.comparing(DashboardStoreRowDTO::getStockQuantity).reversed())
-                .toList();
-
-        log.info("{}|END|stores={}", prefix, stores.size());
+        log.info("{}|END|stores={}", prefix, storeTable != null ? storeTable.size() : 0);
         return DashboardSummaryResponse.builder()
                 .kpis(kpis)
                 .revenueSeries(revenueSeries)
@@ -178,29 +142,6 @@ public class DashboardServiceImpl implements DashboardService {
         return series;
     }
 
-    private Map<Long, StoreAgg> aggregateStoreInventory(List<Store> stores) {
-        Map<Long, StoreAgg> result = new HashMap<>();
-        for (Store store : stores) {
-            List<Long> warehouseIds = storeWarehouseRepository.findByStoreId(store.getId()).stream()
-                    .map(sw -> sw.getWarehouse() != null ? sw.getWarehouse().getId() : sw.getId().getWarehouseId())
-                    .filter(id -> id != null)
-                    .distinct()
-                    .toList();
-
-            long stockQty = 0L;
-            long lowStock = 0L;
-            if (!warehouseIds.isEmpty()) {
-                Long sum = inventoryStockRepository.sumQuantityByWarehouseIds(warehouseIds);
-                stockQty = sum != null ? sum : 0L;
-                Long cnt = inventoryStockRepository.countLowStockByWarehouseIds(warehouseIds, 10);
-                lowStock = cnt != null ? cnt : 0L;
-            }
-
-            result.put(store.getId(), new StoreAgg(store, stockQty, lowStock));
-        }
-        return result;
-    }
-
     private LocalDateTime resolveFrom(String timeRange, LocalDateTime toExclusive) {
         if (timeRange == null) timeRange = "30days";
         return switch (timeRange) {
@@ -219,16 +160,5 @@ public class DashboardServiceImpl implements DashboardService {
         };
     }
 
-    private static class StoreAgg {
-        final Store store;
-        final long stockQuantity;
-        final long lowStockCount;
-
-        StoreAgg(Store store, long stockQuantity, long lowStockCount) {
-            this.store = store;
-            this.stockQuantity = stockQuantity;
-            this.lowStockCount = lowStockCount;
-        }
-    }
 }
 
