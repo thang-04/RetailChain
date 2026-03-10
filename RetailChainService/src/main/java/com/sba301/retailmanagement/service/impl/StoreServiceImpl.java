@@ -4,8 +4,6 @@ import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
 import com.sba301.retailmanagement.dto.response.*;
 import com.sba301.retailmanagement.entity.Store;
-import com.sba301.retailmanagement.entity.StoreWarehouse;
-import com.sba301.retailmanagement.entity.StoreWarehouseId;
 import com.sba301.retailmanagement.entity.Warehouse;
 import com.sba301.retailmanagement.entity.InventoryStock;
 import com.sba301.retailmanagement.entity.User;
@@ -15,7 +13,6 @@ import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.mapper.StoreMapper;
 import com.sba301.retailmanagement.repository.StoreRepository;
-import com.sba301.retailmanagement.repository.StoreWarehouseRepository;
 import com.sba301.retailmanagement.repository.WarehouseRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.repository.InventoryStockRepository;
@@ -43,7 +40,6 @@ public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final StoreMapper storeMapper;
-    private final StoreWarehouseRepository storeWarehouseRepository;
     private final WarehouseRepository warehouseRepository;
     private final InventoryStockRepository inventoryStockRepository;
 
@@ -115,10 +111,7 @@ public class StoreServiceImpl implements StoreService {
             Store store = storeOptional.get();
             StoreDetailResponse response = storeMapper.toDetailResponse(store);
 
-            List<StoreWarehouse> storeWarehouses = storeWarehouseRepository.findByStoreId(store.getId());
-            if (!storeWarehouses.isEmpty()) {
-                response.setWarehouseId(storeWarehouses.get(0).getWarehouse().getId());
-            }
+            response.setWarehouseId(store.getWarehouseId());
 
             List<User> users = userRepository.findByStoreId(store.getId());
             User manager = users.stream()
@@ -235,28 +228,27 @@ public class StoreServiceImpl implements StoreService {
                 throw new IllegalArgumentException("Store code already exists");
             }
 
+            Warehouse warehouse = new Warehouse();
+            warehouse.setCode("WH_" + request.getCode());
+            warehouse.setName("Kho " + request.getName());
+            warehouse.setAddress(request.getAddress());
+            warehouse.setIsCentral(false);
+            warehouse.setStatus(1);
+            warehouse.setCreatedAt(LocalDateTime.now());
+            warehouse.setUpdatedAt(LocalDateTime.now());
+            Warehouse savedWarehouse = warehouseRepository.save(warehouse);
+
             Store store = storeMapper.toEntity(request);
+            store.setWarehouseId(savedWarehouse.getId());
             store.setCreatedAt(LocalDateTime.now());
             store.setUpdatedAt(LocalDateTime.now());
 
             Store savedStore = storeRepository.save(store);
 
-            if (request.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
-                if (warehouseOpt.isPresent()) {
-                    Warehouse warehouse = warehouseOpt.get();
-                    StoreWarehouse storeWarehouse = new StoreWarehouse();
-                    StoreWarehouseId id = new StoreWarehouseId(savedStore.getId(), warehouse.getId());
-                    storeWarehouse.setId(id);
-                    storeWarehouse.setStore(savedStore);
-                    storeWarehouse.setWarehouse(warehouse);
-                    storeWarehouseRepository.save(storeWarehouse);
-                }
-            }
-
             StoreResponse response = storeMapper.toResponse(savedStore);
+            response.setWarehouseId(savedWarehouse.getId());
 
-            log.info("{}|END|id={}", prefix, savedStore.getId());
+            log.info("{}|END|id={}, warehouseId={}", prefix, savedStore.getId(), savedWarehouse.getId());
             return response;
         } catch (IllegalArgumentException e) {
             throw e;
@@ -281,24 +273,21 @@ public class StoreServiceImpl implements StoreService {
             storeMapper.updateEntity(store, request);
             store.setUpdatedAt(LocalDateTime.now());
 
-            Store updatedStore = storeRepository.save(store);
-
-            storeWarehouseRepository.deleteByStoreId(store.getId());
-
-            if (request.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
-                if (warehouseOpt.isPresent()) {
-                    Warehouse warehouse = warehouseOpt.get();
-                    StoreWarehouse storeWarehouse = new StoreWarehouse();
-                    StoreWarehouseId id = new StoreWarehouseId(updatedStore.getId(), warehouse.getId());
-                    storeWarehouse.setId(id);
-                    storeWarehouse.setStore(updatedStore);
-                    storeWarehouse.setWarehouse(warehouse);
-                    storeWarehouseRepository.save(storeWarehouse);
-                }
+            if (request.getAddress() != null && store.getWarehouseId() != null) {
+                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(store.getWarehouseId());
+                warehouseOpt.ifPresent(warehouse -> {
+                    warehouse.setAddress(request.getAddress());
+                    warehouse.setUpdatedAt(LocalDateTime.now());
+                    warehouseRepository.save(warehouse);
+                });
             }
 
+            Store updatedStore = storeRepository.save(store);
+
             StoreResponse response = storeMapper.toResponse(updatedStore);
+            if (updatedStore.getWarehouseId() != null) {
+                response.setWarehouseId(updatedStore.getWarehouseId());
+            }
 
             log.info("{}|END", prefix);
             return response;
