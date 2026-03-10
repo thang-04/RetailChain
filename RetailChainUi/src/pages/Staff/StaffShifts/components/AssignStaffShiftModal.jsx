@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import shiftService from "@/services/shift.service";
-import { axiosPublic } from "@/services/api/axiosClient";
+import { axiosPrivate } from "@/services/api/axiosClient";
 
 const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) => {
     // State form
@@ -38,7 +38,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
     const loadStaffAndShifts = async () => {
         try {
             // Load nhân viên theo store
-            const staffRes = await axiosPublic.get(`/stores/${storeId}/staff-list`);
+            const staffRes = await axiosPrivate.get(`/stores/${storeId}/staff-list`);
             if (staffRes?.code === 200 && staffRes?.data) {
                 setStaffList(staffRes.data);
             }
@@ -61,6 +61,14 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
         }
         if (!workDate) {
             setError("Vui lòng chọn ngày làm việc");
+            return;
+        }
+        // Client-side past date check
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(workDate + "T00:00:00");
+        if (selected < today) {
+            setError("Không thể gán ca làm cho ngày đã qua");
             return;
         }
         if (!selectedShiftId) {
@@ -87,7 +95,23 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                 setError(result?.desc || "Có lỗi xảy ra khi phân công ca");
             }
         } catch (err) {
-            setError(err?.response?.data?.desc || "Có lỗi xảy ra khi phân công ca");
+            // Parse error message from backend response
+            let errorMsg = "Có lỗi xảy ra khi phân công ca";
+            if (err?.response?.data) {
+                const data = err.response.data;
+                // Backend returns String type (text/plain) which might be raw JSON string
+                if (typeof data === "string") {
+                    try {
+                        const parsed = JSON.parse(data);
+                        errorMsg = parsed?.desc || errorMsg;
+                    } catch {
+                        errorMsg = data;
+                    }
+                } else {
+                    errorMsg = data?.desc || errorMsg;
+                }
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -133,7 +157,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                                 {staffList.length > 0 ? (
                                     staffList.map(staff => (
                                         <SelectItem key={staff.id} value={String(staff.id)}>
-                                            {staff.fullName || staff.username} {staff.phone ? `(${staff.phone})` : ""}
+                                            {staff.fullName || staff.username} {staff.phoneNumber ? `(${staff.phoneNumber})` : ""}
                                         </SelectItem>
                                     ))
                                 ) : (

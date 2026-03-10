@@ -30,181 +30,220 @@ import java.util.stream.Collectors;
 @Service
 public class ShiftServiceImpl implements ShiftService {
 
-    @Autowired
-    private ShiftRepository shiftRepository;
+        @Autowired
+        private ShiftRepository shiftRepository;
 
-    @Autowired
-    private ShiftAssignmentRepository shiftAssignmentRepository;
+        @Autowired
+        private ShiftAssignmentRepository shiftAssignmentRepository;
 
-    @Autowired
-    private StoreRepository storeRepository;
+        @Autowired
+        private StoreRepository storeRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+        private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    // ==================== SHIFT CRUD ====================
+        // ==================== SHIFT CRUD ====================
 
-    @Override
-    public ShiftResponse createShift(ShiftRequest request) {
-        Store store = storeRepository.findById(request.getStoreId())
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id: " + request.getStoreId()));
+        @Override
+        public ShiftResponse createShift(ShiftRequest request) {
+                Store store = storeRepository.findById(request.getStoreId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Store not found with id: " + request.getStoreId()));
 
-        Shift shift = new Shift();
-        shift.setStoreId(request.getStoreId());
-        shift.setName(request.getName());
-        shift.setStartTime(LocalTime.parse(request.getStartTime(), TIME_FORMATTER));
-        shift.setEndTime(LocalTime.parse(request.getEndTime(), TIME_FORMATTER));
-        shift.setCreatedAt(LocalDateTime.now());
-        shift.setUpdatedAt(LocalDateTime.now());
+                Shift shift = new Shift();
+                shift.setStoreId(request.getStoreId());
+                shift.setName(request.getName());
+                shift.setStartTime(LocalTime.parse(request.getStartTime(), TIME_FORMATTER));
+                shift.setEndTime(LocalTime.parse(request.getEndTime(), TIME_FORMATTER));
+                shift.setCreatedAt(LocalDateTime.now());
+                shift.setUpdatedAt(LocalDateTime.now());
 
-        Shift saved = shiftRepository.save(shift);
-        return toShiftResponse(saved, store.getName());
-    }
-
-    @Override
-    public List<ShiftResponse> getAllShifts() {
-        return shiftRepository.findAll().stream()
-                .map(shift -> {
-                    String storeName = storeRepository.findById(shift.getStoreId())
-                            .map(Store::getName).orElse("Unknown");
-                    return toShiftResponse(shift, storeName);
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ShiftResponse> getShiftsByStore(Long storeId) {
-        return shiftRepository.findByStoreId(storeId).stream()
-                .map(shift -> {
-                    String storeName = storeRepository.findById(shift.getStoreId())
-                            .map(Store::getName).orElse("Unknown");
-                    return toShiftResponse(shift, storeName);
-                })
-                .collect(Collectors.toList());
-    }
-
-    // ==================== SHIFT ASSIGNMENT ====================
-
-    @Override
-    public ShiftAssignmentResponse assignShift(ShiftAssignmentRequest request) {
-        // Validate shift exists
-        Shift shift = shiftRepository.findById(request.getShiftId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shift not found with id: " + request.getShiftId()));
-
-        // Validate user exists
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
-
-        LocalDate workDate = LocalDate.parse(request.getWorkDate(), DATE_FORMATTER);
-
-        // Check duplicate: same user, same date, same shift, status = ASSIGNED
-        List<ShiftAssignment> existing = shiftAssignmentRepository
-                .findByUserIdAndWorkDateAndStatus(request.getUserId(), workDate, ShiftStatus.ASSIGNED);
-
-        for (ShiftAssignment sa : existing) {
-            if (sa.getShiftId().equals(request.getShiftId())) {
-                throw new IllegalArgumentException(
-                        "User '" + user.getFullName() + "' is already assigned to this shift on "
-                                + request.getWorkDate());
-            }
+                Shift saved = shiftRepository.save(shift);
+                return toShiftResponse(saved, store.getName());
         }
 
-        // Create assignment
-        ShiftAssignment assignment = new ShiftAssignment();
-        assignment.setShiftId(request.getShiftId());
-        assignment.setUserId(request.getUserId());
-        assignment.setWorkDate(workDate);
-        assignment.setStatus(ShiftStatus.ASSIGNED);
-        assignment.setCreatedBy(request.getCreatedBy());
-        assignment.setCreatedAt(LocalDateTime.now());
+        @Override
+        public List<ShiftResponse> getAllShifts() {
+                return shiftRepository.findAll().stream()
+                                .map(shift -> {
+                                        String storeName = storeRepository.findById(shift.getStoreId())
+                                                        .map(Store::getName).orElse("Unknown");
+                                        return toShiftResponse(shift, storeName);
+                                })
+                                .collect(Collectors.toList());
+        }
 
-        ShiftAssignment saved = shiftAssignmentRepository.save(assignment);
+        @Override
+        public List<ShiftResponse> getShiftsByStore(Long storeId) {
+                return shiftRepository.findByStoreId(storeId).stream()
+                                .map(shift -> {
+                                        String storeName = storeRepository.findById(shift.getStoreId())
+                                                        .map(Store::getName).orElse("Unknown");
+                                        return toShiftResponse(shift, storeName);
+                                })
+                                .collect(Collectors.toList());
+        }
 
-        // Build response
-        String createdByName = userRepository.findById(request.getCreatedBy())
-                .map(User::getFullName).orElse("Unknown");
+        // ==================== SHIFT ASSIGNMENT ====================
 
-        return toAssignmentResponse(saved, shift, user.getFullName(), createdByName);
-    }
+        @Override
+        public ShiftAssignmentResponse assignShift(ShiftAssignmentRequest request) {
+                // Validate shift exists
+                Shift shift = shiftRepository.findById(request.getShiftId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Shift not found with id: " + request.getShiftId()));
 
-    @Override
-    public ShiftAssignmentResponse cancelAssignment(Long assignmentId) {
-        ShiftAssignment assignment = shiftAssignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Assignment not found with id: " + assignmentId));
+                // Validate user exists
+                User user = userRepository.findById(request.getUserId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "User not found with id: " + request.getUserId()));
 
-        assignment.setStatus(ShiftStatus.CANCELLED);
-        ShiftAssignment saved = shiftAssignmentRepository.save(assignment);
+                LocalDate workDate = LocalDate.parse(request.getWorkDate(), DATE_FORMATTER);
 
-        Shift shift = shiftRepository.findById(saved.getShiftId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shift not found"));
-        String userName = userRepository.findById(saved.getUserId())
-                .map(User::getFullName).orElse("Unknown");
-        String createdByName = userRepository.findById(saved.getCreatedBy())
-                .map(User::getFullName).orElse("Unknown");
+                // 1. Check past date - không cho gán ca vào ngày đã qua
+                if (workDate.isBefore(LocalDate.now())) {
+                        throw new IllegalArgumentException(
+                                        "Không thể gán ca làm cho ngày đã qua: " + request.getWorkDate());
+                }
 
-        return toAssignmentResponse(saved, shift, userName, createdByName);
-    }
+                // 2. Check user thuộc đúng store với shift
+                if (user.getStoreId() != null && !user.getStoreId().equals(shift.getStoreId())) {
+                        throw new IllegalArgumentException(
+                                        "Nhân viên '" + user.getFullName() + "' không thuộc cửa hàng của ca làm này");
+                }
 
-    @Override
-    public List<ShiftAssignmentResponse> getAssignmentsByStoreAndDateRange(Long storeId, LocalDate from, LocalDate to) {
-        List<ShiftAssignment> assignments = shiftAssignmentRepository
-                .findByShift_StoreIdAndWorkDateBetween(storeId, from, to);
+                // 3. Check duplicate: same user, same date, same shift, status = ASSIGNED
+                List<ShiftAssignment> existing = shiftAssignmentRepository
+                                .findByUserIdAndWorkDateAndStatus(request.getUserId(), workDate, ShiftStatus.ASSIGNED);
 
-        return assignments.stream()
-                .map(this::enrichAssignmentResponse)
-                .collect(Collectors.toList());
-    }
+                for (ShiftAssignment sa : existing) {
+                        if (sa.getShiftId().equals(request.getShiftId())) {
+                                throw new IllegalArgumentException(
+                                                "Nhân viên '" + user.getFullName() + "' đã được gán ca này vào ngày "
+                                                                + request.getWorkDate());
+                        }
+                }
 
-    @Override
-    public List<ShiftAssignmentResponse> getAssignmentsByUser(Long userId) {
-        return shiftAssignmentRepository.findByUserId(userId).stream()
-                .map(this::enrichAssignmentResponse)
-                .collect(Collectors.toList());
-    }
+                // 4. Check time overlap: user đã có ca khác trùng giờ trong cùng ngày
+                for (ShiftAssignment sa : existing) {
+                        Shift existingShift = shiftRepository.findById(sa.getShiftId()).orElse(null);
+                        if (existingShift != null) {
+                                // Overlap xảy ra khi: newStart < existingEnd AND newEnd > existingStart
+                                boolean overlaps = shift.getStartTime().isBefore(existingShift.getEndTime())
+                                                && shift.getEndTime().isAfter(existingShift.getStartTime());
+                                if (overlaps) {
+                                        throw new IllegalArgumentException(
+                                                        "Nhân viên '" + user.getFullName() + "' đã có ca '"
+                                                                        + existingShift.getName() + "' ("
+                                                                        + existingShift.getStartTime()
+                                                                                        .format(TIME_FORMATTER)
+                                                                        + " - "
+                                                                        + existingShift.getEndTime()
+                                                                                        .format(TIME_FORMATTER)
+                                                                        + ") bị trùng giờ vào ngày "
+                                                                        + request.getWorkDate());
+                                }
+                        }
+                }
 
-    // ==================== MAPPING HELPERS ====================
+                // Create assignment
+                ShiftAssignment assignment = new ShiftAssignment();
+                assignment.setShiftId(request.getShiftId());
+                assignment.setUserId(request.getUserId());
+                assignment.setWorkDate(workDate);
+                assignment.setStatus(ShiftStatus.ASSIGNED);
+                assignment.setCreatedBy(request.getCreatedBy());
+                assignment.setCreatedAt(LocalDateTime.now());
 
-    private ShiftResponse toShiftResponse(Shift shift, String storeName) {
-        ShiftResponse response = new ShiftResponse();
-        response.setId(shift.getId());
-        response.setStoreId(shift.getStoreId());
-        response.setStoreName(storeName);
-        response.setName(shift.getName());
-        response.setStartTime(shift.getStartTime().format(TIME_FORMATTER));
-        response.setEndTime(shift.getEndTime().format(TIME_FORMATTER));
-        response.setCreatedAt(shift.getCreatedAt().format(DATETIME_FORMATTER));
-        return response;
-    }
+                ShiftAssignment saved = shiftAssignmentRepository.save(assignment);
 
-    private ShiftAssignmentResponse toAssignmentResponse(ShiftAssignment sa, Shift shift, String userName,
-            String createdByName) {
-        ShiftAssignmentResponse response = new ShiftAssignmentResponse();
-        response.setId(sa.getId());
-        response.setShiftId(sa.getShiftId());
-        response.setShiftName(shift.getName());
-        response.setStartTime(shift.getStartTime().format(TIME_FORMATTER));
-        response.setEndTime(shift.getEndTime().format(TIME_FORMATTER));
-        response.setUserId(sa.getUserId());
-        response.setUserName(userName);
-        response.setWorkDate(sa.getWorkDate().format(DATE_FORMATTER));
-        response.setStatus(sa.getStatus().name());
-        response.setCreatedBy(sa.getCreatedBy());
-        response.setCreatedByName(createdByName);
-        response.setCreatedAt(sa.getCreatedAt().format(DATETIME_FORMATTER));
-        return response;
-    }
+                // Build response
+                String createdByName = userRepository.findById(request.getCreatedBy())
+                                .map(User::getFullName).orElse("Unknown");
 
-    private ShiftAssignmentResponse enrichAssignmentResponse(ShiftAssignment sa) {
-        Shift shift = shiftRepository.findById(sa.getShiftId())
-                .orElseThrow(() -> new ResourceNotFoundException("Shift not found"));
-        String userName = userRepository.findById(sa.getUserId())
-                .map(User::getFullName).orElse("Unknown");
-        String createdByName = userRepository.findById(sa.getCreatedBy())
-                .map(User::getFullName).orElse("Unknown");
-        return toAssignmentResponse(sa, shift, userName, createdByName);
-    }
+                return toAssignmentResponse(saved, shift, user.getFullName(), createdByName);
+        }
+
+        @Override
+        public ShiftAssignmentResponse cancelAssignment(Long assignmentId) {
+                ShiftAssignment assignment = shiftAssignmentRepository.findById(assignmentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Assignment not found with id: " + assignmentId));
+
+                assignment.setStatus(ShiftStatus.CANCELLED);
+                ShiftAssignment saved = shiftAssignmentRepository.save(assignment);
+
+                Shift shift = shiftRepository.findById(saved.getShiftId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Shift not found"));
+                String userName = userRepository.findById(saved.getUserId())
+                                .map(User::getFullName).orElse("Unknown");
+                String createdByName = userRepository.findById(saved.getCreatedBy())
+                                .map(User::getFullName).orElse("Unknown");
+
+                return toAssignmentResponse(saved, shift, userName, createdByName);
+        }
+
+        @Override
+        public List<ShiftAssignmentResponse> getAssignmentsByStoreAndDateRange(Long storeId, LocalDate from,
+                        LocalDate to) {
+                List<ShiftAssignment> assignments = shiftAssignmentRepository
+                                .findByShift_StoreIdAndWorkDateBetween(storeId, from, to);
+
+                return assignments.stream()
+                                .map(this::enrichAssignmentResponse)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
+        public List<ShiftAssignmentResponse> getAssignmentsByUser(Long userId) {
+                return shiftAssignmentRepository.findByUserId(userId).stream()
+                                .map(this::enrichAssignmentResponse)
+                                .collect(Collectors.toList());
+        }
+
+        // ==================== MAPPING HELPERS ====================
+
+        private ShiftResponse toShiftResponse(Shift shift, String storeName) {
+                ShiftResponse response = new ShiftResponse();
+                response.setId(shift.getId());
+                response.setStoreId(shift.getStoreId());
+                response.setStoreName(storeName);
+                response.setName(shift.getName());
+                response.setStartTime(shift.getStartTime().format(TIME_FORMATTER));
+                response.setEndTime(shift.getEndTime().format(TIME_FORMATTER));
+                response.setCreatedAt(shift.getCreatedAt().format(DATETIME_FORMATTER));
+                return response;
+        }
+
+        private ShiftAssignmentResponse toAssignmentResponse(ShiftAssignment sa, Shift shift, String userName,
+                        String createdByName) {
+                ShiftAssignmentResponse response = new ShiftAssignmentResponse();
+                response.setId(sa.getId());
+                response.setShiftId(sa.getShiftId());
+                response.setShiftName(shift.getName());
+                response.setStartTime(shift.getStartTime().format(TIME_FORMATTER));
+                response.setEndTime(shift.getEndTime().format(TIME_FORMATTER));
+                response.setUserId(sa.getUserId());
+                response.setUserName(userName);
+                response.setWorkDate(sa.getWorkDate().format(DATE_FORMATTER));
+                response.setStatus(sa.getStatus().name());
+                response.setCreatedBy(sa.getCreatedBy());
+                response.setCreatedByName(createdByName);
+                response.setCreatedAt(sa.getCreatedAt().format(DATETIME_FORMATTER));
+                return response;
+        }
+
+        private ShiftAssignmentResponse enrichAssignmentResponse(ShiftAssignment sa) {
+                Shift shift = shiftRepository.findById(sa.getShiftId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Shift not found"));
+                String userName = userRepository.findById(sa.getUserId())
+                                .map(User::getFullName).orElse("Unknown");
+                String createdByName = userRepository.findById(sa.getCreatedBy())
+                                .map(User::getFullName).orElse("Unknown");
+                return toAssignmentResponse(sa, shift, userName, createdByName);
+        }
 }

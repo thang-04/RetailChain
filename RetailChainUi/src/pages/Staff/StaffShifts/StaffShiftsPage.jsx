@@ -271,6 +271,43 @@ const StaffShiftsPage = () => {
                             const isWeekend = dayIdx >= 5;
                             const isToday = dayIdx === todayIndex;
 
+                            // --- Overlap layout: compute column index & total columns for each assignment ---
+                            const layoutMap = new Map(); // assignmentId -> { col, totalCols }
+                            if (dayAssignments.length > 0) {
+                                // Sort by start time, then by end time
+                                const sorted = [...dayAssignments].sort((a, b) => {
+                                    if (a.startTime < b.startTime) return -1;
+                                    if (a.startTime > b.startTime) return 1;
+                                    return a.endTime < b.endTime ? -1 : 1;
+                                });
+
+                                // Build overlap groups (connected components of overlapping intervals)
+                                const groups = [];
+                                let currentGroup = [sorted[0]];
+                                let groupEnd = sorted[0].endTime;
+
+                                for (let i = 1; i < sorted.length; i++) {
+                                    if (sorted[i].startTime < groupEnd) {
+                                        // overlaps with current group
+                                        currentGroup.push(sorted[i]);
+                                        if (sorted[i].endTime > groupEnd) groupEnd = sorted[i].endTime;
+                                    } else {
+                                        groups.push(currentGroup);
+                                        currentGroup = [sorted[i]];
+                                        groupEnd = sorted[i].endTime;
+                                    }
+                                }
+                                groups.push(currentGroup);
+
+                                // Assign column positions within each group
+                                groups.forEach(group => {
+                                    const totalCols = group.length;
+                                    group.forEach((assignment, colIdx) => {
+                                        layoutMap.set(assignment.id, { col: colIdx, totalCols });
+                                    });
+                                });
+                            }
+
                             return (
                                 <div
                                     key={dayIdx}
@@ -283,23 +320,34 @@ const StaffShiftsPage = () => {
                                         const bottom = timeToPixels(assignment.endTime);
                                         const height = Math.max(bottom - top, 40);
 
+                                        // Get overlap layout info
+                                        const layout = layoutMap.get(assignment.id) || { col: 0, totalCols: 1 };
+                                        const widthPercent = 100 / layout.totalCols;
+                                        const leftPercent = layout.col * widthPercent;
+                                        const GAP = 2; // px gap between side-by-side items
+
                                         return (
                                             <div
                                                 key={assignment.id || aIdx}
-                                                className={`absolute left-1 right-1 ${color.bg} border-l-4 ${color.border} rounded-md p-2 shadow-sm hover:shadow-md cursor-pointer transition-all hover:scale-[1.02] hover:z-20`}
-                                                style={{ top: `${top}px`, height: `${height}px` }}
+                                                className={`absolute ${color.bg} border-l-4 ${color.border} rounded-md p-1.5 shadow-sm hover:shadow-md cursor-pointer transition-all hover:scale-[1.02] hover:z-20 overflow-hidden`}
+                                                style={{
+                                                    top: `${top}px`,
+                                                    height: `${height}px`,
+                                                    left: `calc(${leftPercent}% + ${GAP}px)`,
+                                                    width: `calc(${widthPercent}% - ${GAP * 2}px)`,
+                                                }}
                                                 title={`${assignment.userName} — ${assignment.shiftName} (${assignment.startTime} - ${assignment.endTime})`}
                                             >
                                                 <div className="flex justify-between items-start">
-                                                    <span className={`text-xs font-bold ${color.text}`}>{assignment.shiftName}</span>
+                                                    <span className={`text-xs font-bold ${color.text} truncate`}>{assignment.shiftName}</span>
                                                 </div>
-                                                <div className="mt-1 flex items-center gap-2">
-                                                    <div className={`size-6 rounded-full ${color.avatar} flex items-center justify-center text-[10px] font-bold`}>
+                                                <div className="mt-0.5 flex items-center gap-1">
+                                                    <div className={`size-5 flex-shrink-0 rounded-full ${color.avatar} flex items-center justify-center text-[9px] font-bold`}>
                                                         {getInitials(assignment.userName)}
                                                     </div>
-                                                    <span className="text-sm font-semibold text-slate-800 truncate">{assignment.userName}</span>
+                                                    <span className="text-xs font-semibold text-slate-800 truncate">{assignment.userName}</span>
                                                 </div>
-                                                <div className="mt-1 text-xs text-slate-600">{assignment.startTime} - {assignment.endTime}</div>
+                                                <div className="mt-0.5 text-[10px] text-slate-600">{assignment.startTime} - {assignment.endTime}</div>
                                             </div>
                                         );
                                     })}
