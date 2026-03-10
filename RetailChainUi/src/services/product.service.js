@@ -27,6 +27,12 @@ const productService = {
     return response;
   },
 
+  // Tạo variants hàng loạt: truyền sizes[] và colors[] (backend tự sinh size x color)
+  createProductVariants: async (productId, data) => {
+    const response = await axiosPrivate.post(`${PRODUCT_API_PATH}/${productId}/variants`, data);
+    return response;
+  },
+
   updateProduct: async (slug, data) => {
     const response = await axiosPrivate.put(`${PRODUCT_API_PATH}/${slug}`, data);
     return response;
@@ -42,7 +48,7 @@ const productService = {
     return response;
   },
 
-  getProductChainStock: async (id) => {
+  getProductChainStock: async () => {
     return [
       { locationId: "WH01", locationName: "Kho Tổng", type: "Warehouse", stock: 100, status: "High" },
       { locationId: "S001", locationName: "Cửa hàng Q1", type: "Store", stock: 10, status: "Low" }

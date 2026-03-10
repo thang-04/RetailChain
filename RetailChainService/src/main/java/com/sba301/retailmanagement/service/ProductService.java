@@ -21,4 +21,6 @@ public interface ProductService {
     List<ProductCategory> getAllCategories();
 
     ProductVariantResponse createProductVariant(Long productId, ProductVariantRequest request);
+
+    List<ProductVariantResponse> createProductVariants(Long productId, ProductVariantRequest request);
 }

@@ -1,25 +1,36 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
+import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
 import com.sba301.retailmanagement.entity.ProductCategory;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.entity.InventoryStock;
+import com.sba301.retailmanagement.entity.InventoryStockId;
+import com.sba301.retailmanagement.entity.Warehouse;
 import com.sba301.retailmanagement.enums.Gender;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
+import com.sba301.retailmanagement.repository.ProductCategoryRepository;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
+import com.sba301.retailmanagement.repository.InventoryStockRepository;
+import com.sba301.retailmanagement.repository.WarehouseRepository;
 import com.sba301.retailmanagement.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,7 +40,9 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final com.sba301.retailmanagement.repository.ProductCategoryRepository productCategoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final InventoryStockRepository inventoryStockRepository;
+    private final WarehouseRepository warehouseRepository;
 
     @Override
     public List<ProductResponse> getAllProducts() {
@@ -136,6 +149,96 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
+    public ProductVariantResponse createProductVariant(Long productId, ProductVariantRequest request) {
+        ProductVariant savedVariant = createSingleVariant(productId, request, request.getSize(), request.getColor(),
+                request.getSku(), request.getBarcode());
+
+        ProductVariantResponse vDto = new ProductVariantResponse();
+        vDto.setId(savedVariant.getId());
+        vDto.setProductId(savedVariant.getProductId());
+        vDto.setSku(savedVariant.getSku());
+        vDto.setBarcode(savedVariant.getBarcode());
+        vDto.setSize(savedVariant.getSize());
+        vDto.setColor(savedVariant.getColor());
+        vDto.setPrice(savedVariant.getPrice());
+        vDto.setStatus(savedVariant.getStatus());
+        vDto.setCreatedAt(savedVariant.getCreatedAt());
+        vDto.setUpdatedAt(savedVariant.getUpdatedAt());
+
+        return vDto;
+    }
+
+    @Override
+    @Transactional
+    public List<ProductVariantResponse> createProductVariants(Long productId, ProductVariantRequest request) {
+        List<String> sizes = request.getSizes() != null ? request.getSizes() : Collections.emptyList();
+        List<String> colors = request.getColors() != null ? request.getColors() : Collections.emptyList();
+
+        // Fallback to single values if arrays are not provided
+        if (sizes.isEmpty() && request.getSize() != null && !request.getSize().trim().isEmpty()) {
+            sizes = List.of(request.getSize());
+        }
+        if (colors.isEmpty() && request.getColor() != null && !request.getColor().trim().isEmpty()) {
+            colors = List.of(request.getColor());
+        }
+
+        if (sizes.isEmpty() && colors.isEmpty()) {
+            throw new IllegalArgumentException("Phải truyền size/color hoặc danh sách sizes/colors để tạo variant");
+        }
+
+        List<ProductVariant> existingVariants = productVariantRepository.findByProductId(productId);
+        Set<String> existingKeys = existingVariants.stream()
+                .map(v -> normalizeKey(v.getSize()) + "|" + normalizeKey(v.getColor()))
+                .collect(Collectors.toCollection(HashSet::new));
+
+        List<ProductVariantResponse> result = new ArrayList<>();
+
+        if (sizes.isEmpty()) {
+            // Only colors
+            for (String color : colors) {
+                String key = normalizeKey(null) + "|" + normalizeKey(color);
+                if (existingKeys.contains(key)) {
+                    continue;
+                }
+                ProductVariant saved = createSingleVariant(productId, request, null, color, null, request.getBarcode());
+                existingKeys.add(key);
+                result.add(mapVariantToResponse(saved));
+            }
+            return result;
+        }
+
+        if (colors.isEmpty()) {
+            // Only sizes
+            for (String size : sizes) {
+                String key = normalizeKey(size) + "|" + normalizeKey(null);
+                if (existingKeys.contains(key)) {
+                    continue;
+                }
+                ProductVariant saved = createSingleVariant(productId, request, size, null, null, request.getBarcode());
+                existingKeys.add(key);
+                result.add(mapVariantToResponse(saved));
+            }
+            return result;
+        }
+
+        // Cartesian product sizes x colors
+        for (String size : sizes) {
+            for (String color : colors) {
+                String key = normalizeKey(size) + "|" + normalizeKey(color);
+                if (existingKeys.contains(key)) {
+                    continue;
+                }
+                ProductVariant saved = createSingleVariant(productId, request, size, color, null, request.getBarcode());
+                existingKeys.add(key);
+                result.add(mapVariantToResponse(saved));
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public List<ProductCategory> getAllCategories() {
         return productCategoryRepository.findAll();
     }
@@ -193,5 +296,80 @@ public class ProductServiceImpl implements ProductService {
 
         dto.setVariants(variantDtos);
         return dto;
+    }
+
+    private String normalizeKey(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.trim().toUpperCase().replaceAll("\\s+", "");
+    }
+
+    private ProductVariantResponse mapVariantToResponse(ProductVariant variant) {
+        ProductVariantResponse vDto = new ProductVariantResponse();
+        vDto.setId(variant.getId());
+        vDto.setProductId(variant.getProductId());
+        vDto.setSku(variant.getSku());
+        vDto.setBarcode(variant.getBarcode());
+        vDto.setSize(variant.getSize());
+        vDto.setColor(variant.getColor());
+        vDto.setPrice(variant.getPrice());
+        vDto.setStatus(variant.getStatus());
+        vDto.setCreatedAt(variant.getCreatedAt());
+        vDto.setUpdatedAt(variant.getUpdatedAt());
+        return vDto;
+    }
+
+    private ProductVariant createSingleVariant(Long productId, ProductVariantRequest request, String size, String color,
+            String sku, String barcode) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + productId));
+
+        ProductVariant variant = new ProductVariant();
+        variant.setProductId(productId);
+
+        // Use provided SKU or generate one: PRODCODE-COLOR-SIZE
+        if (sku != null && !sku.trim().isEmpty()) {
+            variant.setSku(sku);
+        } else {
+            String colorStr = color != null ? color.toUpperCase().replaceAll("\\s+", "") : "NOCLR";
+            String sizeStr = size != null ? size.toUpperCase().replaceAll("\\s+", "") : "NOSIZE";
+            variant.setSku(product.getCode() + "-" + colorStr + "-" + sizeStr);
+        }
+
+        variant.setBarcode(barcode);
+        variant.setSize(size);
+        variant.setColor(color);
+        variant.setPrice(request.getPrice());
+        variant.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        variant.setCreatedAt(LocalDateTime.now());
+        variant.setUpdatedAt(LocalDateTime.now());
+
+        ProductVariant savedVariant = productVariantRepository.save(variant);
+
+        if (request.getInitialQuantity() != null && request.getInitialQuantity() > 0) {
+            Warehouse warehouse = resolveWarehouseForInitialStock(request.getWarehouseId());
+            InventoryStock stock = new InventoryStock();
+            stock.setId(new InventoryStockId(warehouse.getId(), savedVariant.getId()));
+            stock.setWarehouse(warehouse);
+            stock.setVariant(savedVariant);
+            stock.setQuantity(request.getInitialQuantity());
+            stock.setUpdatedAt(LocalDateTime.now());
+            inventoryStockRepository.save(stock);
+        }
+
+        return savedVariant;
+    }
+
+    private Warehouse resolveWarehouseForInitialStock(Long warehouseId) {
+        if (warehouseId == null) {
+            List<Warehouse> warehouses = warehouseRepository.findAll();
+            if (warehouses.isEmpty()) {
+                throw new ResourceNotFoundException("No warehouses exist to store initial stock");
+            }
+            return warehouses.get(0);
+        }
+        return warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + warehouseId));
     }
 }

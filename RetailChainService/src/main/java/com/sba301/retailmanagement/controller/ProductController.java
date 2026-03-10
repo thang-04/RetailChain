@@ -1,7 +1,9 @@
 package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
+import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
+import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.service.ProductService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
@@ -159,6 +161,19 @@ public class ProductController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error fetching categories: " + e.getMessage());
+        }
+    }
+
+    // --- Product Variant Endpoints ---
+
+    @PostMapping("/{productId}/variants")
+    public String createProductVariants(@PathVariable Long productId, @RequestBody ProductVariantRequest request) {
+        try {
+            List<ProductVariantResponse> response = productService.createProductVariants(productId, request);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Variants created successfully", response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error creating variants: " + e.getMessage());
         }
     }
 }
