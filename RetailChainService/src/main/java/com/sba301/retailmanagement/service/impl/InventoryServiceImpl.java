@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 public class InventoryServiceImpl implements InventoryService {
 
     private final WarehouseRepository warehouseRepository;
-    private final StoreWarehouseRepository storeWarehouseRepository;
     private final SupplierRepository supplierRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final InventoryDocumentRepository inventoryDocumentRepository;
@@ -54,7 +53,7 @@ public class InventoryServiceImpl implements InventoryService {
         warehouse.setContactName(request.getContactName());
         warehouse.setContactPhone(request.getContactPhone());
         warehouse.setDescription(request.getDescription());
-        warehouse.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : 0);
+        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : false);
         warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
@@ -267,16 +266,14 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse targetWarehouse = warehouseRepository.findById(request.getTargetWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
 
-        // Validate: Source must NOT be linked to any store (Central Warehouse)
-        boolean sourceHasStore = storeWarehouseRepository.existsByWarehouseId(sourceWarehouse.getId());
-        if (sourceHasStore) {
-            throw new RuntimeException("Transfer source must be a Central Warehouse (not linked to any store)");
+        // Validate: Source must be Central Warehouse (isCentral = true)
+        if (!Boolean.TRUE.equals(sourceWarehouse.getIsCentral())) {
+            throw new RuntimeException("Transfer source must be a Central Warehouse (isCentral = true)");
         }
 
-        // Validate: Target MUST be linked to a store (Store Warehouse)
-        boolean targetHasStore = storeWarehouseRepository.existsByWarehouseId(targetWarehouse.getId());
-        if (!targetHasStore) {
-            throw new RuntimeException("Transfer destination must be a Store Warehouse (linked to a store)");
+        // Validate: Target MUST NOT be Central Warehouse (isCentral = false) - Store Warehouse
+        if (Boolean.TRUE.equals(targetWarehouse.getIsCentral())) {
+            throw new RuntimeException("Transfer destination must be a Store Warehouse (isCentral = false)");
         }
 
         if (sourceWarehouse.getId().equals(targetWarehouse.getId())) {
@@ -414,7 +411,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .contactName(warehouse.getContactName())
                 .contactPhone(warehouse.getContactPhone())
                 .description(warehouse.getDescription())
-                .isDefault(warehouse.getIsDefault())
+                .isCentral(warehouse.getIsCentral())
                 .status(warehouse.getStatus())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())
@@ -466,8 +463,8 @@ public class InventoryServiceImpl implements InventoryService {
             warehouse.setDescription(request.getDescription());
         }
 
-        if (request.getIsDefault() != null) {
-            warehouse.setIsDefault(request.getIsDefault());
+        if (request.getIsCentral() != null) {
+            warehouse.setIsCentral(request.getIsCentral());
         }
 
         if (request.getStatus() != null) {
@@ -486,12 +483,6 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
-
-        try {
-            storeWarehouseRepository.deleteByWarehouseId(id);
-        } catch (Exception e) {
-            // Ignore if method missing, assume handled or empty
-        }
 
         try {
             warehouseRepository.delete(warehouse);
