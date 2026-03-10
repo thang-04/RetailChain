@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "RetailChain",
+  "project_id": "4b168c80-6c27-448a-844a-5da7ef409838"
+}
