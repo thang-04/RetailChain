@@ -11,6 +11,10 @@ const StorePage = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
   useEffect(() => {
     const fetchStores = async () => {
       try {
@@ -27,6 +31,34 @@ const StorePage = () => {
 
   const handleStoreAdded = (newStore) => {
     setStores(prevStores => [...prevStores, newStore]);
+  };
+
+  // Pagination Logic
+  const totalPages = Math.ceil(stores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentStores = stores.slice(startIndex, endIndex);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Generate pagination buttons
+  const getPaginationGroup = () => {
+    const pages = [];
+    let start = Math.max(1, currentPage - 1);
+    let end = Math.min(totalPages, currentPage + 1);
+
+    // Xử lý góc edge-cases khi đang ở đầu/cuối để luôn hiển thị 3 trang nếu có
+    if (currentPage === 1) end = Math.min(3, totalPages);
+    if (currentPage === totalPages) start = Math.max(1, totalPages - 2);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   return (
@@ -80,30 +112,80 @@ const StorePage = () => {
               </Button>
             </div>
           ) : (
-            <StoreList stores={stores} />
+            <StoreList stores={currentStores} />
           )}
 
-          {/* Pagination - Only show if stores exist */}
+          {/* Pagination - Optimized UI/UX */}
           {!loading && stores.length > 0 && (
-            <div className="mt-auto bg-white dark:bg-[#1a262a] rounded-xl border border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Showing <span className="font-semibold text-slate-900 dark:text-white">1-{stores.length}</span> of <span className="font-semibold text-slate-900 dark:text-white">{stores.length}</span> stores
+            <div className="mt-auto bg-white/70 dark:bg-[#1a262a]/70 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4 transition-all">
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Hiển thị <span className="font-bold text-slate-900 dark:text-white px-1">{startIndex + 1}-{Math.min(endIndex, stores.length)}</span> trên <span className="font-bold text-slate-900 dark:text-white px-1">{stores.length}</span> cơ sở
               </p>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" disabled className="h-9 px-4 text-slate-500">
-                  Previous
-                </Button>
-                <div className="flex items-center gap-1">
-                  <Button className="size-9 p-0 bg-primary text-white font-bold" variant="default">1</Button>
-                  <Button className="size-9 p-0 text-slate-600 dark:text-slate-400 font-medium" variant="ghost">2</Button>
-                  <Button className="size-9 p-0 text-slate-600 dark:text-slate-400 font-medium" variant="ghost">3</Button>
-                  <span className="px-1 text-slate-400">...</span>
-                  <Button className="size-9 p-0 text-slate-600 dark:text-slate-400 font-medium" variant="ghost">9</Button>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="h-10 px-4 text-slate-600 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:bg-transparent rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                  >
+                    Trước
+                  </Button>
+
+                  <div className="flex items-center gap-1">
+                    {/* Luôn hiện trang 1 */}
+                    {getPaginationGroup()[0] > 1 && (
+                      <>
+                        <Button
+                          onClick={() => handlePageChange(1)}
+                          className={`size-10 p-0 rounded-xl font-bold transition-all ${currentPage === 1 ? 'bg-primary text-white shadow-md shadow-primary/20 hover:bg-primary-dark' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                          variant={currentPage === 1 ? "default" : "ghost"}
+                        >
+                          1
+                        </Button>
+                        {getPaginationGroup()[0] > 2 && <span className="px-2 text-slate-400">...</span>}
+                      </>
+                    )}
+
+                    {/* Vòng lặp các trang ở giữa */}
+                    {getPaginationGroup().map((item) => (
+                      <Button
+                        key={item}
+                        onClick={() => handlePageChange(item)}
+                        className={`size-10 p-0 rounded-xl font-bold transition-all ${currentPage === item ? 'bg-primary text-white shadow-md shadow-primary/20 hover:bg-primary-dark' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                        variant={currentPage === item ? "default" : "ghost"}
+                      >
+                        {item}
+                      </Button>
+                    ))}
+
+                    {/* Luôn hiện trang cuối */}
+                    {getPaginationGroup()[getPaginationGroup().length - 1] < totalPages && (
+                      <>
+                        {getPaginationGroup()[getPaginationGroup().length - 1] < totalPages - 1 && <span className="px-2 text-slate-400">...</span>}
+                        <Button
+                          onClick={() => handlePageChange(totalPages)}
+                          className={`size-10 p-0 rounded-xl font-bold transition-all ${currentPage === totalPages ? 'bg-primary text-white shadow-md shadow-primary/20 hover:bg-primary-dark' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                          variant={currentPage === totalPages ? "default" : "ghost"}
+                        >
+                          {totalPages}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="h-10 px-4 text-slate-600 disabled:text-slate-300 dark:disabled:text-slate-600 disabled:bg-transparent rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                  >
+                    Tiếp
+                  </Button>
                 </div>
-                <Button variant="outline" className="h-9 px-4 text-slate-600 dark:text-slate-300">
-                  Next
-                </Button>
-              </div>
+              )}
             </div>
           )}
         </div>

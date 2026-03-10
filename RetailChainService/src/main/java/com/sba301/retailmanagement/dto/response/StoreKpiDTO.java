@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoreKpiDTO {
-    private String dailyRevenue;
-    private String orders;
+    private Integer totalProductVariants;
+    private Long totalStockQuantity;
     private Integer lowStockCount;
     private Integer activeStaff;
 }

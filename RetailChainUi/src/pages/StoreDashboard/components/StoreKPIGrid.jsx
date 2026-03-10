@@ -3,41 +3,39 @@ import { Badge } from "@/components/ui/badge";
 
 const StoreKPIGrid = ({ data }) => {
   // Default values or destructuring from data
-  const { dailyRevenue = "---", orders = "---", lowStockCount = 12, activeStaff = 4 } = data || {};
+  const { totalProductVariants = 0, totalStockQuantity = 0, lowStockCount = 0, activeStaff = 0 } = data || {};
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {/* Revenue Card */}
+      {/* Total Stock Items Card */}
       <Card className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
         <CardContent className="p-5">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <span className="material-symbols-outlined">payments</span>
+              <span className="material-symbols-outlined">inventory_2</span>
             </div>
             <Badge variant="secondary" className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full border-none shadow-none">
-              <span className="material-symbols-outlined text-[14px] mr-1">trending_up</span>
-              +5%
+              In Stock
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Revenue</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-primary transition-colors">{dailyRevenue}</h3>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Physical Items</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-primary transition-colors">{totalStockQuantity.toLocaleString()}</h3>
         </CardContent>
       </Card>
 
-      {/* Orders Card */}
+      {/* Product Variants Card */}
       <Card className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
         <CardContent className="p-5">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
-              <span className="material-symbols-outlined">shopping_cart</span>
+              <span className="material-symbols-outlined">category</span>
             </div>
-            <Badge variant="secondary" className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full border-none shadow-none">
-              <span className="material-symbols-outlined text-[14px] mr-1">trending_up</span>
-              +12%
+            <Badge variant="secondary" className="flex items-center text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full border-none shadow-none">
+              Varieties
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Today's Orders</p>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors">{orders}</h3>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Unique Products</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors">{totalProductVariants.toLocaleString()}</h3>
         </CardContent>
       </Card>
 

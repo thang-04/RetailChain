@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -20,6 +22,7 @@ public class SupplierController {
 
     private final SupplierService supplierService;
 
+    @PreAuthorize("hasAuthority('" + SUPPLIER_VIEW + "')")
     @GetMapping
     public String getAllSuppliers() {
         String prefix = "[getAllSuppliers]";

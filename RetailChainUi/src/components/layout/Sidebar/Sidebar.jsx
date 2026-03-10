@@ -1,64 +1,96 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import useAuth from "../../../contexts/AuthContext/useAuth";
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user, isSuperAdmin, isStoreManager, isStaff, hasRole } = useAuth();
 
   const menuItems = [
     {
       path: "/",
-      label: "Dashboard (Chain)",
+      label: "Dashboard",
       icon: "dashboard",
-      filledIcon: true
+      filledIcon: true,
+      show: true, // everyone
     },
     {
-      path: "/store",
-      label: "Stores",
-      icon: "storefront"
+      path: isSuperAdmin() ? "/store" : (user?.storeCode ? `/store/${user.storeCode}` : (user?.storeId ? `/store/${user.storeId}` : "#")),
+      label: isSuperAdmin() ? "Stores" : "My Store",
+      icon: "storefront",
+      show: isSuperAdmin() || isStoreManager(),
     },
     {
       path: "/warehouse",
       label: "Central Warehouse",
-      icon: "warehouse"
+      icon: "warehouse",
+      show: isSuperAdmin(),
     },
     {
       path: "/products",
       label: "Products",
-      icon: "inventory_2"
+      icon: "inventory_2",
+      show: true,
     },
     {
       path: "/inventory",
       label: "Inventory",
-      icon: "inventory"
+      icon: "inventory",
+      show: true,
     },
     {
       path: "/stock-in",
       label: "Stock In",
-      icon: "input_circle"
+      icon: "input_circle",
+      show: isSuperAdmin() || isStoreManager(),
     },
     {
       path: "/stock-out",
       label: "Stock Out",
-      icon: "output_circle"
+      icon: "output_circle",
+      show: isSuperAdmin() || isStoreManager(),
     },
     {
       path: "/inventory/ledger",
       label: "Stock Ledger",
-      icon: "history"
+      icon: "history",
+      show: true,
     },
     {
       path: "/reports",
-      label: "Chain Reports",
-      icon: "bar_chart"
+      label: "Reports",
+      icon: "bar_chart",
+      show: isSuperAdmin() || isStoreManager(),
     },
     {
       path: "/staff",
       label: "Human Resources",
-      icon: "badge"
+      icon: "badge",
+      show: isSuperAdmin() || isStoreManager(),
+    },
+    {
+      path: "/roles",
+      label: "Roles & Permissions",
+      icon: "admin_panel_settings",
+      show: isSuperAdmin(),
+    },
+    {
+      path: "/users",
+      label: "User Management",
+      icon: "manage_accounts",
+      show: isSuperAdmin() || isStoreManager(),
+    },
+    {
+      path: "/staff/shifts",
+      label: "Staff Shifts",
+      icon: "calendar_month",
+      filledIcon: true,
+      show: isStoreManager(),
     }
   ];
+
+  const visibleMenuItems = menuItems.filter(item => item.show);
 
   return (
     <aside className="w-64 h-full bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700 flex flex-col flex-shrink-0 transition-all duration-300">
@@ -72,7 +104,7 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive = location.pathname === item.path;
 
           return (
@@ -102,20 +134,6 @@ const Sidebar = () => {
           );
         })}
       </nav>
-
-      {/* User Profile (Bottom Sidebar) */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-          <Avatar className="size-9 rounded-full">
-            <AvatarImage src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdbf2TxRWWjUGEm2z54lsGHvOG-L9OXBhc_2WxceZlYziy1nGWgi52tuTZnefSanrBsk742y5p--5k-rkmcguWrcYDT04sGGMTUeDnc9MhKbYAw67yD-C7-Ufopkjw1DmJs1HGObtxWmIeF3-fiqw9FUyMjlnsLGxi9NGaXhJlTMEjM-a3vhvH9rneywwFJ_Di6CRzOSmLswugDjTwnI--uRsKzl_PZJU4IQAv_C5oJpyQhElWNJjtDwTyQkypAgNMAFXNSkJxgyM" alt="Alex Morgan" />
-            <AvatarFallback>AM</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col text-left">
-            <p className="text-sm font-semibold text-text-main dark:text-white">Alex Morgan</p>
-            <p className="text-xs text-text-muted dark:text-gray-400">Head of Operations</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

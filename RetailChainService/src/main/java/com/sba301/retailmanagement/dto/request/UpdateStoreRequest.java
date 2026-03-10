@@ -13,4 +13,5 @@ public class UpdateStoreRequest {
     private String name;
     private String address;
     private Integer status;
+    private Long warehouseId;
 }

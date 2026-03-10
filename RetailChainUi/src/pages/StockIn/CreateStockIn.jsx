@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Trash2, Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import inventoryService from '@/services/inventory.service';
 import supplierService from '@/services/supplier.service';
 
@@ -100,8 +101,7 @@ const CreateStockIn = () => {
     const handleSubmit = async () => {
         // Validation check
         if (isFormInvalid) {
-            // TODO: Replace with a proper toast notification
-            alert("Vui lòng điền đầy đủ thông tin sản phẩm và số lượng hợp lệ.");
+            toast.error("Vui lòng điền đầy đủ thông tin sản phẩm và số lượng hợp lệ.");
             return;
         }
 
@@ -121,11 +121,11 @@ const CreateStockIn = () => {
             };
 
             await inventoryService.importStock(payload);
+            toast.success("Tạo phiếu nhập kho thành công!");
             navigate('/stock-in');
         } catch (error) {
             console.error("Failed to create stock in:", error);
-            // TODO: Replace with a proper toast notification
-            alert("Đã có lỗi xảy ra khi tạo phiếu nhập. Vui lòng thử lại.");
+            toast.error("Đã có lỗi xảy ra khi tạo phiếu nhập. Vui lòng thử lại.");
         } finally {
             setSubmitting(false);
         }
@@ -259,7 +259,7 @@ const CreateStockIn = () => {
                             <Link to="/stock-in">
                                 <Button variant="outline">Hủy Bỏ</Button>
                             </Link>
-                            <Button onClick={handleSubmit} disabled={submitting || isFormInvalid}>
+                             <Button onClick={handleSubmit} disabled={submitting || isFormInvalid}>
                                 {submitting ? "Đang xử lý..." : "Lưu Phiếu Nhập"}
                                 <Save className="w-4 h-4 ml-2" />
                             </Button>

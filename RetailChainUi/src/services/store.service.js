@@ -3,7 +3,7 @@ import { axiosPublic, axiosPrivate } from './api/axiosClient';
 const storeService = {
   getAllStores: async () => {
     try {
-      const response = await axiosPublic.get('/stores');
+      const response = await axiosPrivate.get('/stores');
       if (response && response.data) {
         return response.data.map(store => ({
           id: store.code,
@@ -26,7 +26,7 @@ const storeService = {
 
   getStoreById: async (slug) => {
     try {
-      const response = await axiosPublic.get(`/stores/${slug}`);
+      const response = await axiosPrivate.get(`/stores/${slug}`);
       if (response && response.data) {
         const storeData = response.data;
 
@@ -41,14 +41,16 @@ const storeService = {
           size: storeData.size || "N/A",
           type: storeData.type || "Standard",
           status: storeData.status || "Active",
+          warehouseId: storeData.warehouseId || "",
           kpi: storeData.kpi || {
-            dailyRevenue: "0",
-            monthlyRevenue: "0",
-            orders: 0,
-            avgBasketSize: "0"
+            totalProductVariants: 0,
+            totalStockQuantity: 0,
+            lowStockCount: 0,
+            activeStaff: 0
           },
           inventory: storeData.inventory || [],
           staff: storeData.staff || [],
+          revenueData: storeData.revenueData || [],
           recentOrders: storeData.recentOrders || [],
           lowStock: storeData.lowStock || []
         };
@@ -65,7 +67,8 @@ const storeService = {
       const requestData = {
         code: data.code,
         name: data.name,
-        address: data.address
+        address: data.address,
+        warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };
 
       const response = await axiosPrivate.post('/stores', requestData);
@@ -91,7 +94,7 @@ const storeService = {
 
   getStoreStaff: async (storeId) => {
     // Note: This endpoint needs verification on the backend
-    return axiosPublic.get('/stores/' + storeId + '/staff').then(res => res.data);
+    return axiosPrivate.get('/stores/' + storeId + '/staff').then(res => res.data);
   },
 
   updateStore: async (id, data) => {
@@ -105,7 +108,8 @@ const storeService = {
       const requestData = {
         name: data.name,
         address: data.address,
-        status: statusMap[data.status] ?? 1
+        status: statusMap[data.status] ?? 1,
+        warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };
 
       const response = await axiosPrivate.put(`/stores/${id}`, requestData);

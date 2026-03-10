@@ -2,11 +2,8 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
-import com.sba301.retailmanagement.dto.request.WarehouseRequest;
-
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
-import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.service.InventoryService;
 import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
@@ -17,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.sba301.retailmanagement.utils.CommonUtils.gson;
+import org.springframework.security.access.prepost.PreAuthorize;
+import static com.sba301.retailmanagement.security.SecurityConstants.*;
 
 @Slf4j
 @RestController
@@ -26,62 +25,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @PostMapping("/warehouse")
-    public String createWarehouse(@RequestBody WarehouseRequest request) {
-        String prefix = "[createWarehouse]";
-        log.info("{}|START|request={}", prefix, gson.toJson(request));
-        try {
-            WarehouseResponse response = inventoryService.createWarehouse(request);
-            log.info("{}|END|response={}", prefix, gson.toJson(response));
-            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouse created successfully", response);
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error creating warehouse: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/warehouse")
-    public String getAllWarehouses() {
-        String prefix = "[getAllWarehouses]";
-        log.info("{}|START", prefix);
-        try {
-            List<WarehouseResponse> response = inventoryService.getAllWarehouses();
-            log.info("{}|END|size={}", prefix, response.size());
-            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouses retrieved successfully", response);
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving warehouses: " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/warehouse/{id}")
-    public String updateWarehouse(@PathVariable Long id, @RequestBody WarehouseRequest request) {
-        String prefix = "[updateWarehouse]|id=" + id;
-        log.info("{}|START|request={}", prefix, gson.toJson(request));
-        try {
-            WarehouseResponse response = inventoryService.updateWarehouse(id, request);
-            log.info("{}|END", prefix);
-            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Warehouse updated successfully", response);
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating warehouse: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/warehouse/{id}")
-    public String deleteWarehouse(@PathVariable Long id) {
-        String prefix = "[deleteWarehouse]|id=" + id;
-        log.info("{}|START", prefix);
-        try {
-            inventoryService.deleteWarehouse(id);
-            log.info("{}|END", prefix);
-            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Warehouse deleted successfully");
-        } catch (Exception e) {
-            log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting warehouse: " + e.getMessage());
-        }
-    }
-
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/stock/{warehouseId}")
     public String getStockByWarehouse(@PathVariable Long warehouseId) {
         String prefix = "[getStockByWarehouse]|warehouseId=" + warehouseId;
@@ -96,6 +40,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/product/{productId}")
     public String getStockByProduct(@PathVariable Long productId) {
         String prefix = "[getStockByProduct]|productId=" + productId;
@@ -110,6 +55,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/import")
     public String importStock(@RequestBody StockRequest request) {
         String prefix = "[importStock]";
@@ -124,6 +70,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/export")
     public String exportStock(@RequestBody StockRequest request) {
         String prefix = "[exportStock]";
@@ -138,6 +85,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/transfer")
     public String transferStock(@RequestBody TransferRequest request) {
         String prefix = "[transferStock]";
@@ -152,6 +100,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/documents")
     public String getDocuments(@RequestParam String type) {
         String prefix = "[getDocuments]|type=" + type;
@@ -167,6 +116,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_UPDATE + "')")
     @DeleteMapping("/documents/{id}")
     public String deleteDocument(@PathVariable Long id) {
         String prefix = "[deleteDocument]|id=" + id;
@@ -181,6 +131,7 @@ public class InventoryController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
     @GetMapping("/overview")
     public String getInventoryOverview() {
         String prefix = "[getInventoryOverview]";

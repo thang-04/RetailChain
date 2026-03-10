@@ -26,11 +26,35 @@ public class Warehouse {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
-    @Column(name = "warehouse_type", nullable = false)
-    private Integer warehouseType;
+    @Column(name = "address", length = 500)
+    private String address;
 
-    @Column(name = "store_id")
-    private Long storeId;
+    @Column(name = "province", length = 100)
+    private String province;
+
+    @Column(name = "district", length = 100)
+    private String district;
+
+    @Column(name = "ward", length = 100)
+    private String ward;
+
+    @Column(name = "contact_name", length = 255)
+    private String contactName;
+
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "is_default")
+    private Integer isDefault = 0;
+
+    @Column(name = "warehouse_level")
+    private Integer warehouseLevel;
+
+    @Column(name = "parent_id")
+    private Long parentId;
 
     @Column(name = "status", nullable = false)
     private Integer status = 1;
