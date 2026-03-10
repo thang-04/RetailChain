@@ -17,6 +17,7 @@ public class StoreResponse {
     private String name;
     private String address;
     private Integer status;
+    private Long warehouseId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

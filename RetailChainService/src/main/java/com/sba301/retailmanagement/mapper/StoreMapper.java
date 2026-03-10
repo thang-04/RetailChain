@@ -19,6 +19,7 @@ public class StoreMapper {
                 .name(store.getName())
                 .address(store.getAddress())
                 .status(store.getStatus())
+                .warehouseId(store.getWarehouseId())
                 .createdAt(store.getCreatedAt())
                 .updatedAt(store.getUpdatedAt())
                 .build();
