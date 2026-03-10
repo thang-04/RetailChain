@@ -13,5 +13,4 @@ public class CreateStoreRequest {
     private String code;
     private String name;
     private String address;
-    private Long warehouseId;
 }
