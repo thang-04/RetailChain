@@ -5,6 +5,7 @@ import ProductHeader from "./components/ProductHeader/ProductHeader";
 import ProductFilter from "./components/FilterBar/ProductFilter";
 import ProductTable from "./components/ProductTable/ProductTable";
 import productService from "../../services/product.service";
+import useAuth from "../../contexts/AuthContext/useAuth";
 
 // Mock data dùng khi backend offline
 const MOCK_CATEGORIES = [
@@ -29,6 +30,9 @@ const ProductPage = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [backendOffline, setBackendOffline] = useState(false);
+
+  const { hasPermission } = useAuth();
+  const canCreateProduct = hasPermission('PRODUCT_CREATE') || hasPermission('PRODUCT_UPDATE');
 
   // Filters State
   const [filters, setFilters] = useState({
@@ -120,7 +124,7 @@ const ProductPage = () => {
         </div>
       )}
 
-      <ProductHeader onAddClick={handleCreate} />
+      <ProductHeader onAddClick={canCreateProduct ? handleCreate : null} />
 
       <div className="flex flex-col gap-6">
         <ProductFilter
