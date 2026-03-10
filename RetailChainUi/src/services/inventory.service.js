@@ -8,7 +8,7 @@ const inventoryService = {
   },
 
   getAllWarehouses: async () => {
-    return axiosPrivate.get('/inventory/warehouse');
+    return axiosPrivate.get('/warehouse');
   },
 
   // Wrapper for product service
