@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '../../contexts/AuthContext/useAuth';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-    const { user, loading, hasRole, permissions } = useAuth();
+    const { user, loading, hasRole } = useAuth();
 
     if (loading) return <div>Loading...</div>;
 

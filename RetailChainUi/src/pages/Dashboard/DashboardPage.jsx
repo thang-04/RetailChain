@@ -14,7 +14,6 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   
   const { hasRole, hasPermission, user } = useAuth();
-  const isStaff = hasRole('STAFF');
   const canViewReports = hasPermission('REPORT_VIEW') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
   const canViewAllStores = hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 

@@ -26,7 +26,6 @@ const InventoryPage = () => {
   const [error, setError] = useState(null);
 
   const { hasPermission, hasRole } = useAuth();
-  const canImport = hasPermission('STOCKIN_CREATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
   const canExport = hasPermission('STOCKOUT_CREATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
   const fetchInventory = useCallback(async () => {
