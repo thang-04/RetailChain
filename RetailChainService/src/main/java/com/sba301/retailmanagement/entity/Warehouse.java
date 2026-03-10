@@ -47,14 +47,8 @@ public class Warehouse {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "is_default")
-    private Integer isDefault = 0;
-
-    @Column(name = "warehouse_level")
-    private Integer warehouseLevel;
-
-    @Column(name = "parent_id")
-    private Long parentId;
+    @Column(name = "is_central")
+    private Boolean isCentral = false;
 
     @Column(name = "status", nullable = false)
     private Integer status = 1;
