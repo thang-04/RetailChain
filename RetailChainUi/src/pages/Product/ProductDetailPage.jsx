@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +13,13 @@ import {
     Calendar,
     Hash,
     Layers,
-    UserCircle2
+    UserCircle2,
+    Plus,
+    CircleDollarSign
 } from "lucide-react";
 import productService from "@/services/product.service";
 import inventoryService from "@/services/inventory.service";
+import ProductVariantForm from "./components/ProductVariantForm/ProductVariantForm";
 
 const ProductDetailPage = () => {
     const { slug } = useParams();
@@ -26,6 +29,10 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [chainStock, setChainStock] = useState([]);
+
+    // Variant states
+    const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
+    const [savingVariant, setSavingVariant] = useState(false);
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -63,6 +70,72 @@ const ProductDetailPage = () => {
         const cat = categories.find(c => c.id === id);
         return cat ? cat.name : "Unknown";
     };
+
+    const handleCreateVariant = async (formData) => {
+        if (!product?.id) return;
+        setSavingVariant(true);
+        try {
+            const createdRes = await productService.createProductVariants(product.id, formData);
+
+            // axios interceptor có thể trả về: { status, message, data } hoặc trực tiếp data
+            const payload = createdRes?.data ?? createdRes;
+            const createdVariants = Array.isArray(payload)
+                ? payload
+                : (payload?.data || payload?.result || payload?.items || payload?.variants || []);
+
+            alert(`Đã tạo ${createdVariants.length} variants thành công.`);
+
+            // Refresh product details to get new variants
+            const productRes = await productService.getProductBySlug(slug);
+            setProduct(productRes?.data ?? productRes);
+
+            // Refresh stock table if an initial quantity was added
+            const realStockRes = await inventoryService.getStockByProduct(product.id);
+            setChainStock((realStockRes?.data ?? realStockRes) || []);
+
+            setIsVariantFormOpen(false);
+        } catch (error) {
+            console.error("Failed to add variant", error);
+            alert("Tạo variants thất bại: " + (error.response?.data?.desc || error.message));
+        } finally {
+            setSavingVariant(false);
+        }
+    };
+
+    const groupedVariants = useMemo(() => {
+        const variants = product?.variants || [];
+        const map = new Map();
+
+        variants.forEach((v) => {
+            const colorKey = (v.color || "Không rõ").trim();
+            if (!map.has(colorKey)) {
+                map.set(colorKey, {
+                    color: colorKey,
+                    sizes: new Set(),
+                    minPrice: null,
+                    maxPrice: null,
+                    activeCount: 0,
+                    totalCount: 0,
+                });
+            }
+            const g = map.get(colorKey);
+            if (v.size) g.sizes.add(v.size);
+            const price = v.price ?? null;
+            if (price !== null && price !== undefined) {
+                g.minPrice = g.minPrice === null ? price : Math.min(g.minPrice, price);
+                g.maxPrice = g.maxPrice === null ? price : Math.max(g.maxPrice, price);
+            }
+            g.totalCount += 1;
+            if (v.status === 1) g.activeCount += 1;
+        });
+
+        return Array.from(map.values())
+            .map((g) => ({
+                ...g,
+                sizes: Array.from(g.sizes).sort((a, b) => String(a).localeCompare(String(b))),
+            }))
+            .sort((a, b) => a.color.localeCompare(b.color));
+    }, [product?.variants]);
 
     if (fetching) {
         return (
@@ -172,6 +245,74 @@ const ProductDetailPage = () => {
                             <div className="space-y-4">
                                 <div className="flex items-end justify-between px-1">
                                     <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Package className="w-5 h-5 text-primary" /> Variants
+                                        </h3>
+                                        <p className="text-sm text-slate-500">Hiển thị theo nhóm màu, mỗi màu có nhiều size.</p>
+                                    </div>
+                                    <Button onClick={() => setIsVariantFormOpen(true)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white">
+                                        <Plus className="w-4 h-4 mr-2" /> Tạo variants
+                                    </Button>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                                    <table className="w-full text-left border-collapse text-sm">
+                                        <thead>
+                                            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
+                                                <th className="px-6 py-4">Màu</th>
+                                                <th className="px-6 py-4">Sizes</th>
+                                                <th className="px-6 py-4 text-right">Giá</th>
+                                                <th className="px-6 py-4 text-center">Trạng thái</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {groupedVariants.length > 0 ? groupedVariants.map((g) => (
+                                                <tr key={g.color} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                                                        {g.color}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {g.sizes.length > 0 ? g.sizes.map((s) => (
+                                                                <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 font-medium">
+                                                                    {s}
+                                                                </span>
+                                                            )) : (
+                                                                <span className="text-xs text-slate-400">—</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right font-bold text-green-600 dark:text-green-400">
+                                                        {g.minPrice === null
+                                                            ? "—"
+                                                            : (g.minPrice === g.maxPrice
+                                                                ? `${Number(g.minPrice).toLocaleString()}`
+                                                                : `${Number(g.minPrice).toLocaleString()} - ${Number(g.maxPrice).toLocaleString()}`)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        {g.activeCount > 0 ? (
+                                                            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                                                                ĐANG BÁN ({g.activeCount}/{g.totalCount})
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
+                                                                NGỪNG BÁN
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">Chưa có variants. Hãy tạo ở phía trên.</td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                <div className="flex items-end justify-between px-1">
+                                    <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Chain Inventory</h3>
                                         <p className="text-sm text-slate-500">Stock availability across all locations.</p>
                                     </div>
@@ -225,6 +366,14 @@ const ProductDetailPage = () => {
             <div className="h-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Nexus Retail Systems • Enterprise Management</p>
             </div>
+
+            <ProductVariantForm
+                open={isVariantFormOpen}
+                onOpenChange={setIsVariantFormOpen}
+                onSubmit={handleCreateVariant}
+                loading={savingVariant}
+                product={product}
+            />
         </div>
     );
 };
