@@ -34,6 +34,9 @@ public class Store {
     @Column(name = "status", nullable = false)
     private Integer status = 1;
 
+    @Column(name = "warehouse_id", nullable = false)
+    private Long warehouseId;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
