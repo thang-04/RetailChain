@@ -31,7 +31,7 @@ const Sidebar = () => {
       path: "/products",
       label: "Products",
       icon: "inventory_2",
-      show: hasPermission('PRODUCT_VIEW') || isStoreManager() || isStaff(), // Defaulting to true for now since previous was true, but enforcing permission
+      show: hasPermission('PRODUCT_VIEW') || isStoreManager() || isStaff(),
     },
     {
       path: "/inventory",
@@ -105,7 +105,13 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto">
         {visibleMenuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          // Exact match cho root (/), startsWith cho các path khác
+          // Nhưng cần tránh /products match /products/categories
+          const isActive =
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname === item.path ||
+                location.pathname.startsWith(item.path + "/");
 
           return (
             <Button

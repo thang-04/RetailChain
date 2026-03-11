@@ -1,7 +1,9 @@
 package com.sba301.retailmanagement.service.impl;
 
+import com.sba301.retailmanagement.dto.request.CategoryRequest;
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
+import com.sba301.retailmanagement.dto.response.CategoryResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
@@ -241,6 +243,72 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductCategory> getAllCategories() {
         return productCategoryRepository.findAll();
+    }
+
+    // =============================================
+    // --- Category CRUD Methods ---
+    // =============================================
+
+    @Override
+    public List<CategoryResponse> getCategoriesWithCount() {
+        List<ProductCategory> categories = productCategoryRepository.findAll();
+        return categories.stream().map(cat -> {
+            long count = productRepository.countByCategoryId(cat.getId());
+            return new CategoryResponse(cat.getId(), cat.getName(), count);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public CategoryResponse getCategoryById(Long id) {
+        ProductCategory category = productCategoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tìm thấy với id: " + id));
+        long count = productRepository.countByCategoryId(category.getId());
+        return new CategoryResponse(category.getId(), category.getName(), count);
+    }
+
+    @Override
+    @Transactional
+    public CategoryResponse createCategory(CategoryRequest request) {
+        if (productCategoryRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("Tên danh mục '" + request.getName() + "' đã tồn tại");
+        }
+        ProductCategory category = new ProductCategory();
+        category.setName(request.getName());
+        ProductCategory saved = productCategoryRepository.save(category);
+        return new CategoryResponse(saved.getId(), saved.getName(), 0L);
+    }
+
+    @Override
+    @Transactional
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+        ProductCategory category = productCategoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tìm thấy với id: " + id));
+
+        // Kiểm tra tên trùng (ngoại trừ chính nó)
+        productCategoryRepository.findByName(request.getName()).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new IllegalArgumentException("Tên danh mục '" + request.getName() + "' đã tồn tại");
+            }
+        });
+
+        category.setName(request.getName());
+        ProductCategory saved = productCategoryRepository.save(category);
+        long count = productRepository.countByCategoryId(saved.getId());
+        return new CategoryResponse(saved.getId(), saved.getName(), count);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCategory(Long id) {
+        ProductCategory category = productCategoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Danh mục không tìm thấy với id: " + id));
+
+        long productCount = productRepository.countByCategoryId(id);
+        if (productCount > 0) {
+            throw new IllegalStateException(
+                    "Không thể xóa danh mục '" + category.getName() + "' vì còn " + productCount + " sản phẩm đang thuộc danh mục này");
+        }
+        productCategoryRepository.deleteById(id);
     }
 
     private void mapRequestToEntity(ProductRequest request, Product product) {

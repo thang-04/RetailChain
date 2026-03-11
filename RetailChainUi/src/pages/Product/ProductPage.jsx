@@ -129,7 +129,7 @@ const ProductPage = () => {
       <div className="flex flex-col gap-6">
         <ProductFilter
           filters={filters}
-          onFilterChange={setFilters}
+          onFilterChange={handleFilterChange}
           categories={categories}
         />
 

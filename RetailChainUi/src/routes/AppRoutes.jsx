@@ -15,6 +15,7 @@ import StoreStaffPage from "../pages/StoreDashboard/StoreStaffPage";
 import ProductPage from "../pages/Product/ProductPage";
 import ProductDetailPage from "../pages/Product/ProductDetailPage";
 import ProductEditPage from "../pages/Product/ProductEditPage";
+import ProductCategoryPage from "../pages/Product/ProductCategoryPage";
 
 // Inventory
 import InventoryPage from "../pages/Inventory/InventoryPage";
@@ -93,6 +94,14 @@ const AppRoutes = () => {
 
                     {/* Product Module - All roles can view */}
                     <Route path="/products" element={<ProductPage />} />
+                    <Route
+                        path="/products/categories"
+                        element={
+                            <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                <ProductCategoryPage />
+                            </ProtectedRoute>
+                        }
+                    />
                     <Route 
                         path="/products/create" 
                         element={
