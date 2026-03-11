@@ -83,12 +83,12 @@ const StepTwoProducts = ({
     return (
         <div className="space-y-6">
             {/* Search & Filter Bar */}
-            <Card className="border-violet-100 shadow-sm">
+            <Card className="border-border shadow-sm">
                 <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Search Input */}
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input
                                 placeholder="Tìm kiếm sản phẩm theo tên hoặc SKU..."
                                 value={searchTerm}
@@ -101,12 +101,12 @@ const StepTwoProducts = ({
                         <Button
                             variant="outline"
                             onClick={() => setShowFilters(!showFilters)}
-                            className={cn(showFilters && "bg-violet-50 border-violet-300")}
+                            className={cn(showFilters && "bg-accent border-input")}
                         >
                             <Filter className="w-4 h-4 mr-2" />
                             Bộ lọc
                             {(filterCategory || filterSize || filterColor) && (
-                                <Badge variant="secondary" className="ml-2 bg-violet-100 text-violet-700">
+                                <Badge variant="secondary" className="ml-2">
                                     {(filterCategory ? 1 : 0) + (filterSize ? 1 : 0) + (filterColor ? 1 : 0)}
                                 </Badge>
                             )}
@@ -174,9 +174,9 @@ const StepTwoProducts = ({
             )}
 
             {/* Products Table */}
-            <Card className="border-violet-100 shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between bg-violet-50 border-b border-violet-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-violet-700">
+            <Card className="border-border shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between bg-secondary/50 border-b">
+                    <CardTitle className="text-lg flex items-center gap-2 text-foreground">
                         <Package className="w-5 h-5" />
                         Danh sách hàng hóa
                     </CardTitle>
@@ -253,16 +253,16 @@ const StepTwoProducts = ({
 
                     {/* Summary Panel */}
                     {items.length > 0 && (
-                        <div className="mt-6 p-4 bg-violet-50 rounded-lg border border-violet-100">
-                            <h4 className="font-medium text-violet-700 mb-3">Tổng quan đơn nhập</h4>
+                        <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                            <h4 className="font-medium text-foreground mb-3">Tổng quan đơn nhập</h4>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div>
                                     <p className="text-xs text-muted-foreground">Tổng dòng</p>
-                                    <p className="text-2xl font-bold text-violet-700">{items.filter(i => i.variantId).length}</p>
+                                    <p className="text-2xl font-bold text-primary">{items.filter(i => i.variantId).length}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground">Tổng số lượng</p>
-                                    <p className="text-2xl font-bold text-violet-700">
+                                    <p className="text-2xl font-bold text-primary">
                                         {items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)}
                                     </p>
                                 </div>
