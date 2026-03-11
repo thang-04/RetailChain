@@ -34,7 +34,7 @@ const StepOneInfo = ({ formData, setFormData, warehouses, suppliers, errors }) =
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{wh.name}</span>
                                         <span className="text-xs text-muted-foreground">
-                                            ({wh.warehouseType === 1 ? 'Kho tổng' : 'Kho cửa hàng'})
+                                            ({wh.isCentral ? 'Kho tổng' : 'Kho cửa hàng'})
                                         </span>
                                     </div>
                                 </SelectItem>
@@ -53,14 +53,14 @@ const StepOneInfo = ({ formData, setFormData, warehouses, suppliers, errors }) =
                         Nhà cung cấp
                     </Label>
                     <Select
-                        value={formData.supplierId}
-                        onValueChange={(val) => setFormData({ ...formData, supplierId: val })}
+                        value={formData.supplierId || "none"} // Sửa ở đây
+                        onValueChange={(val) => setFormData({ ...formData, supplierId: val === "none" ? "" : val })} // Sửa ở đây
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Chọn nhà cung cấp (không bắt buộc)" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">-- Không chọn --</SelectItem>
+                            <SelectItem value="none">-- Không chọn --</SelectItem> {/* Sửa ở đây */}
                             {suppliers.map(sup => (
                                 <SelectItem key={sup.id} value={String(sup.id)}>
                                     {sup.name}

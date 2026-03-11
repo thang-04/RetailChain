@@ -8,13 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Plus, Trash2, Package, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const StepTwoProducts = ({ 
-    items, 
-    setItems, 
-    productVariants, 
+const StepTwoProducts = ({
+    items,
+    setItems,
+    productVariants,
     categories,
     errors,
-    summary 
+    summary
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('');
@@ -27,13 +27,13 @@ const StepTwoProducts = ({
         const cats = new Set();
         const szs = new Set();
         const clrs = new Set();
-        
+
         productVariants.forEach(pv => {
             if (pv.categoryName) cats.add(pv.categoryName);
             if (pv.size) szs.add(pv.size);
             if (pv.color) clrs.add(pv.color);
         });
-        
+
         return {
             categories: Array.from(cats),
             sizes: Array.from(szs),
@@ -44,13 +44,13 @@ const StepTwoProducts = ({
     // Filter product variants
     const filteredVariants = useMemo(() => {
         return productVariants.filter(variant => {
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 variant.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 variant.sku?.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = !filterCategory || variant.categoryName === filterCategory;
             const matchesSize = !filterSize || variant.size === filterSize;
             const matchesColor = !filterColor || variant.color === filterColor;
-            
+
             return matchesSearch && matchesCategory && matchesSize && matchesColor;
         });
     }, [productVariants, searchTerm, filterCategory, filterSize, filterColor]);
@@ -96,10 +96,10 @@ const StepTwoProducts = ({
                                 className="pl-10"
                             />
                         </div>
-                        
+
                         {/* Filter Toggle */}
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             onClick={() => setShowFilters(!showFilters)}
                             className={cn(showFilters && "bg-violet-50 border-violet-300")}
                         >
@@ -118,12 +118,12 @@ const StepTwoProducts = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t">
                             <div className="space-y-2">
                                 <label className="text-xs font-medium">Danh mục</label>
-                                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                                <Select value={filterCategory || "all"} onValueChange={(v) => setFilterCategory(v === "all" ? "" : v)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Tất cả danh mục" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">Tất cả</SelectItem>
+                                        <SelectItem value="all">Tất cả</SelectItem>
                                         {allCategories.map(cat => (
                                             <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                                         ))}
@@ -132,12 +132,12 @@ const StepTwoProducts = ({
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-medium">Size</label>
-                                <Select value={filterSize} onValueChange={setFilterSize}>
+                                <Select value={filterSize || "all"} onValueChange={(v) => setFilterSize(v === "all" ? "" : v)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Tất cả size" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">Tất cả</SelectItem>
+                                        <SelectItem value="all">Tất cả</SelectItem>
                                         {sizes.map(sz => (
                                             <SelectItem key={sz} value={sz}>{sz}</SelectItem>
                                         ))}
@@ -146,12 +146,12 @@ const StepTwoProducts = ({
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-medium">Màu sắc</label>
-                                <Select value={filterColor} onValueChange={setFilterColor}>
+                                <Select value={filterColor || "all"} onValueChange={(v) => setFilterColor(v === "all" ? "" : v)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Tất cả màu" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="">Tất cả</SelectItem>
+                                        <SelectItem value="all">Tất cả</SelectItem>
                                         {colors.map(clr => (
                                             <SelectItem key={clr} value={clr}>{clr}</SelectItem>
                                         ))}
