@@ -51,7 +51,7 @@ const StepTwoProducts = ({ items, setItems, productVariants, categories, errors 
         ));
     };
 
-    const totalQuantity = items.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+    const totalQuantity = items.filter(i => i.variantId).reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
 
     return (
         <div className="space-y-6">

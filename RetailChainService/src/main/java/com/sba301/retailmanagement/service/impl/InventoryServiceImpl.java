@@ -20,8 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -303,11 +305,29 @@ public class InventoryServiceImpl implements InventoryService {
         document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
 
+        // Fetch all variants and calculate totalAmount
+        List<Long> variantIds = request.getItems().stream()
+                .map(InventoryItemRequest::getVariantId)
+                .collect(Collectors.toList());
+        Map<Long, ProductVariant> variantMap = productVariantRepository.findAllById(variantIds).stream()
+                .collect(Collectors.toMap(ProductVariant::getId, v -> v));
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (InventoryItemRequest itemReq : request.getItems()) {
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
+            if (variant == null) {
+                throw new RuntimeException("Product Variant not found: " + itemReq.getVariantId());
+            }
+            BigDecimal unitPrice = variant.getPrice() != null ? variant.getPrice() : BigDecimal.ZERO;
+            totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+        }
+        document.setTotalAmount(totalAmount);
+
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
 
+        // Process items
         for (InventoryItemRequest itemReq : request.getItems()) {
-            ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
-                    .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
 
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
