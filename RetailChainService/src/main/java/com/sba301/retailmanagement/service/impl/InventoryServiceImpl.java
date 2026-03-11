@@ -13,6 +13,9 @@ import com.sba301.retailmanagement.enums.InventoryDocumentType;
 import com.sba301.retailmanagement.repository.*;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryServiceImpl implements InventoryService {
 
     private final WarehouseRepository warehouseRepository;
@@ -35,6 +39,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -132,6 +137,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("IMP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -140,7 +148,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouse(warehouse);
         document.setSupplierId(request.getSupplierId());
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
         document.setTotalAmount(java.math.BigDecimal.ZERO);
 
@@ -356,6 +364,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
             ProductVariant variant, InventoryAction action, int quantity, int balance) {
+        User currentUser = getCurrentUser();
+        Long actorUserId = currentUser != null ? currentUser.getId() : null;
+        
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
@@ -368,7 +379,7 @@ public class InventoryServiceImpl implements InventoryService {
         history.setAction(action);
         history.setQuantity(quantity);
         history.setBalanceAfter(balance);
-        history.setActorUserId(1L); // TODO: Get from SecurityContext
+        history.setActorUserId(actorUserId);
         history.setOccurredAt(LocalDateTime.now());
 
         inventoryHistoryRepository.save(history);
@@ -512,6 +523,33 @@ public class InventoryServiceImpl implements InventoryService {
 
             String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
 
+            // Map items
+            List<com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse> itemResponses = items.stream()
+                    .map(item -> {
+                        String productName = "Unknown";
+                        if (item.getVariant() != null && item.getVariant().getProduct() != null) {
+                            productName = item.getVariant().getProduct().getName();
+                        }
+                        String sku = item.getVariant() != null ? item.getVariant().getSku() : "N/A";
+                        String size = item.getVariant() != null ? item.getVariant().getSize() : "";
+                        String color = item.getVariant() != null ? item.getVariant().getColor() : "";
+                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice() : java.math.BigDecimal.ZERO;
+                        long unitPriceLong = unitPrice != null ? unitPrice.longValue() : 0L;
+                        long totalPriceLong = unitPriceLong * item.getQuantity();
+
+                        return com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse.builder()
+                                .variantId(item.getVariantId())
+                                .productName(productName)
+                                .sku(sku)
+                                .size(size)
+                                .color(color)
+                                .quantity(item.getQuantity())
+                                .unitPrice(unitPriceLong)
+                                .totalPrice(totalPriceLong)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
             return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
                     .id(doc.getId())
                     .documentCode(doc.getDocumentCode())
@@ -527,6 +565,7 @@ public class InventoryServiceImpl implements InventoryService {
                     .totalItems(totalItems)
                     .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
                     .supplier(supplierName)
+                    .items(itemResponses)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -582,5 +621,18 @@ public class InventoryServiceImpl implements InventoryService {
                 .criticalStoreCount((long) criticalWarehouses.size())
                 .growthPercentage(growthPercentage)
                 .build();
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String email = ((UserDetails) principal).getUsername();
+                return userRepository.findByEmail(email).orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("No authenticated user found");
+        }
+        return null;
     }
 }

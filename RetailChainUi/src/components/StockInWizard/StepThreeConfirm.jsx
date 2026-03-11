@@ -30,7 +30,7 @@ const StepThreeConfirm = ({ formData, items, productVariants, suppliers, warehou
                     <CardContent className="pt-4">
                         <p className="font-medium text-lg">{selectedWarehouse?.name || 'Chưa chọn'}</p>
                         <p className="text-sm text-muted-foreground">
-                            {selectedWarehouse?.warehouseType === 1 ? 'Kho tổng' : 'Kho cửa hàng'}
+                            {selectedWarehouse?.isCentral ? 'Kho tổng' : 'Kho cửa hàng'}
                         </p>
                     </CardContent>
                 </Card>

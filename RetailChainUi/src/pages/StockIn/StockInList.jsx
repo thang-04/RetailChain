@@ -448,8 +448,8 @@ const StockInList = () => {
                                                     <TableRow key={idx} className="hover:bg-slate-50/50 transition-colors">
                                                         <TableCell className="font-medium">{item.productName || `Sản phẩm #${idx + 1}`}</TableCell>
                                                         <TableCell className="text-right font-bold text-primary">{item.quantity}</TableCell>
-                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
-                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
+                                                        <TableCell className="text-right text-slate-700">{(item.unitPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
+                                                        <TableCell className="text-right font-bold text-slate-700">{(item.totalPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
                                                     </TableRow>
                                                 ))
                                             ) : (

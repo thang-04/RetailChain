@@ -3,9 +3,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, User, FileText } from 'lucide-react';
+import { Building2, User, FileText, AlertCircle } from 'lucide-react';
 
 const StepOneInfo = ({ formData, setFormData, warehouses, suppliers, errors }) => {
+    const centralWarehouse = warehouses.find(wh => wh.isCentral === true);
+    
     return (
         <Card className="border-violet-100 shadow-sm">
             <CardHeader className="bg-violet-50 border-b border-violet-100">
@@ -15,34 +17,27 @@ const StepOneInfo = ({ formData, setFormData, warehouses, suppliers, errors }) =
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
-                {/* Warehouse Selection */}
+                {/* Warehouse Selection - ReadOnly */}
                 <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-violet-500" />
                         Kho nhập hàng <span className="text-red-500">*</span>
                     </Label>
-                    <Select
-                        value={formData.warehouseId}
-                        onValueChange={(val) => setFormData({ ...formData, warehouseId: val })}
-                    >
-                        <SelectTrigger className={errors.warehouseId ? "border-red-500" : ""}>
-                            <SelectValue placeholder="Chọn kho nhập hàng" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {warehouses.map(wh => (
-                                <SelectItem key={wh.id} value={String(wh.id)}>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">{wh.name}</span>
-                                        <span className="text-xs text-muted-foreground">
-                                            ({wh.isCentral ? 'Kho tổng' : 'Kho cửa hàng'})
-                                        </span>
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    {errors.warehouseId && (
-                        <p className="text-xs text-red-500">{errors.warehouseId}</p>
+                    {centralWarehouse ? (
+                        <div className="p-3 bg-violet-50 border border-violet-200 rounded-md">
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium text-violet-900">{centralWarehouse.name}</span>
+                                <span className="text-xs bg-violet-200 text-violet-800 px-2 py-0.5 rounded">(Kho tổng)</span>
+                            </div>
+                            {centralWarehouse.address && (
+                                <p className="text-sm text-muted-foreground mt-1">{centralWarehouse.address}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-600">
+                            <AlertCircle className="w-4 h-4" />
+                            <span>Không tìm thấy kho tổng. Vui lòng liên hệ quản trị viên.</span>
+                        </div>
                     )}
                 </div>
 
