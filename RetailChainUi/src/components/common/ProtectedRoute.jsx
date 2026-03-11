@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '../../contexts/AuthContext/useAuth';
 
-const ProtectedRoute = ({ allowedRoles, children }) => { // Thêm prop children
+const ProtectedRoute = ({ allowedRoles, children }) => {
     const { user, loading, hasRole } = useAuth();
 
     if (loading) return <div>Loading...</div>;

@@ -60,7 +60,7 @@ public class InventoryServiceImpl implements InventoryService {
         warehouse.setContactName(request.getContactName());
         warehouse.setContactPhone(request.getContactPhone());
         warehouse.setDescription(request.getDescription());
-        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : false);
+        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : 1);
         warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
@@ -276,14 +276,16 @@ public class InventoryServiceImpl implements InventoryService {
         Warehouse targetWarehouse = warehouseRepository.findById(request.getTargetWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
 
-        // Validate: Source must be Central Warehouse (isCentral = true)
-        if (!Boolean.TRUE.equals(sourceWarehouse.getIsCentral())) {
-            throw new RuntimeException("Transfer source must be a Central Warehouse (isCentral = true)");
+        // Validate: Source must NOT be linked to any store (Central Warehouse)
+        boolean sourceIsCentral = sourceWarehouse.getIsCentral() != null && sourceWarehouse.getIsCentral() == 1;
+        if (!sourceIsCentral) {
+            throw new RuntimeException("Transfer source must be a Central Warehouse (not linked to any store)");
         }
 
-        // Validate: Target MUST NOT be Central Warehouse (isCentral = false) - Store Warehouse
-        if (Boolean.TRUE.equals(targetWarehouse.getIsCentral())) {
-            throw new RuntimeException("Transfer destination must be a Store Warehouse (isCentral = false)");
+        // Validate: Target MUST be linked to a store (Store Warehouse)
+        boolean targetIsCentral = targetWarehouse.getIsCentral() != null && targetWarehouse.getIsCentral() == 1;
+        if (targetIsCentral) {
+            throw new RuntimeException("Transfer destination must be a Store Warehouse (linked to a store)");
         }
 
         if (sourceWarehouse.getId().equals(targetWarehouse.getId())) {

@@ -48,7 +48,7 @@ public class Warehouse {
     private String description;
 
     @Column(name = "is_central")
-    private Boolean isCentral = false;
+    private Integer isCentral = 0;
 
     @Column(name = "status", nullable = false)
     private Integer status = 1;

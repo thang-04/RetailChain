@@ -111,7 +111,9 @@ public class StoreServiceImpl implements StoreService {
             Store store = storeOptional.get();
             StoreDetailResponse response = storeMapper.toDetailResponse(store);
 
-            response.setWarehouseId(store.getWarehouseId());
+            if (store.getWarehouse() != null) {
+                response.setWarehouseId(store.getWarehouse().getId());
+            }
 
             List<User> users = userRepository.findByStoreId(store.getId());
             User manager = users.stream()
@@ -216,12 +218,15 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public StoreResponse createStore(CreateStoreRequest request) {
-        String prefix = "[createStore]|code=" + (request != null ? request.getCode() : "null");
+        String prefix = "[createStore]|name=" + (request != null ? request.getName() : "null");
         log.info("{}|START", prefix);
         try {
-            if (request == null || request.getCode() == null) {
-                log.error("{}|FAILED|Request or code is null", prefix);
-                throw new IllegalArgumentException("Request or code cannot be null");
+            if (request == null) {
+                log.error("{}|FAILED|Request is null", prefix);
+                throw new IllegalArgumentException("Request cannot be null");
+            }
+            if (request.getCode() == null || request.getCode().trim().isEmpty()) {
+                request.setCode("ST" + System.currentTimeMillis());
             }
             if (storeRepository.findByCode(request.getCode()).isPresent()) {
                 log.error("{}|Store code already exists", prefix);
@@ -244,7 +249,6 @@ public class StoreServiceImpl implements StoreService {
             store.setUpdatedAt(LocalDateTime.now());
 
             Store savedStore = storeRepository.save(store);
-
             StoreResponse response = storeMapper.toResponse(savedStore);
             response.setWarehouseId(savedWarehouse.getId());
 
@@ -272,15 +276,6 @@ public class StoreServiceImpl implements StoreService {
 
             storeMapper.updateEntity(store, request);
             store.setUpdatedAt(LocalDateTime.now());
-
-            if (request.getAddress() != null && store.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(store.getWarehouseId());
-                warehouseOpt.ifPresent(warehouse -> {
-                    warehouse.setAddress(request.getAddress());
-                    warehouse.setUpdatedAt(LocalDateTime.now());
-                    warehouseRepository.save(warehouse);
-                });
-            }
 
             Store updatedStore = storeRepository.save(store);
 
@@ -358,6 +353,43 @@ public class StoreServiceImpl implements StoreService {
         }
     }
 
+    @Override
+    public void assignStaffToStore(Long storeId, List<Long> staffIds) {
+        String prefix = "[assignStaffToStore]|storeId=" + storeId;
+        log.info("{}|START|staffIds={}", prefix, staffIds);
+        try {
+            if (!storeRepository.existsById(storeId)) {
+                log.error("{}|Store not found", prefix);
+                throw new ResourceNotFoundException("Store not found with id: " + storeId);
+            }
+
+            if (staffIds == null || staffIds.isEmpty()) {
+                log.info("{}|END|No staff to assign", prefix);
+                return;
+            }
+
+            List<User> staffList = userRepository.findAllById(staffIds);
+            for (User staff : staffList) {
+                // Ensure they are STAFF
+                boolean isStaff = staff.getRoles() != null && staff.getRoles().stream()
+                        .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STAFF.name()));
+                if (isStaff) {
+                    staff.setStoreId(storeId);
+                } else {
+                    log.warn("{}|User {} is not STAFF, skipping assignment", prefix, staff.getId());
+                }
+            }
+            userRepository.saveAll(staffList);
+
+            log.info("{}|END|Assigned {} staff members", prefix, staffList.size());
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error assigning staff: " + e.getMessage());
+        }
+    }
+
     private User getCurrentUser() {
         try {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -373,6 +405,6 @@ public class StoreServiceImpl implements StoreService {
 
     private boolean isSuperAdmin(User user) {
         return user != null && user.getRoles() != null && user.getRoles().stream()
-                .anyMatch(r -> r.getCode().equals(RoleConstant.SUPER_ADMIN.name()));
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.SUPER_ADMIN.name()));
     }
 }

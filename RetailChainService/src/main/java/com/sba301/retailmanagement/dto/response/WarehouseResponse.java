@@ -18,7 +18,7 @@ public class WarehouseResponse {
     private String contactName;
     private String contactPhone;
     private String description;
-    private Boolean isCentral;
+    private Integer isCentral;
     private Integer status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

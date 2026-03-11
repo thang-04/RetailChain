@@ -97,6 +97,16 @@ const storeService = {
     return axiosPrivate.get('/stores/' + storeId + '/staff').then(res => res.data);
   },
 
+  assignStaffToStore: async (storeId, staffIds) => {
+    try {
+      const response = await axiosPrivate.post(`/stores/${storeId}/staff`, staffIds);
+      return response.data;
+    } catch (error) {
+      console.error(`Error assigning staff to store ${storeId}:`, error);
+      throw error;
+    }
+  },
+
   updateStore: async (id, data) => {
     try {
       const statusMap = {

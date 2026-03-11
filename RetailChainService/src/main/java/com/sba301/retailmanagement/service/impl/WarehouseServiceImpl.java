@@ -40,7 +40,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setContactName(request.getContactName());
         warehouse.setContactPhone(request.getContactPhone());
         warehouse.setDescription(request.getDescription());
-        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : false);
+        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : 0);
         warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
@@ -49,7 +49,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         return mapToResponse(savedWarehouse);
     }
-
 
     @Override
     public List<WarehouseResponse> getAllWarehouses() {
@@ -107,10 +106,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouse.setStatus(request.getStatus());
         }
 
-        if (request.getIsCentral() != null && !request.getIsCentral().equals(warehouse.getIsCentral())) {
-            if (Boolean.TRUE.equals(request.getIsCentral()) && warehouseRepository.countByIsCentralTrue() > 0) {
-                throw new RuntimeException("Only one central warehouse allowed");
-            }
+        if (request.getIsCentral() != null) {
             warehouse.setIsCentral(request.getIsCentral());
         }
 

@@ -13,6 +13,6 @@ public class WarehouseRequest {
     private String contactName;
     private String contactPhone;
     private String description;
-    private Boolean isCentral;
+    private Integer isCentral;
     private Integer status;
 }
