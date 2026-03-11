@@ -66,12 +66,12 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
 
     return (
         <div aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8" role="dialog">
-            <div aria-hidden="true" className="absolute inset-0 bg-[#131c1f]/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#1e282c] text-left shadow-lift transition-all flex flex-col h-[85vh]">
-                <div className="flex items-center justify-between border-b border-[#f1f3f4] dark:border-gray-700 px-8 py-4 bg-white dark:bg-[#1e282c] shrink-0">
+            <div aria-hidden="true" className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-card text-left shadow-lift transition-all flex flex-col h-[85vh]">
+                <div className="flex items-center justify-between border-b border-border px-8 py-4 bg-card shrink-0">
                     <div>
-                        <h3 className="text-xl font-bold leading-6 text-[#121617] dark:text-white tracking-tight">Add New Store Location</h3>
-                        <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Search for a location on the map to begin.</p>
+                        <h3 className="text-xl font-bold leading-6 text-foreground tracking-tight">Add New Store Location</h3>
+                        <p className="mt-0.5 text-sm text-muted-foreground">Search for a location on the map to begin.</p>
                     </div>
                     <button
                         className="rounded-full p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-500 transition-colors"

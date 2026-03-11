@@ -71,8 +71,9 @@ const StorePage = () => {
           {/* Page Title & Actions */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
+              <h1 className="sr-only">Quản lý cửa hàng</h1>
               <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Store Management
+                Quản lý cửa hàng
               </h2>
             </div>
             {hasPermission('STORE_CREATE') && (
@@ -123,7 +124,7 @@ const StorePage = () => {
 
           {/* Pagination - Optimized UI/UX */}
           {!loading && stores.length > 0 && (
-            <div className="mt-auto bg-white/70 dark:bg-[#1a262a]/70 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4 transition-all">
+            <div className="mt-auto bg-card border border-border rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between shadow-sm gap-4 transition-all">
               <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                 Hiển thị <span className="font-bold text-slate-900 dark:text-white px-1">{startIndex + 1}-{Math.min(endIndex, stores.length)}</span> trên <span className="font-bold text-slate-900 dark:text-white px-1">{stores.length}</span> cơ sở
               </p>

@@ -37,11 +37,21 @@ const Header = () => {
                         type="text"
                     />
                 </div>
-                <Button variant="ghost" size="icon" className="relative text-text-muted hover:text-primary hover:bg-transparent">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="relative text-text-muted hover:text-primary hover:bg-transparent"
+                    aria-label="Thông báo"
+                >
                     <span className="material-symbols-outlined">notifications</span>
                     <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-surface-dark"></span>
                 </Button>
-                <Button variant="ghost" size="icon" className="text-text-muted hover:text-primary hover:bg-transparent">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-text-muted hover:text-primary hover:bg-transparent"
+                    aria-label="Cài đặt"
+                >
                     <span className="material-symbols-outlined">settings</span>
                 </Button>
 

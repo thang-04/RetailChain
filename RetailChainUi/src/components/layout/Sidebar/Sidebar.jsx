@@ -22,12 +22,6 @@ const Sidebar = () => {
       show: hasPermission('STORE_VIEW') || isStoreManager(),
     },
     {
-      path: "/warehouse",
-      label: "Central Warehouse",
-      icon: "warehouse",
-      show: hasPermission('WAREHOUSE_VIEW'),
-    },
-    {
       path: "/products",
       label: "Products",
       icon: "inventory_2",
@@ -93,7 +87,7 @@ const Sidebar = () => {
         <div className="bg-primary aspect-square rounded-lg size-10 flex items-center justify-center text-white">
           <span className="material-symbols-outlined text-2xl">grid_view</span>
         </div>
-        <h1 className="text-xl font-bold tracking-tight text-text-main dark:text-white">RetailOS</h1>
+        <span className="text-xl font-bold tracking-tight text-text-main dark:text-white">RetailOS</span>
       </div>
 
       {/* Navigation */}

@@ -149,8 +149,8 @@ const StockInList = () => {
                         </div>
                     </div>
 
-                    {/* Filter Bar - Modern Glassmorphism Style */}
-                    <div className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/50 dark:border-white/10 rounded-[2rem] p-6 shadow-xl shadow-slate-200/20 dark:shadow-none">
+                    {/* Filter Bar - Modern Style */}
+                    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                         <div className="flex items-center gap-2 mb-5">
                             <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                 <Filter className="w-4 h-4 text-primary" />
@@ -378,8 +378,8 @@ const StockInList = () => {
 
             {/* Detail Modal */}
             <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="max-w-3xl rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden">
-                    <DialogHeader className="bg-primary p-8 text-white relative">
+                <DialogContent className="max-w-3xl rounded-3xl border-none shadow-2xl p-0 overflow-hidden">
+                    <DialogHeader className="bg-primary p-8 text-primary-foreground relative">
                         <DialogTitle className="text-2xl font-bold">Chi Tiết Phiếu Nhập Kho</DialogTitle>
                         <DialogDescription className="text-primary-foreground/80 font-medium">
                             Mã phiếu: <span className="font-bold border-b border-primary-foreground/40">{selectedRecord?.documentCode}</span>
@@ -392,24 +392,24 @@ const StockInList = () => {
                     {selectedRecord && (
                         <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
                             {/* Meta Info */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-200/50 dark:border-slate-700/50 shadow-inner">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 bg-muted rounded-3xl border border-border">
                                 <div className="space-y-1">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Ngày tạo</p>
-                                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Ngày tạo</p>
+                                    <div className="flex items-center gap-2 text-foreground">
                                         <Calendar size={14} className="text-primary" />
                                         <p className="font-bold">{new Date(selectedRecord.createdAt).toLocaleDateString('vi-VN')}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Nhà cung cấp</p>
-                                    <p className="font-bold text-slate-700 dark:text-slate-200">{selectedRecord.supplier || 'N/A'}</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Nhà cung cấp</p>
+                                    <p className="font-bold text-foreground">{selectedRecord.supplier || 'N/A'}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Kho đích</p>
-                                    <p className="font-bold text-slate-700 dark:text-slate-200">{selectedRecord.targetWarehouseName}</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Kho đích</p>
+                                    <p className="font-bold text-foreground">{selectedRecord.targetWarehouseName}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Trạng thái</p>
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Trạng thái</p>
                                     <Badge variant={
                                         selectedRecord.status === 'Completed' ? 'default' :
                                             selectedRecord.status === 'Pending' ? 'secondary' : 'outline'
@@ -418,9 +418,9 @@ const StockInList = () => {
                                             selectedRecord.status === 'Pending' ? 'Chờ duyệt' : 'Đã hủy'}
                                     </Badge>
                                 </div>
-                                <div className="col-span-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 mt-2">
-                                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Ghi chú</p>
-                                    <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic">
+<div className="col-span-4 pt-4 border-t border-border mt-2">
+                                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">Ghi chú</p>
+                                    <p className="text-sm text-muted-foreground font-medium italic">
                                         "{selectedRecord.note || 'Không có ghi chú.'}"
                                     </p>
                                 </div>
@@ -428,13 +428,13 @@ const StockInList = () => {
 
                             {/* Items List */}
                             <div className="space-y-4">
-                                <h4 className="font-bold text-lg flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                                <h4 className="font-bold text-lg flex items-center gap-2 text-foreground">
                                     <span className="w-1.5 h-6 bg-primary rounded-full"></span>
                                     Danh sách mặt hàng
                                 </h4>
-                                <div className="border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
+                                <div className="border border-border rounded-3xl overflow-hidden shadow-sm">
                                     <Table>
-                                        <TableHeader className="bg-slate-50 dark:bg-slate-800">
+                                        <TableHeader className="bg-muted">
                                             <TableRow>
                                                 <TableHead className="font-bold">Sản phẩm</TableHead>
                                                 <TableHead className="text-right font-bold">Số lượng</TableHead>
@@ -445,22 +445,22 @@ const StockInList = () => {
                                         <TableBody>
                                             {selectedRecord.items?.length > 0 ? (
                                                 selectedRecord.items.map((item, idx) => (
-                                                    <TableRow key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                                    <TableRow key={idx} className="hover:bg-primary/5 transition-colors">
                                                         <TableCell className="font-medium">{item.productName || `Sản phẩm #${idx + 1}`}</TableCell>
                                                         <TableCell className="text-right font-bold text-primary">{item.quantity}</TableCell>
-                                                        <TableCell className="text-right text-slate-700">{(item.unitPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
-                                                        <TableCell className="text-right font-bold text-slate-700">{(item.totalPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
+                                                        <TableCell className="text-right text-foreground">{(item.unitPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
+                                                        <TableCell className="text-right font-bold text-foreground">{(item.totalPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
                                                     </TableRow>
                                                 ))
                                             ) : (
                                                 <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-8 text-slate-400 italic">
+                                                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground italic">
                                                         Không có dữ liệu mặt hàng
                                                     </TableCell>
                                                 </TableRow>
                                             )}
-                                            <TableRow className="bg-slate-50 dark:bg-slate-800/80 font-extrabold text-lg">
-                                                <TableCell colSpan={3} className="text-right text-slate-700 dark:text-slate-200">Tổng cộng:</TableCell>
+                                            <TableRow className="bg-muted font-extrabold text-lg">
+                                                <TableCell colSpan={3} className="text-right text-foreground">Tổng cộng:</TableCell>
                                                 <TableCell className="text-right text-primary">
                                                     {(selectedRecord.totalValue || 0).toLocaleString('vi-VN')} đ
                                                 </TableCell>
@@ -472,8 +472,8 @@ const StockInList = () => {
                         </div>
                     )}
 
-                    <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-900/50 gap-4">
-                        <Button variant="outline" onClick={() => setIsDetailOpen(false)} className="rounded-xl px-8 border-slate-200">Đóng</Button>
+                    <DialogFooter className="p-8 bg-muted gap-4">
+                        <Button variant="outline" onClick={() => setIsDetailOpen(false)} className="rounded-xl px-8 border-border">Đóng</Button>
                         <Button className="rounded-xl px-8 shadow-lg shadow-primary/20">
                             <Upload className="w-4 h-4 mr-2 rotate-180" /> In Phiếu
                         </Button>

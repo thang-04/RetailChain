@@ -49,8 +49,8 @@ const ConfirmModal = ({
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-[#1e282c] shadow-2xl transition-all">
+            <div className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+            <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-card shadow-2xl transition-all">
                 <div className="p-6">
                     <div className="flex items-start gap-4">
                         <div className={`flex-shrink-0 rounded-full p-3 ${style.bgColor} border ${style.borderColor}`}>

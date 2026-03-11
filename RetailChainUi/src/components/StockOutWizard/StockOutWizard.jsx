@@ -189,23 +189,23 @@ const StockOutWizard = () => {
         return (
             <div className="flex items-center justify-center h-96">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-                    <p className="text-gray-500">Đang tải dữ liệu...</p>
+                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Đang tải dữ liệu...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark">
-            <div className="p-6 border-b bg-white dark:bg-slate-900">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
+            <div className="p-6 border-b bg-card">
                 <div className="flex items-center gap-4 mb-6">
                     <Link to="/stock-out">
                         <Button variant="ghost" size="icon">
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                     </Link>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-2xl font-bold text-foreground">
                         Tạo phiếu xuất kho
                     </h1>
                 </div>
@@ -217,7 +217,7 @@ const StockOutWizard = () => {
                 {renderStep()}
             </div>
 
-            <div className="p-6 border-t bg-white dark:bg-slate-900 flex justify-between">
+            <div className="p-6 border-t bg-card flex justify-between">
                 <div>
                     {currentStep > 1 && (
                         <Button 
@@ -234,7 +234,7 @@ const StockOutWizard = () => {
                     {currentStep < STEPS.length ? (
                         <Button 
                             onClick={handleNext}
-                            className="px-6 bg-amber-600 hover:bg-amber-700"
+                            className="px-6"
                         >
                             Tiếp theo
                             <ArrowRight className="w-4 h-4 ml-2" />
@@ -243,11 +243,11 @@ const StockOutWizard = () => {
                         <Button 
                             onClick={handleSubmit}
                             disabled={submitting}
-                            className="px-6 bg-amber-600 hover:bg-amber-700"
+                            className="px-6"
                         >
                             {submitting ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                                     Đang tạo...
                                 </>
                             ) : (

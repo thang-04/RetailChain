@@ -16,9 +16,9 @@ const ProgressStepper = ({ currentStep, steps }) => {
                                 <div
                                     className={cn(
                                         "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300",
-                                        isCompleted && "bg-amber-600 text-white",
-                                        isCurrent && "bg-amber-100 border-2 border-amber-600 text-amber-600",
-                                        !isCompleted && !isCurrent && "bg-gray-100 text-gray-400"
+                                        isCompleted && "bg-primary text-primary-foreground",
+                                        isCurrent && "bg-primary/10 border-2 border-primary text-primary",
+                                        !isCompleted && !isCurrent && "bg-muted text-muted-foreground"
                                     )}
                                 >
                                     {isCompleted ? <Check className="w-5 h-5" /> : stepNumber}
@@ -26,7 +26,7 @@ const ProgressStepper = ({ currentStep, steps }) => {
                                 <span
                                     className={cn(
                                         "mt-2 text-xs font-medium text-center",
-                                        isCurrent ? "text-amber-600" : isCompleted ? "text-gray-600" : "text-gray-400"
+                                        isCurrent ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"
                                     )}
                                 >
                                     {step}
@@ -36,7 +36,7 @@ const ProgressStepper = ({ currentStep, steps }) => {
                                 <div
                                     className={cn(
                                         "flex-1 h-1 mx-2 transition-all duration-300",
-                                        stepNumber < currentStep ? "bg-amber-600" : "bg-gray-200"
+                                        stepNumber < currentStep ? "bg-primary" : "bg-border"
                                     )}
                                 />
                             )}

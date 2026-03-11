@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../contexts/AuthContext/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -25,57 +28,52 @@ const LoginPage = () => {
     };
 
     return (
-        <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
-            <div style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '400px' }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>RetailChain Login</h1>
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <Card className="w-full max-w-md">
+                <CardHeader className="text-center space-y-2">
+                    <CardTitle className="text-2xl">RetailChain</CardTitle>
+                    <CardDescription>Đăng nhập để tiếp tục</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {error && (
+                        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg mb-4">
+                            {error}
+                        </div>
+                    )}
 
-                {error && (
-                    <div style={{ backgroundColor: '#ffebee', color: '#c62828', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Email</label>
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                            placeholder="admin@retailchain.com"
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Password</label>
-                        <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                            placeholder="••••••"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        style={{
-                            marginTop: '1rem',
-                            padding: '0.75rem',
-                            backgroundColor: isSubmitting ? '#9ca3af' : '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontWeight: 'bold',
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer'
-                        }}
-                    >
-                        {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
-                    </button>
-                </form>
-            </div>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <label htmlFor="email" className="text-sm font-medium">Email</label>
+                            <Input
+                                id="email"
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="admin@retailchain.com"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="password" className="text-sm font-medium">Mật khẩu</label>
+                            <Input
+                                id="password"
+                                type="password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••"
+                            />
+                        </div>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full"
+                        >
+                            {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     );
 };
