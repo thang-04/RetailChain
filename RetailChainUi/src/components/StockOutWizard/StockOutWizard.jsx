@@ -45,8 +45,8 @@ const StockOutWizard = () => {
                 ]);
 
                 if (warehouseRes.data) {
-                    const central = warehouseRes.data.filter(wh => wh.isCentral === true);
-                    const stores = warehouseRes.data.filter(wh => wh.isCentral === false);
+                    const central = warehouseRes.data.filter(wh => wh.isCentral === 1);
+                    const stores = warehouseRes.data.filter(wh => wh.isCentral === 0);
                     setCentralWarehouses(central);
                     setStoreWarehouses(stores);
                     

@@ -52,7 +52,7 @@ const StockInWizard = () => {
 
                 if (warehouseRes.data) {
                     setWarehouses(warehouseRes.data);
-                   const centralWarehouse = warehouseRes.data.find(wh => wh.isCentral === true);
+                   const centralWarehouse = warehouseRes.data.find(wh => wh.isCentral === 1);
                     if (centralWarehouse) {
                         setFormData(prev => ({ ...prev, warehouseId: String(centralWarehouse.id) }));
                     }

@@ -12,7 +12,6 @@ import com.sba301.retailmanagement.repository.InventoryStockRepository;
 import com.sba301.retailmanagement.repository.ProductRepository;
 import com.sba301.retailmanagement.repository.ProductVariantRepository;
 import com.sba301.retailmanagement.repository.StoreRepository;
-import com.sba301.retailmanagement.repository.StoreWarehouseRepository;
 import com.sba301.retailmanagement.service.DashboardService;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,6 @@ public class DashboardServiceImpl implements DashboardService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final StoreRepository storeRepository;
-    private final StoreWarehouseRepository storeWarehouseRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final InventoryDocumentRepository inventoryDocumentRepository;
     private final InventoryService inventoryService;
@@ -181,11 +179,8 @@ public class DashboardServiceImpl implements DashboardService {
     private Map<Long, StoreAgg> aggregateStoreInventory(List<Store> stores) {
         Map<Long, StoreAgg> result = new HashMap<>();
         for (Store store : stores) {
-            List<Long> warehouseIds = storeWarehouseRepository.findByStoreId(store.getId()).stream()
-                    .map(sw -> sw.getWarehouse() != null ? sw.getWarehouse().getId() : sw.getId().getWarehouseId())
-                    .filter(id -> id != null)
-                    .distinct()
-                    .toList();
+            Long warehouseId = store.getWarehouseId();
+            List<Long> warehouseIds = warehouseId != null ? List.of(warehouseId) : List.of();
 
             long stockQty = 0L;
             long lowStock = 0L;

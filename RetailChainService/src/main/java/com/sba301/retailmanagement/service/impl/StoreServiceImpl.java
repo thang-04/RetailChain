@@ -237,7 +237,7 @@ public class StoreServiceImpl implements StoreService {
             warehouse.setCode("WH_" + request.getCode());
             warehouse.setName("Kho " + request.getName());
             warehouse.setAddress(request.getAddress());
-            warehouse.setIsCentral(false);
+            warehouse.setIsCentral(0);
             warehouse.setStatus(1);
             warehouse.setCreatedAt(LocalDateTime.now());
             warehouse.setUpdatedAt(LocalDateTime.now());

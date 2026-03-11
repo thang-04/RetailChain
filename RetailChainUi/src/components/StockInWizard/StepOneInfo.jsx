@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, User, FileText, AlertCircle } from 'lucide-react';
 
 const StepOneInfo = ({ formData, setFormData, warehouses, suppliers, errors }) => {
-    const centralWarehouse = warehouses.find(wh => wh.isCentral === true);
+    const centralWarehouse = warehouses.find(wh => wh.isCentral === 1);
     
     return (
         <Card className="border-violet-100 shadow-sm">
