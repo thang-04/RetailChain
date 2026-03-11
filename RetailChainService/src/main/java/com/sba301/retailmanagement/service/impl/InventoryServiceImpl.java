@@ -288,6 +288,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Source and Target warehouse cannot be the same");
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+        
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("TRF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -297,7 +300,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouseId(targetWarehouse.getId());
         document.setTargetWarehouse(targetWarehouse);
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
 
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
