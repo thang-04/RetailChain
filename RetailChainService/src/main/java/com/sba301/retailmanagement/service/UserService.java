@@ -10,6 +10,8 @@ public interface UserService {
 
     List<UserDTO> getAllUsers();
 
+    List<UserDTO> getUnassignedStaff();
+
     UserDTO getUserById(Long id);
 
     UserDTO getUserByEmail(String email);

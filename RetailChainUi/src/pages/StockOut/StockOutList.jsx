@@ -65,7 +65,7 @@ const StockOutList = () => {
         return records.filter(record => {
             const matchesSearch =
                 (record.documentCode?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                (record.sourceWarehouseName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                (record.targetWarehouseName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 (record.note?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
             const matchesStatus = statusFilter === 'ALL' || record.status === statusFilter;
@@ -453,8 +453,8 @@ const StockOutList = () => {
                                                     <TableRow key={idx} className="hover:bg-rose-50/30 transition-colors">
                                                         <TableCell className="font-medium">{item.productName || `Sản phẩm #${idx + 1}`}</TableCell>
                                                         <TableCell className="text-right font-bold text-rose-500">{item.quantity}</TableCell>
-                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
-                                                        <TableCell className="text-right text-slate-500 italic">--</TableCell>
+                                                        <TableCell className="text-right">{(item.unitPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
+                                                        <TableCell className="text-right font-bold text-rose-600">{(item.totalPrice || 0).toLocaleString('vi-VN')} đ</TableCell>
                                                     </TableRow>
                                                 ))
                                             ) : (
@@ -466,8 +466,8 @@ const StockOutList = () => {
                                             )}
                                             <TableRow className="bg-slate-50 dark:bg-slate-800/80 font-extrabold text-lg">
                                                 <TableCell colSpan={3} className="text-right text-slate-700 dark:text-slate-200">Tổng cộng:</TableCell>
-                                                <TableCell className="text-right text-rose-500">
-                                                    {(selectedRecord.totalValue || 0).toLocaleString('vi-VN')} đ
+                                                <TableCell className="text-right text-rose-600">
+                                                    {(selectedRecord.items?.reduce((sum, item) => sum + (item.totalPrice || 0), 0) || 0).toLocaleString('vi-VN')} đ
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>

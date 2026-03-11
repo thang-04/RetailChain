@@ -20,4 +20,6 @@ public interface StoreService {
     Boolean deleteStore(String slug);
 
     List<StaffResponse> getStaffByStoreId(Long storeId);
+
+    void assignStaffToStore(Long storeId, List<Long> staffIds);
 }

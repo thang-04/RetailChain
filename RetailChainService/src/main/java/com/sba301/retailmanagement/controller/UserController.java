@@ -51,6 +51,23 @@ public class UserController {
         }
     }
 
+    @GetMapping("/unassigned-staff")
+    @Operation(summary = "Get unassigned staff", description = "Returns a list of STAFF users without a store")
+    @PreAuthorize("hasAuthority('" + USER_VIEW + "')")
+    public String getUnassignedStaff() {
+        String prefix = "[getUnassignedStaff]";
+        try {
+            log.info("{}|START", prefix);
+            var users = userService.getUnassignedStaff();
+            log.info("{}|END|size={}", prefix, users.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get unassigned staff successfully", users);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving unassigned staff: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns detailed information of the currently authenticated user")
     public String getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {

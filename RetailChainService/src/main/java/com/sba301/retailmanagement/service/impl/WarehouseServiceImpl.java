@@ -26,6 +26,10 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new RuntimeException("Warehouse code already exists");
         }
 
+        if (Boolean.TRUE.equals(request.getIsCentral()) && warehouseRepository.countByIsCentralTrue() > 0) {
+            throw new RuntimeException("Only one central warehouse allowed");
+        }
+
         Warehouse warehouse = new Warehouse();
         warehouse.setCode(request.getCode());
         warehouse.setName(request.getName());
@@ -36,8 +40,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setContactName(request.getContactName());
         warehouse.setContactPhone(request.getContactPhone());
         warehouse.setDescription(request.getDescription());
-        warehouse.setWarehouseLevel(request.getWarehouseLevel() != null ? request.getWarehouseLevel() : 1);
-        warehouse.setParentId(request.getParentId());
+        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : 0);
         warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
@@ -46,7 +49,6 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         return mapToResponse(savedWarehouse);
     }
-
 
     @Override
     public List<WarehouseResponse> getAllWarehouses() {
@@ -104,15 +106,9 @@ public class WarehouseServiceImpl implements WarehouseService {
             warehouse.setStatus(request.getStatus());
         }
 
-        if (request.getWarehouseLevel() != null) {
-            warehouse.setWarehouseLevel(request.getWarehouseLevel());
+        if (request.getIsCentral() != null) {
+            warehouse.setIsCentral(request.getIsCentral());
         }
-
-        if (request.getParentId() != null) {
-            warehouse.setParentId(request.getParentId());
-        }
-
-        warehouse.setUpdatedAt(LocalDateTime.now());
 
         warehouse.setUpdatedAt(LocalDateTime.now());
         Warehouse saved = warehouseRepository.save(warehouse);
@@ -134,13 +130,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
-        String parentName = null;
-        if (warehouse.getParentId() != null) {
-            parentName = warehouseRepository.findById(warehouse.getParentId())
-                    .map(Warehouse::getName)
-                    .orElse(null);
-        }
-
         return WarehouseResponse.builder()
                 .id(warehouse.getId())
                 .code(warehouse.getCode())
@@ -152,8 +141,7 @@ public class WarehouseServiceImpl implements WarehouseService {
                 .contactName(warehouse.getContactName())
                 .contactPhone(warehouse.getContactPhone())
                 .description(warehouse.getDescription())
-                .warehouseLevel(warehouse.getWarehouseLevel())
-                .parentId(warehouse.getParentId())
+                .isCentral(warehouse.getIsCentral())
                 .status(warehouse.getStatus())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())

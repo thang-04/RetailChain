@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/api/inventory/**").authenticated()
                         .requestMatchers("/api/store/**").authenticated()
-                        .requestMatchers("/api/role/**").authenticated()
+                        .requestMatchers("/api/roles/**").authenticated()
                         .requestMatchers("/api/permission/**").authenticated()
                         .requestMatchers("/api/warehouse/**").authenticated()
                         .requestMatchers("/api/supplier/**").authenticated()

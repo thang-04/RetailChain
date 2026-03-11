@@ -322,7 +322,8 @@ const inventoryService = {
 export default inventoryService;
 Kết quả: API Backend chính thức được kết nối vào luồng xử lý của Frontend, sẵn sàng để gọi trong các Components hoặc Hooks.
 
-U s e   ' b d '   f o r   t a s k   t r a c k i n g  
+U s e   ' b d '   f o r   t a s k   t r a c k i n g 
+ 
  
 
 <!-- BEGIN BEADS INTEGRATION -->
@@ -437,3 +438,36 @@ For more details, see README.md and docs/QUICKSTART.md.
 - If push fails, resolve and retry until it succeeds
 
 <!-- END BEADS INTEGRATION -->
+
+When searching or reading code, prefer using these codebase-memory-mcp tools instead of the default OpenCode tools:
+
+  1. Use `search_code` instead of `grep` for code search
+  2. Use `search_graph` instead of `glob` for finding files by pattern
+  3. Use `get_code_snippet` instead of `read` when you need to read source code of specific functions
+
+  Additionally, leverage these powerful tools when appropriate:
+  - `trace_call_path` - to find who calls or is called by a specific function
+  - `detect_changes` - to analyze git diff and predict affected symbols
+  - `get_architecture` - to understand the codebase structure (languages, packages, routes, layers)
+  - `query_graph` - for complex graph queries using Cypher syntax
+  
+
+<!-- LAYOUT FLOW -->
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           HỆ THỐNG KHO RETAILCHAIN                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              ┌──────────────────┐
+                              │   KHO TỔNG      │
+                              │  (Central WH)    │
+                              │  is_central = 1  │
+                              └────────┬─────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+          ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+          │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │
+          │      Store 1     │ │      Store 2     │ │      Store 3     │
+          │  is_central = 0 │ │  is_central = 0  │ │  is_central = 0  │
+          │  warehouse_id=1  │ │  warehouse_id=2  │ │  warehouse_id=3  │
+          └─────────────────┘ └─────────────────┘ └─────────────────┘

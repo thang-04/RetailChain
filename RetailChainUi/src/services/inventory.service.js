@@ -8,7 +8,7 @@ const inventoryService = {
   },
 
   getAllWarehouses: async () => {
-    return axiosPrivate.get('/inventory/warehouse');
+    return axiosPrivate.get('/warehouse');
   },
 
   // Wrapper for product service
@@ -59,7 +59,7 @@ const inventoryService = {
 
   getStockOutRecords: async () => {
     try {
-      const response = await axiosPrivate.get('/inventory/documents?type=EXPORT');
+      const response = await axiosPrivate.get('/inventory/documents?type=TRANSFER');
       return response.data || [];
     } catch (error) {
       console.error("Fetch stock out error", error);

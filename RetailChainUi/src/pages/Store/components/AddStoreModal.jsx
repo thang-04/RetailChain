@@ -4,35 +4,15 @@ import useGeoLocation from '../../../hooks/useGeoLocation';
 import storeService from '../../../services/store.service';
 import inventoryService from '../../../services/inventory.service';
 
+import { toast } from 'sonner';
+
 const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
     const [address, setAddress] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
-    const [formData, setFormData] = useState({ code: '', name: '', warehouseId: '' });
+    const [formData, setFormData] = useState({ name: '' });
     const [submitting, setSubmitting] = useState(false);
-    const [warehouses, setWarehouses] = useState([]);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
-
-    useEffect(() => {
-        if (isOpen) {
-            const fetchWarehouses = async () => {
-                try {
-                    const raw = await inventoryService.getAllWarehouses();
-                    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
-                    if (res && (res.code === 200 || res.status === 200) && res.data) {
-                        setWarehouses(res.data);
-                    } else if (Array.isArray(res)) {
-                        setWarehouses(res);
-                    } else if (res?.data && Array.isArray(res.data)) {
-                        setWarehouses(res.data);
-                    }
-                } catch (error) {
-                    console.error('Error fetching warehouses:', error);
-                }
-            };
-            fetchWarehouses();
-        }
-    }, [isOpen]);
 
     const handleSearch = async (e) => {
         if (e.key === 'Enter' && searchQuery.trim()) {
@@ -52,24 +32,22 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.code || !formData.name || !address) {
-            alert('Vui lòng điền đầy đủ thông tin: Mã cửa hàng, Tên cửa hàng và Địa chỉ');
+        if (!formData.name || !address) {
+            toast.error('Vui lòng điền đầy đủ thông tin: Tên cửa hàng và Địa chỉ');
             return;
         }
 
         setSubmitting(true);
         try {
             const newStore = await storeService.createStore({
-                code: formData.code,
                 name: formData.name,
-                address: address,
-                warehouseId: formData.warehouseId
+                address: address
             });
 
             console.log('Store created successfully:', newStore);
-            alert('Tạo cửa hàng thành công!');
+            toast.success('Tạo cửa hàng thành công!');
             // Reset form
-            setFormData({ code: '', name: '', warehouseId: '' });
+            setFormData({ name: '' });
             setAddress('');
             setSearchQuery('');
             setMapPosition(null);
@@ -78,7 +56,7 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
             onClose();
         } catch (error) {
             console.error('Error creating store:', error);
-            alert('Lỗi: ' + (error.message || 'Lỗi khi tạo cửa hàng. Vui lòng thử lại.'));
+            toast.error('Lỗi: ' + (error.message || 'Lỗi khi tạo cửa hàng. Vui lòng thử lại.'));
         } finally {
             setSubmitting(false);
         }
@@ -147,20 +125,6 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
                                         <p className="text-[11px] text-gray-500 italic">Adjust map pin to update address</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-code">
-                                            Mã Cửa Hàng (Code) *
-                                        </label>
-                                        <input
-                                            className="block w-full rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
-                                            id="store-code"
-                                            name="store-code"
-                                            placeholder="e.g., S001"
-                                            type="text"
-                                            value={formData.code}
-                                            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="store-name">
                                             Tên Cửa Hàng *
                                         </label>
@@ -178,28 +142,6 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
                                 <div className="h-px bg-[#f1f3f4] dark:bg-gray-700"></div>
                                 <div className="space-y-4">
                                     <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Operations</h4>
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="warehouse">
-                                            Assigned Warehouse
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                className="block w-full appearance-none rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 pr-10 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
-                                                id="warehouse"
-                                                name="warehouse"
-                                                value={formData.warehouseId}
-                                                onChange={(e) => setFormData({ ...formData, warehouseId: e.target.value })}
-                                            >
-                                                <option value="">-- Select a predefined warehouse (Optional) --</option>
-                                                {warehouses.map(w => (
-                                                    <option key={w.id} value={w.id}>{w.name}</option>
-                                                ))}
-                                            </select>
-                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                                <span className="material-symbols-outlined text-[20px]">expand_more</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="status">
                                             Operational Status

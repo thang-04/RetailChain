@@ -86,7 +86,7 @@ const Sidebar = () => {
       label: "Staff Shifts",
       icon: "calendar_month",
       filledIcon: true,
-      show: hasPermission('STAFF_VIEW') || isStoreManager(),
+        show: isSuperAdmin() || isStoreManager(),
     }
   ];
 

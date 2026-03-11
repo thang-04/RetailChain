@@ -13,22 +13,27 @@ import com.sba301.retailmanagement.enums.InventoryDocumentType;
 import com.sba301.retailmanagement.repository.*;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryServiceImpl implements InventoryService {
 
     private final WarehouseRepository warehouseRepository;
-    private final StoreWarehouseRepository storeWarehouseRepository;
     private final SupplierRepository supplierRepository;
     private final InventoryStockRepository inventoryStockRepository;
     private final InventoryDocumentRepository inventoryDocumentRepository;
@@ -36,6 +41,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -54,7 +60,7 @@ public class InventoryServiceImpl implements InventoryService {
         warehouse.setContactName(request.getContactName());
         warehouse.setContactPhone(request.getContactPhone());
         warehouse.setDescription(request.getDescription());
-        warehouse.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : 0);
+        warehouse.setIsCentral(request.getIsCentral() != null ? request.getIsCentral() : 1);
         warehouse.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         warehouse.setCreatedAt(LocalDateTime.now());
         warehouse.setUpdatedAt(LocalDateTime.now());
@@ -133,6 +139,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("IMP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -141,7 +150,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouse(warehouse);
         document.setSupplierId(request.getSupplierId());
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
         document.setTotalAmount(java.math.BigDecimal.ZERO);
 
@@ -268,14 +277,14 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new RuntimeException("Target Warehouse not found"));
 
         // Validate: Source must NOT be linked to any store (Central Warehouse)
-        boolean sourceHasStore = storeWarehouseRepository.existsByWarehouseId(sourceWarehouse.getId());
-        if (sourceHasStore) {
+        boolean sourceIsCentral = sourceWarehouse.getIsCentral() != null && sourceWarehouse.getIsCentral() == 1;
+        if (!sourceIsCentral) {
             throw new RuntimeException("Transfer source must be a Central Warehouse (not linked to any store)");
         }
 
         // Validate: Target MUST be linked to a store (Store Warehouse)
-        boolean targetHasStore = storeWarehouseRepository.existsByWarehouseId(targetWarehouse.getId());
-        if (!targetHasStore) {
+        boolean targetIsCentral = targetWarehouse.getIsCentral() != null && targetWarehouse.getIsCentral() == 1;
+        if (targetIsCentral) {
             throw new RuntimeException("Transfer destination must be a Store Warehouse (linked to a store)");
         }
 
@@ -283,6 +292,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Source and Target warehouse cannot be the same");
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+        
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("TRF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -292,14 +304,32 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouseId(targetWarehouse.getId());
         document.setTargetWarehouse(targetWarehouse);
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
+
+        // Fetch all variants and calculate totalAmount
+        List<Long> variantIds = request.getItems().stream()
+                .map(InventoryItemRequest::getVariantId)
+                .collect(Collectors.toList());
+        Map<Long, ProductVariant> variantMap = productVariantRepository.findAllById(variantIds).stream()
+                .collect(Collectors.toMap(ProductVariant::getId, v -> v));
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (InventoryItemRequest itemReq : request.getItems()) {
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
+            if (variant == null) {
+                throw new RuntimeException("Product Variant not found: " + itemReq.getVariantId());
+            }
+            BigDecimal unitPrice = variant.getPrice() != null ? variant.getPrice() : BigDecimal.ZERO;
+            totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+        }
+        document.setTotalAmount(totalAmount);
 
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
 
+        // Process items
         for (InventoryItemRequest itemReq : request.getItems()) {
-            ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
-                    .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
 
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
@@ -359,6 +389,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
             ProductVariant variant, InventoryAction action, int quantity, int balance) {
+        User currentUser = getCurrentUser();
+        Long actorUserId = currentUser != null ? currentUser.getId() : null;
+        
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
@@ -371,7 +404,7 @@ public class InventoryServiceImpl implements InventoryService {
         history.setAction(action);
         history.setQuantity(quantity);
         history.setBalanceAfter(balance);
-        history.setActorUserId(1L); // TODO: Get from SecurityContext
+        history.setActorUserId(actorUserId);
         history.setOccurredAt(LocalDateTime.now());
 
         inventoryHistoryRepository.save(history);
@@ -414,7 +447,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .contactName(warehouse.getContactName())
                 .contactPhone(warehouse.getContactPhone())
                 .description(warehouse.getDescription())
-                .isDefault(warehouse.getIsDefault())
+                .isCentral(warehouse.getIsCentral())
                 .status(warehouse.getStatus())
                 .createdAt(warehouse.getCreatedAt())
                 .updatedAt(warehouse.getUpdatedAt())
@@ -466,8 +499,8 @@ public class InventoryServiceImpl implements InventoryService {
             warehouse.setDescription(request.getDescription());
         }
 
-        if (request.getIsDefault() != null) {
-            warehouse.setIsDefault(request.getIsDefault());
+        if (request.getIsCentral() != null) {
+            warehouse.setIsCentral(request.getIsCentral());
         }
 
         if (request.getStatus() != null) {
@@ -486,12 +519,6 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
         inventoryStockRepository.deleteAll(inventoryStockRepository.findByWarehouseId(id));
-
-        try {
-            storeWarehouseRepository.deleteByWarehouseId(id);
-        } catch (Exception e) {
-            // Ignore if method missing, assume handled or empty
-        }
 
         try {
             warehouseRepository.delete(warehouse);
@@ -521,6 +548,33 @@ public class InventoryServiceImpl implements InventoryService {
 
             String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
 
+            // Map items
+            List<com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse> itemResponses = items.stream()
+                    .map(item -> {
+                        String productName = "Unknown";
+                        if (item.getVariant() != null && item.getVariant().getProduct() != null) {
+                            productName = item.getVariant().getProduct().getName();
+                        }
+                        String sku = item.getVariant() != null ? item.getVariant().getSku() : "N/A";
+                        String size = item.getVariant() != null ? item.getVariant().getSize() : "";
+                        String color = item.getVariant() != null ? item.getVariant().getColor() : "";
+                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice() : java.math.BigDecimal.ZERO;
+                        long unitPriceLong = unitPrice != null ? unitPrice.longValue() : 0L;
+                        long totalPriceLong = unitPriceLong * item.getQuantity();
+
+                        return com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse.builder()
+                                .variantId(item.getVariantId())
+                                .productName(productName)
+                                .sku(sku)
+                                .size(size)
+                                .color(color)
+                                .quantity(item.getQuantity())
+                                .unitPrice(unitPriceLong)
+                                .totalPrice(totalPriceLong)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
             return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
                     .id(doc.getId())
                     .documentCode(doc.getDocumentCode())
@@ -536,6 +590,7 @@ public class InventoryServiceImpl implements InventoryService {
                     .totalItems(totalItems)
                     .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
                     .supplier(supplierName)
+                    .items(itemResponses)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -591,5 +646,18 @@ public class InventoryServiceImpl implements InventoryService {
                 .criticalStoreCount((long) criticalWarehouses.size())
                 .growthPercentage(growthPercentage)
                 .build();
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String email = ((UserDetails) principal).getUsername();
+                return userRepository.findByEmail(email).orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("No authenticated user found");
+        }
+        return null;
     }
 }

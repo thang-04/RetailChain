@@ -12,36 +12,38 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByUsername(String username);
+        Optional<User> findByUsername(String username);
 
-    Optional<User> findByEmail(String email);
+        Optional<User> findByEmail(String email);
 
-    boolean existsByUsername(String username);
+        boolean existsByUsername(String username);
 
-    boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u " +
-            "LEFT JOIN FETCH u.roles r " +
-            "LEFT JOIN FETCH r.permissions " +
-            "WHERE u.email = :email")
-    Optional<User> findByEmailWithAuthorities(@Param("email") String email);
+        @Query("SELECT u FROM User u " +
+                        "LEFT JOIN FETCH u.roles r " +
+                        "LEFT JOIN FETCH r.permissions " +
+                        "WHERE u.email = :email")
+        Optional<User> findByEmailWithAuthorities(@Param("email") String email);
 
-    @Query("SELECT u FROM User u " +
-            "LEFT JOIN FETCH u.roles r " +
-            "LEFT JOIN FETCH r.permissions " +
-            "WHERE u.username = :username")
-    Optional<User> findByUsernameWithAuthorities(@Param("username") String username);
+        @Query("SELECT u FROM User u " +
+                        "LEFT JOIN FETCH u.roles r " +
+                        "LEFT JOIN FETCH r.permissions " +
+                        "WHERE u.username = :username")
+        Optional<User> findByUsernameWithAuthorities(@Param("username") String username);
 
-    /**
-     * Tìm users trong một store cụ thể
-     * Dùng cho Store Manager xem Staff trong store
-     */
-    List<User> findByStoreId(Long storeId);
+        /**
+         * Tìm users trong một store cụ thể
+         * Dùng cho Store Manager xem Staff trong store
+         */
+        List<User> findByStoreId(Long storeId);
 
-    List<User> findByCreatedByUserId(Long createdByUserId);
+        List<User> findByCreatedByUserId(Long createdByUserId);
 
-    long countByStoreId(Long storeId);
+        long countByStoreId(Long storeId);
 
-    @Query("SELECT u FROM User u WHERE NOT EXISTS (SELECT r FROM u.roles r WHERE r.code = :roleCode)")
-    List<User> findUsersNotHavingRole(@Param("roleCode") String roleCode);
+        List<User> findByStoreIdIsNullAndRoles_CodeIgnoreCase(String roleCode);
+
+        @Query("SELECT u FROM User u WHERE NOT EXISTS (SELECT r FROM u.roles r WHERE LOWER(r.code) = LOWER(:roleCode))")
+        List<User> findUsersNotHavingRole(@Param("roleCode") String roleCode);
 }
