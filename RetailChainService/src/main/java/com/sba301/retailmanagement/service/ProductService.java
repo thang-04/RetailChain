@@ -1,7 +1,10 @@
 package com.sba301.retailmanagement.service;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
+import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
+import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
+import com.sba301.retailmanagement.entity.ProductCategory;
 import java.util.List;
 
 public interface ProductService {
@@ -15,5 +18,9 @@ public interface ProductService {
 
     String getNextProductCode(Long categoryId);
 
-    List<com.sba301.retailmanagement.entity.ProductCategory> getAllCategories();
+    List<ProductCategory> getAllCategories();
+
+    ProductVariantResponse createProductVariant(Long productId, ProductVariantRequest request);
+
+    List<ProductVariantResponse> createProductVariants(Long productId, ProductVariantRequest request);
 }

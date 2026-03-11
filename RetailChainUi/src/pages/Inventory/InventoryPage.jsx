@@ -4,6 +4,7 @@ import InventoryStats from "./components/InventoryStats";
 import InventoryFilter from "./components/InventoryFilter";
 import InventoryTable from "./components/InventoryTable";
 import inventoryService from "../../services/inventory.service";
+import useAuth from "../../contexts/AuthContext/useAuth";
 
 const InventoryPage = () => {
   const [inventoryData, setInventoryData] = useState([]);
@@ -23,6 +24,9 @@ const InventoryPage = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { hasPermission, hasRole } = useAuth();
+  const canExport = hasPermission('STOCKOUT_CREATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
   const fetchInventory = useCallback(async () => {
     setLoading(true);
@@ -144,7 +148,7 @@ const InventoryPage = () => {
         onExport={handleExport}
         dateRange={dateRange}
         onDateChange={handleDateChange}
-        canExport={total > 0}
+        canExport={canExport && total > 0}
       />
       <InventoryStats overview={overview} />
       
