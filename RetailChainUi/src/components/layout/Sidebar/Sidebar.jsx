@@ -52,12 +52,6 @@ const Sidebar = () => {
       show: hasPermission('INVENTORY_CREATE'),
     },
     {
-      path: "/inventory/ledger",
-      label: "Stock Ledger",
-      icon: "history",
-      show: hasPermission('INVENTORY_VIEW') || isStoreManager() || isStaff(),
-    },
-    {
       path: "/reports",
       label: "Reports",
       icon: "bar_chart",
