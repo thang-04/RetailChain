@@ -32,6 +32,7 @@ const storeService = {
 
         return {
           id: storeData.code,
+          dbId: storeData.id,
           name: storeData.name,
           address: storeData.address,
           manager: storeData.manager || "N/A",

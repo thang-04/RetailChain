@@ -9,6 +9,7 @@ const StoreStaffPage = () => {
     const [staffList, setStaffList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [storeDbId, setStoreDbId] = useState(null);
 
     // Filter states
     const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,7 @@ const StoreStaffPage = () => {
         try {
             const data = await storeService.getStoreById(id);
             setStaffList(data.staff || []);
+            setStoreDbId(data.dbId || data.id); // capture DB numeric ID
         } catch (error) {
             console.error("Failed to fetch staff list:", error);
         } finally {
@@ -196,7 +198,7 @@ const StoreStaffPage = () => {
             <AddStaffModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                storeId={id}
+                storeId={storeDbId || id}
                 onSuccess={() => {
                     setIsAddModalOpen(false);
                     fetchStaff();
