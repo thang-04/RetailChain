@@ -584,7 +584,7 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status("Completed") // Inventory transaction is immediate in this system logic
+                    .status(doc.getDocumentType() == InventoryDocumentType.IMPORT ? "Completed" : "Pending") // IMPORT = Completed, others = Pending
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
