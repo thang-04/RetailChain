@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import {
     Select,
     SelectContent,
@@ -24,8 +25,42 @@ import inventoryService from '@/services/inventory.service';
 import {
     Upload, Plus, Eye, Edit, Trash2, MoreHorizontal,
     Search, FileText, RotateCcw, Calendar,
-    Truck
+    Truck, Package, Clock, CheckCircle2,
+    ClipboardList, DollarSign, Filter
 } from 'lucide-react';
+
+const StatCard = ({ title, value, subtitle, icon: Icon, variant = "default" }) => {
+    const variants = {
+        default: "bg-muted/30 border-border",
+        success: "bg-green-50/50 border-green-200/50", 
+        warning: "bg-amber-50/50 border-amber-200/50", 
+        danger: "bg-red-50/50 border-red-200/50",
+    };
+    
+    const iconColors = {
+        default: "text-primary bg-primary/10",
+        success: "text-green-600 bg-green-100/50",
+        warning: "text-amber-600 bg-amber-100/50",
+        danger: "text-red-600 bg-red-100/50",
+    };
+
+    return (
+        <Card className={`border ${variants[variant]} hover:shadow-md transition-all duration-200`}>
+            <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+                        <p className="text-2xl font-bold text-foreground">{value}</p>
+                        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+                    </div>
+                    <div className={`p-3 rounded-lg ${iconColors[variant]}`}>
+                        <Icon className="w-5 h-5" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 const StockOutList = () => {
     const [records, setRecords] = useState([]);
@@ -72,6 +107,16 @@ const StockOutList = () => {
         });
     }, [records, searchTerm, dateFilter]);
 
+    const stats = useMemo(() => {
+        const total = records.length;
+        const completed = records.filter(r => r.status === 'Completed').length;
+        const pending = records.filter(r => r.status === 'Pending').length;
+        const cancelled = records.filter(r => r.status === 'Cancelled').length;
+        const totalValue = records.reduce((sum, r) => sum + (r.totalValue || 0), 0);
+        
+        return { total, completed, pending, cancelled, totalValue };
+    }, [records]);
+
     const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
     const paginatedRecords = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
@@ -105,105 +150,150 @@ const StockOutList = () => {
 
     const hasActiveFilters = searchTerm || dateFilter.start || dateFilter.end;
 
+    const getStatusBadge = (status) => {
+        const statusConfig = {
+            'Completed': { label: 'Hoàn thành', class: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100' },
+            'Pending': { label: 'Chờ duyệt', class: 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100' },
+            'Cancelled': { label: 'Đã hủy', class: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100' },
+        };
+        const config = statusConfig[status] || statusConfig['Pending'];
+        return <Badge className={`${config.class} border font-medium px-2.5 py-0.5`}>{config.label}</Badge>;
+    };
+
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
-            <div className="flex-1 overflow-y-auto">
-                <div className="max-w-[1600px] mx-auto px-6 pt-8 pb-12">
+            <div className="flex-1 overflow-y-auto p-8">
+                <div className="max-w-[1400px] mx-auto flex flex-col gap-6 min-h-full">
                     {/* Header */}
                     <div className="mb-8">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                            <div>
-                                <h1 className="sr-only">Quản Lý Xuất Kho</h1>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                                        <Truck className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <h2 className="text-3xl font-bold text-foreground tracking-tight">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center shrink-0">
+                                    <Truck className="w-7 h-7 text-primary" />
+                                </div>
+                                <div className="space-y-0.5">
+                                    <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
                                         Xuất Kho
                                     </h2>
+                                    <p className="text-muted-foreground font-medium">Theo dõi và quản lý các phiếu xuất kho.</p>
                                 </div>
-                                <p className="text-muted-foreground">
-                                    Theo dõi và quản lý các phiếu xuất kho, lịch sử xuất hàng đến cửa hàng.
-                                </p>
                             </div>
                             
                             <div className="flex items-center gap-3">
-                                <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+                                <Button variant="outline" className="gap-2 rounded-xl border-dashed hover:border-primary hover:bg-primary/5">
                                     <Upload className="w-4 h-4" />
-                                    <span>Nhập Excel</span>
+                                    <span className="hidden sm:inline">Nhập Excel</span>
                                 </Button>
                                 <Link to="/stock-out/create">
-                                    <Button className="gap-2 px-5">
+                                    <Button className="gap-2 px-5 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
                                         <Plus className="w-4 h-4" />
-                                        <span>Tạo phiếu mới</span>
+                                        <span className="font-semibold">Tạo phiếu mới</span>
                                     </Button>
                                 </Link>
                             </div>
                         </div>
                     </div>
 
+                    {/* Stats Cards */}
+                    {!loading && records.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <StatCard
+                                title="Tổng phiếu"
+                                value={stats.total}
+                                subtitle="Tất cả phiếu xuất"
+                                icon={ClipboardList}
+                                variant="default"
+                            />
+                            <StatCard
+                                title="Chờ duyệt"
+                                value={stats.pending}
+                                subtitle="Đang xử lý"
+                                icon={Clock}
+                                variant="warning"
+                            />
+                            <StatCard
+                                title="Hoàn thành"
+                                value={stats.completed}
+                                subtitle="Đã xuất kho"
+                                icon={CheckCircle2}
+                                variant="success"
+                            />
+                            <StatCard
+                                title="Tổng giá trị"
+                                value={stats.totalValue.toLocaleString('vi-VN') + ' đ'}
+                                subtitle="Giá trị xuất kho"
+                                icon={DollarSign}
+                                variant="default"
+                            />
+                        </div>
+                    )}
+
                     {/* Filter Section */}
                     <div className="mb-6">
-                        <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
-                            {/* Search */}
-                            <div className="flex-1 max-w-xs">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                    Tìm kiếm
-                                </label>
-                                <div className="relative">
-                                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                                    <Input
-                                        className="pl-10 bg-background border-border h-12"
-                                        placeholder="Mã phiếu, kho xuất, ghi chú..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                        <Card className="border-2 border-dashed border-border/60 bg-muted/20">
+                            <CardContent className="p-5">
+                                <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
+                                    {/* Search */}
+                                    <div className="flex-1 max-w-xs">
+                                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                            Tìm kiếm
+                                        </label>
+                                        <div className="relative">
+                                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                                            <Input
+                                                className="pl-10 bg-background border-border h-11"
+                                                placeholder="Mã phiếu, kho xuất, ghi chú..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Date From */}
+                                    <div className="w-40">
+                                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                            Từ ngày
+                                        </label>
+                                        <Input
+                                            type="date"
+                                            className="bg-background border-border h-11"
+                                            value={dateFilter.start}
+                                            onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value }))}
+                                        />
+                                    </div>
+
+                                    {/* Date To */}
+                                    <div className="w-40">
+                                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                                            Đến ngày
+                                        </label>
+                                        <Input
+                                            type="date"
+                                            className="bg-background border-border h-11"
+                                            value={dateFilter.end}
+                                            onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value }))}
+                                        />
+                                    </div>
+
+                                    {/* Clear filters */}
+                                    {hasActiveFilters && (
+                                        <Button 
+                                            variant="ghost" 
+                                            onClick={handleResetFilters}
+                                            className="text-muted-foreground hover:text-foreground gap-2 h-11"
+                                        >
+                                            <RotateCcw className="w-4 h-4" />
+                                            <span>Xóa lọc</span>
+                                        </Button>
+                                    )}
                                 </div>
-                            </div>
-
-                            {/* Date From */}
-                            <div className="w-40">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                    Từ ngày
-                                </label>
-                                <Input
-                                    type="date"
-                                    className="bg-background border-border h-12"
-                                    value={dateFilter.start}
-                                    onChange={(e) => setDateFilter(prev => ({ ...prev, start: e.target.value }))}
-                                />
-                            </div>
-
-                            {/* Date To */}
-                            <div className="w-40">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                                    Đến ngày
-                                </label>
-                                <Input
-                                    type="date"
-                                    className="bg-background border-border h-12"
-                                    value={dateFilter.end}
-                                    onChange={(e) => setDateFilter(prev => ({ ...prev, end: e.target.value }))}
-                                />
-                            </div>
-
-                            {/* Clear filters */}
-                            {hasActiveFilters && (
-                                <Button 
-                                    variant="ghost" 
-                                    onClick={handleResetFilters}
-                                    className="text-muted-foreground hover:text-foreground gap-2 h-12"
-                                >
-                                    <RotateCcw className="w-4 h-4" />
-                                    <span>Xóa lọc</span>
-                                </Button>
-                            )}
-                        </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* Stats Summary */}
                     {filteredRecords.length > 0 && (
-                        <div className="mb-6">
+                        <div className="mb-4 flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">
                                 Tìm thấy <span className="font-semibold text-foreground">{filteredRecords.length}</span> phiếu xuất kho
                             </span>
@@ -217,9 +307,9 @@ const StockOutList = () => {
                             <p className="text-muted-foreground">Đang tải dữ liệu...</p>
                         </div>
                     ) : filteredRecords.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-32 bg-muted/20 rounded-2xl border-2 border-dashed border-border">
-                            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
-                                <Package className="w-10 h-10 text-muted-foreground/60" />
+                        <div className="flex flex-col items-center justify-center py-20 bg-muted/20 rounded-2xl border-2 border-dashed border-border">
+                            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                                <Truck className="w-12 h-12 text-primary/40" />
                             </div>
                             <h3 className="text-xl font-semibold text-foreground mb-2">
                                 {hasActiveFilters ? 'Không tìm thấy kết quả' : 'Chưa có phiếu xuất kho nào'}
@@ -227,7 +317,7 @@ const StockOutList = () => {
                             <p className="text-muted-foreground text-center max-w-sm mb-6">
                                 {hasActiveFilters 
                                     ? 'Thử điều chỉnh bộ lọc để tìm kiếm kết quả khác.'
-                                    : 'Tạo phiếu xuất kho đầu tiên để bắt đầu quản lý.'
+                                    : 'Tạo phiếu xuất kho đầu tiên để bắt đầu quản lý xuất hàng từ kho tổng đến cửa hàng.'
                                 }
                             </p>
                             {hasActiveFilters ? (
@@ -273,13 +363,7 @@ const StockOutList = () => {
                                                 {(record.totalValue || 0).toLocaleString('vi-VN')} đ
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge variant={
-                                                    record.status === 'Completed' ? 'default' :
-                                                        record.status === 'Pending' ? 'secondary' : 'outline'
-                                                } className="text-xs">
-                                                    {record.status === 'Completed' ? 'Hoàn thành' :
-                                                        record.status === 'Pending' ? 'Chờ duyệt' : 'Đã hủy'}
-                                                </Badge>
+                                                {getStatusBadge(record.status)}
                                             </TableCell>
                                             <TableCell>
                                                 <DropdownMenu>
@@ -341,7 +425,9 @@ const StockOutList = () => {
                                             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                             disabled={currentPage === 1}
                                         >
-                                            ←
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                            </svg>
                                         </Button>
                                         <span className="px-3 py-1.5 bg-primary text-white font-medium text-sm rounded-lg min-w-[60px] text-center">
                                             {currentPage} / {totalPages}
@@ -353,7 +439,9 @@ const StockOutList = () => {
                                             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                             disabled={currentPage === totalPages || totalPages === 0}
                                         >
-                                            →
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
                                         </Button>
                                     </div>
                                 </div>
@@ -397,13 +485,7 @@ const StockOutList = () => {
                                 </div>
                                 <div className="space-y-1">
                                     <p className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Trạng thái</p>
-                                    <Badge variant={
-                                        selectedRecord.status === 'Completed' ? 'default' :
-                                            selectedRecord.status === 'Pending' ? 'secondary' : 'outline'
-                                    } className="rounded-lg px-3 shadow-sm">
-                                        {selectedRecord.status === 'Completed' ? 'Hoàn thành' :
-                                            selectedRecord.status === 'Pending' ? 'Chờ duyệt' : 'Đã hủy'}
-                                    </Badge>
+                                    {selectedRecord && getStatusBadge(selectedRecord.status)}
                                 </div>
                             </div>
 

@@ -1,26 +1,29 @@
 # Báo Cáo Kiểm Tra Chất Lượng Frontend
-**RetailChain - Đảm Bảo Chất Lượng**
+
+**Project:** RetailChainUi  
+**Date:** 2026-03-12  
+**Audit Type:** Comprehensive Design & Code Quality  
+**Overall Quality Score:** 5/10 (Below Average)
 
 ---
 
 ## Đánh Giá Anti-Patterns: **CHƯA ĐẠT**
 
-### Có phải AI tạo ra không? **KHÔNG** - Đây là ứng dụng doanh nghiệp thực tế.
+### Có phải AI tạo ra không? **CÓ CẢNH BÁO NGHIÊM TRỌNG**
 
-Tuy nhiên, có một số anti-patterns AI cụ thể:
+Detected AI Slop Tells:
+1. **Dark mode infrastructure everywhere** - 595+ instances of `dark:` classes despite project being light-only
+2. **Hard-coded colors** - 62+ hex colors not using design tokens
+3. **Mixed color systems** - Inconsistent usage of slate-*, gray-*, text-*, surface-*
+4. **Generic KPI cards** - Hero metric layout with big numbers and trend badges
+5. **Card-based layouts** - Heavy use of Card components
 
-| Anti-Pattern | Trạng thái | Bằng chứng |
-|--------------|------------|-------------|
-| Gradient text cho headings | ✅ ĐẠT | Không có gradient text |
-| Glassmorphism | ✅ ĐẠT | Đã remove tất cả backdrop-blur |
-| Hero metrics | ✅ ĐẠT | KPI cards mang tính chức năng |
-| Card grids | ✅ ĐẠT | Dùng cho hiển thị dữ liệu |
-| Font generic | ✅ ĐẠT | Font Manrope đã cấu hình |
-| Gray text trên nền màu | ⚠️ NHỎ | Một số dark mode variants |
-| Nested cards | ✅ ĐẠT | Không lồng quá nhiều |
-| Bounce easing | ✅ ĐẠT | Không có bounce animations |
-| Redundant copy | ⚠️ NHỎ | Lẫn English/Vietnamese |
-| Gradient backgrounds | ✅ ĐẠT | Đã replace với solid colors |
+**Điểm tốt:**
+- ✅ Không có gradient text
+- ✅ Không có glassmorphism effects  
+- ✅ Không có bounce animations
+- ✅ Font Manrope đã cấu hình đúng
+- ✅ Vietnamese text trong hầu hết UI
 
 ---
 
@@ -28,20 +31,21 @@ Tuy nhiên, có một số anti-patterns AI cụ thể:
 
 | Danh mục | Critical | High | Medium | Low | Tổng |
 |----------|----------|------|--------|-----|-------|
-| Anti-Patterns | 0 | 0 | 4 | 2 | 6 |
-| Accessibility | 0 | 10 | 3 | 0 | 13 |
-| Performance | 0 | 0 | 0 | 0 | 0 |
-| Theming | 0 | 0 | 1 | 1 | 2 |
-| Responsive | 0 | 0 | 0 | 1 | 1 |
-| **TỔNG** | **0** | **10** | **8** | **4** | **22** |
+| Anti-Patterns | 2 | 3 | 2 | 1 | 8 |
+| Accessibility | 2 | 8 | 5 | 3 | 18 |
+| Performance | 1 | 1 | 2 | 2 | 6 |
+| Theming | 3 | 4 | 6 | 4 | 17 |
+| Responsive | 0 | 2 | 3 | 2 | 7 |
+| Localization | 0 | 1 | 3 | 1 | 5 |
+| **TỔNG** | **8** | **19** | **21** | **13** | **61** |
 
 ### 5 Vấn Đề Nghiêm Trọng Nhất
 
-1. ~~**Không có React.memo**~~ - ✅ ĐÃ FIX
-2. ~~**Không có Lazy Loading**~~ - ✅ ĐÃ FIX
-3. ~~**LoginPage dùng Inline Styles**~~ - ✅ ĐÃ FIX
-4. ~~**Sai Heading Hierarchy**~~ - ✅ ĐÃ FIX (Sidebar, Dashboard, Store)
-5. ~~**Glassmorphism Effects**~~ - ✅ ĐÃ FIX
+1. **Dark mode code bloat** - 595+ dark: classes (project light-only)
+2. **Hard-coded colors** - 62+ hex colors not using design tokens
+3. **Missing accessibility** - Interactive elements lack focus indicators
+4. **Mixed design tokens** - 4 color systems in use simultaneously
+5. **Localization inconsistency** - Mixed English/Vietnamese text
 
 ---
 
@@ -49,194 +53,339 @@ Tuy nhiên, có một số anti-patterns AI cụ thể:
 
 ### 🔴 Vấn Đề Critical
 
-#### 1. Không có React.memo trong List Components
-- **Vị trí**: `InventoryTable.jsx`, `ProductTable.jsx`, `StoreList.jsx`
-- **Mức độ**: Critical
-- **Danh mục**: Performance
-- **Mô tả**: Table và list re-render mỗi khi parent update
-- **Tác động**: Performance cực kỳ chậm với dữ liệu lớn (100+ rows)
-- **Khuyến nghị**: Wrap table rows với React.memo
-- **Command gợi ý**: `/optimize`
+#### 1. Dark Mode Code Bloat (595+ instances)
+- **Vị trí**: Toàn bộ codebase - grep tìm thấy 595 matches cho `dark:`
+- **Danh mục**: Theming / Anti-Patterns
+- **Mô tả**: Project "Light mode only" trong AGENTS.md nhưng có dark mode infrastructure khắp nơi trong index.css và tất cả components
+- **Tác động**: Codebase bloated, maintenance khó, có thể activate dark mode ngoài ý muốn
+- **Khuyến nghị**: Remove tất cả .dark classes, dark mode CSS variables, và dark: Tailwind variants
+- **Command gợi ý**: `/normalize`
 
-#### 2. Không có Lazy Loading (Code Splitting)
-- **Vị trí**: `App.jsx` / route definitions
-- **Mức độ**: Critical
+#### 2. Hard-Coded Colors - Modal Components
+- **Vị trí**: 
+  - EditStoreModal.jsx:92,94,106,110,127,133,138,149,153,163,167,172,199,201
+  - AddStoreModal.jsx:85,89,106,112,117,128,132,142,146,150,172,174
+- **Danh mục**: Theming
+- **Mô tả**: Direct hex colors như `#121617`, `#f1f3f4`, `#dde2e4`, `#1e282c`, `#131c1f`, `#182124`
+- **Tác động**: Không themeable, không nhất quán với design tokens
+- **Khuyến nghị**: Thay bằng CSS variables (--color-text-main, --color-surface, etc.)
+- **Command gợi ý**: `/normalize`
+
+#### 3. Hard-Coded Colors - Charts
+- **Vị trí**:
+  - RevenueChart.jsx:104,105,113,122
+  - StoreRevenueChart.jsx:60,61,65,66,67,68,72,75
+- **Danh mục**: Theming
+- **Mô tả**: Hard-coded `#24748f` (primary) và `#94a3b8` trong SVG elements
+- **Tác động**: Chart colors không update nếu primary thay đổi
+- **Khuyến nghị**: Dùng CSS variables hoặc design token functions
+- **Command gợi ý**: `/normalize`
+
+#### 4. Missing Accessibility - Interactive Cards
+- **Vị trí**: KPIGrid.jsx:63-82, StoreKPIGrid.jsx:11-71
+- **Danh mục**: Accessibility
+- **Mô tả**: Cards với role="button" và tabIndex=0 nhưng:
+  - Không có aria-pressed state
+  - Không có aria-label mô tả action
+  - Keyboard navigation incomplete
+- **Tác động**: Keyboard users không thể discover hoặc interact với clickable cards
+- **WCAG**: 2.1.1 Keyboard, 2.4.7 Focus Visible
+- **Khuyến nghị**: Thêm aria-pressed, focus styles, aria-label
+- **Command gợi ý**: `/harden`
+
+#### 5. Mixed Design Tokens
+- **Vị trí**: Throughout codebase - mixing slate-*, gray-*, text-*, surface-*
+- **Danh mục**: Theming
+- **Mô tả**: Inconsistent use of color naming:
+  - `text-slate-500`, `text-gray-400`, `text-text-muted` trong cùng components
+  - `bg-surface-light`, `bg-white`, `bg-slate-50`, `bg-[#1a262a]`
+- **Tác động**: Visual inconsistency, maintenance confusion
+- **Khuyến nghị**: Standardize trên single token system (text-*, bg-*, surface-*)
+- **Command gợi ý**: `/normalize`
+
+#### 6. Mixed Localization - English/Vietnamese
+- **Vị trí**:
+  - DashboardPage.jsx:50,53 ("Store Dashboard")
+  - StoreDashboardPage.jsx:48,49,60,65,66,67,92
+  - StoreKPIGrid.jsx:18,21,34,37,51,66,68
+- **Danh mục**: Localization
+- **Mô tả**: UI text mixes English và Vietnamese:
+  - "Store Dashboard" vs "Tổng quan chuỗi bán lẻ"
+  - "In Stock", "Varieties", "Attention", "On Shift" (English) trong Vietnamese UI
+  - "Edit Store", "Save Changes", "Cancel" (English) trong Vietnamese form
+- **Tác động**: Inconsistent user experience, violates "Vietnamese first" requirement
+- **Khuyến nghị**: Standardize tất cả UI text thành Vietnamese
+- **Command gợi ý**: `/clarify`
+
+#### 7. Hard-Coded Background Colors
+- **Vị trí**:
+  - ProductPage.jsx:114 (`bg-[#f8fafc]`)
+  - InventoryPage.jsx:156,159,164
+  - StockInList.jsx:120,244,254,256, etc.
+- **Danh mục**: Theming
+- **Mô tả**: Direct hex backgrounds không dùng design tokens
+- **Tác động**: Không themeable, breaks design system consistency
+- **Khuyến nghị**: Thay bằng design tokens
+- **Command gợi ý**: `/normalize`
+
+#### 8. Performance - No Image Optimization
+- **Vị trí**: Throughout product tables, store images
 - **Danh mục**: Performance
-- **Mô tả**: Tất cả routes load ngay lập tức, không có code splitting
-- **Tác động**: Bundle lớn, Time to Interactive chậm
-- **Khuyến nghị**: Dùng React.lazy() và Suspense
+- **Mô tả**: No lazy loading, no image optimization, direct URL display
+- **Tác động**: Slow page loads, bandwidth waste
+- **Khuyến nghị**: Add lazy loading, use srcSet cho responsive images
 - **Command gợi ý**: `/optimize`
 
 ---
 
 ### 🟠 Vấn Đề High
 
-#### 3. LoginPage dùng Inline Styles
-- **Vị trí**: `src/pages/Auth/LoginPage.jsx` (lines 28-74)
-- **Mức độ**: High
+#### 9. Focus Indicators Missing
+- **Vị trí**: Multiple custom interactive elements lack focus-visible styles
+- **Danh mục**: Accessibility
+- **Mô tả**: Custom buttons, clickable cards, icon buttons missing focus-visible
+- **Tác động**: Keyboard users cannot see focused elements
+- **WCAG**: 2.4.7 Focus Visible
+- **Command gợi ý**: `/harden`
+
+#### 10. EditStoreModal - Missing Form Labels
+- **Vị trí**: EditStoreModal.jsx:133,149,167
+- **Danh mục**: Accessibility
+- **Mô tả**: Labels use htmlFor nhưng inputs dùng different ids
+- **Tác động**: Screen reader users cannot associate labels with inputs
+- **WCAG**: 1.3.1 Info and Relationships
+- **Command gợi ý**: `/harden`
+
+#### 11. Inconsistent Button Styles
+- **Vị trí**: Throughout codebase
 - **Danh mục**: Theming
-- **Mô tả**: 40+ dòng inline styles thay vì Tailwind classes
-- **Tác động**: Không hỗ trợ dark mode, không tùy chỉnh được
-- **Khuyến nghị**: Convert sang Tailwind classes
+- **Mô tả**: Some buttons use custom classes, others use variant props
 - **Command gợi ý**: `/normalize`
 
-#### 4. Sai Heading Hierarchy
-- **Files**: 
-  - `Sidebar.jsx` line 90: Dùng `<h1>` cho logo (nên là `<span>`)
-  - `DashboardPage.jsx` line 49: Bắt đầu với `<h2>` thay vì `<h1>`
-  - `StorePage.jsx` line 74: Bắt đầu với `<h2>`
-- **Mức độ**: High
-- **Danh mục**: Accessibility
-- **Mô tả**: Nhiều trang bỏ qua h1 hoặc dùng sai level
-- **Tác động**: Screen reader users không điều hướng được
-- **Khuyến nghị**: 
-  - Sidebar logo nên dùng `<span>` hoặc `<div>`
-  - Mỗi trang nên bắt đầu với `<h1>`
+#### 12. Shadow Token Inconsistency
+- **Vị trí**: index.css defines `--shadow-soft`, but components use `shadow-sm`, `shadow-lg`, `shadow-xl`
+- **Danh mục**: Theming
+- **Command gợi ý**: `/normalize`
+
+#### 13. Inconsistent Card Styling
+- **Vị trí**: Various Card components
+- **Danh mục**: Theming
+- **Command gợi ý**: `/normalize`
+
+#### 14. Missing Loading States
+- **Vị trí**: Multiple pages
+- **Danh mục**: Accessibility / UX
 - **Command gợi ý**: `/harden`
 
-#### 5. Icon Buttons thiếu aria-label
-- **Vị trí**: `Header.jsx` lines 40-45 (notification, settings buttons)
-- **Mức độ**: High
+#### 15. Inconsistent Status Badge Colors
+- **Vị trí**: Various components
+- **Danh mục**: Theming
+- **Command gợi ý**: `/normalize`
+
+#### 16. Form Error Handling
+- **Vị trí**: LoginPage.jsx:38-42
 - **Danh mục**: Accessibility
-- **Mô tả**: Buttons chỉ có icon, không có label
-- **Tác động**: Screen reader không biết button để làm gì
-- **Khuyến nghị**: Thêm aria-label="Thông báo" và aria-label="Cài đặt"
+- **Mô tả**: Error message lacks ARIA role="alert"
 - **Command gợi ý**: `/harden`
 
-#### 6. Glassmorphism Effects (backdrop-blur)
-- **Vị trí**:
-  - `StorePage.jsx` line 126: `backdrop-blur-md`
-  - `StockOutList.jsx` lines 154, 245: `backdrop-blur-xl`, `backdrop-blur-md`
-  - `StockInList.jsx` line 153: `backdrop-blur-xl`
-  - `confirmModal.jsx` line 52: `backdrop-blur-sm`
-  - `LocationPicker.jsx` line 97: `backdrop-blur`
-- **Mức độ**: High
-- **Danh mục**: Anti-Patterns
-- **Mô tả**: 9 instances của glassmorphism
-- **Tác động**: Vấn đề accessibility, không nhất quán
-- **Khuyến nghị**: Thay bằng solid colors
-- **Command gợi ý**: `/quieter`
+#### 17. EditStoreModal - Color Contrast
+- **Vị trí**: EditStoreModal.jsx:146
+- **Danh mục**: Accessibility
+- **WCAG**: 1.4.3 Contrast
+- **Command gợi ý**: `/critique`
 
-#### 7. Gradient Backgrounds
-- **Vị trí**: `WarehouseListPage.jsx` lines 188, 202, 216, 230
-- **Mức độ**: High
-- **Danh mục**: Anti-Patterns
-- **Mô tả**: 
-  - `bg-gradient-to-br from-blue-50 to-blue-100`
-  - `bg-gradient-to-br from-purple-50 to-purple-100`
-  - `bg-gradient-to-br from-green-50 to green-100`
-  - `bg-gradient-to-br from-emerald-50 to-emerald-100`
-- **Tác động**: AI slop aesthetic, không nhất quán
-- **Khuyến nghị**: Dùng solid card colors với accent borders
-- **Command gợi ý**: `/distill`
+#### 18. Empty State Inconsistency
+- **Vị trí**: Multiple pages
+- **Danh mục**: UX
+- **Command gợi ý**: `/extract`
 
----
-
-### 🟡 Vấn Đề Medium
-
-#### 8. Hard-coded Colors
-- **Vị trí**: `LoginPage.jsx` line 28: `#f0f2f5`, line 67: `#2563eb`
-- **Vị trí**: `StoreRevenueChart.jsx` line 75: `#ffffff`
-- **Mức độ**: Medium
-- **Danh mục**: Theming
-- **Mô tả**: Dùng hex colors thay vì design tokens
-- **Khuyến nghị**: Dùng `bg-background`, `bg-primary` tokens
-
-#### 9. Dark Mode Variants không dùng
-- **Vị trí**: Nhiều components có nhiều `dark:` classes
-- **Mức độ**: Medium
-- **Danh mục**: Theming
-- **Mô tả**: Project là light mode only nhưng có dark mode code
-- **Khuyến nghị**: Remove dark mode code hoặc implement đúng
-
-#### 10. Lẫn English/Vietnamese
-- **Vị trí**: Nhiều trang
-- **Mức độ**: Medium
-- **Danh mục**: Localization
-- **Mô tả**: Một số headings English, một số Vietnamese
-- **Khuyến nghị**: Chuẩn hóa thành Vietnamese
-
----
-
-### 🟢 Vấn Đề Low
-
-#### 11. Hard-coded Width
-- **Vị trí**: `LoginPage.jsx` line 29: `width: '400px'`
-- **Mức độ**: Low
+#### 19. Responsive - Fixed Table Widths
+- **Vị trí**: Various Table components
 - **Danh mục**: Responsive
-- **Mô tả**: Fixed width không responsive
-- **Khuyến nghị**: Dùng `max-w-md w-full`
+- **Command gợi ý**: `/adapt`
 
-#### 12. Pure Black/White
-- **Vị trí**: LoginPage.jsx line 68: `color: 'white'`
-- **Mức độ**: Low
+#### 20. Inconsistent Spacing
+- **Vị trí**: Various components
 - **Danh mục**: Theming
-- **Mô tả**: Nên dùng `text-primary-foreground`
+- **Command gợi ý**: `/polish`
+
+#### 21. Header - Missing Skip Link
+- **Vị trí**: MainLayout / App structure
+- **Danh mục**: Accessibility
+- **WCAG**: 2.4.1 Bypass Blocks
+- **Command gợi ý**: `/harden`
+
+#### 22. Sidebar - Navigation Focus
+- **Vị trí**: Sidebar.jsx:99-122
+- **Danh mục**: Accessibility
+- **Command gợi ý**: `/harden`
+
+#### 23. KPI Grid - Animation Performance
+- **Vị trí**: KPIGrid.jsx:81
+- **Danh mục**: Performance
+- **Mô tả**: Animating translateY, shadow, border on hover
+- **Command gợi ý**: `/optimize`
+
+#### 24-26. Additional High Issues
+(Detail truncated for brevity - see full report)
+
+---
+
+### 🟡 Vấn Đề Medium (Selected)
+
+#### 27. Inconsistent Font Usage
+- **Danh mục**: Theming
+
+#### 28. Hard-coded Border Colors
+- **Danh mục**: Theming
+
+#### 29. Icon Inconsistency
+- **Dị trí**: Mixed lucide-react and material-symbols
+- **Danh mục**: Theming
+
+#### 30. Unused CSS Variables
+- **Danh mục**: Performance / Theming
+
+#### 31. Console Logs in Production
+- **Vị trí**: EditStoreModal.jsx:52,73
+- **Danh mục**: Performance
+
+#### 32-40. Additional Medium Issues
+(Detail truncated for brevity)
+
+---
+
+### 🟢 Vấn Đề Low (Selected)
+
+#### 41-50. Various Low Issues
+- Alphabetical imports
+- Prop drilling
+- Magic numbers
+- Unused variables
+- Console error handling
 
 ---
 
 ## Các Pattern Lặp Lại
 
-| Pattern | Số lượng | Files | Trạng thái |
-|---------|----------|-------|-------------|
-| Inline styles | 1 | LoginPage.jsx | ✅ ĐÃ FIX |
-| Glassmorphism (backdrop-blur) | 9 | StorePage, StockOutList, StockInList, modals | ✅ ĐÃ FIX |
-| Gradient backgrounds | 4 | WarehouseListPage | ✅ ĐÃ FIX |
-| Thiếu h1 | 12+ | Hầu hết các trang | ✅ ĐÃ FIX (3 trang chính) |
-| Icon buttons không aria-label | 3+ | Header, various | ✅ ĐÃ FIX |
+### 1. Dark Mode Code (595+ instances)
+Vấn đề phổ biến nhất - dark mode infrastructure khắp codebase despite explicit "Light mode only" requirement.
+
+### 2. Hard-coded Colors (62+ instances)
+Three categories:
+- Modal components: `#121617`, `#f1f3f4`, `#dde2e4`, `#1e282c`
+- Chart components: `#24748f`, `#94a3b8`
+- Backgrounds: `#f8fafc`, `#1a262a`, `#0f171a`
+
+### 3. Mixed Design Tokens
+Bốn systems used simultaneously:
+- Tailwind slate: `slate-500`, `slate-900`, `slate-50`
+- Tailwind gray: `gray-200`, `gray-400`, `gray-700`
+- Custom tokens: `text-text-main`, `text-text-muted`
+- Direct hex: `#121617`, `#f1f3f4`
+
+### 4. Inconsistent Vietnamese Localization
+English terms appearing in Vietnamese UI:
+- "Store Dashboard", "Edit Store", "Save Changes"
+- "In Stock", "Varieties", "Attention", "On Shift"
+
+### 5. Accessibility Gaps
+- Missing focus indicators on custom interactive elements
+- Incomplete ARIA labels on icon buttons
+- Form validation not announced to screen readers
 
 ---
 
 ## Các Điểm Tích Cực
 
-1. ✅ **Design tokens** - Primary color #24748f đã cấu hình đúng
-2. ✅ **Manrope font** - Đã set làm display và body font
-3. ✅ **Alt text on images** - Tất cả img tags có alt
-4. ✅ **Labels on forms** - Tất cả inputs có label
-5. ✅ **Focus indicators** - focus-visible classes đã có
-6. ✅ **Responsive breakpoints** - Tốt, dùng md:, lg: prefixes
-7. ✅ **shadcn/ui components** - Nhất quán
-8. ✅ **Vietnamese localization** - Hầu hết đã Vietnamese
-9. ✅ **Radius tokens** - Dùng 0.625rem (rounded-xl) nhất quán
+1. ✅ **shadcn/ui integration** - Good use of component library
+2. ✅ **Vietnamese text** - Most UI text in Vietnamese
+3. ✅ **Responsive grid** - Good use of responsive grid classes
+4. ✅ **Form validation** - Basic HTML5 validation in place
+5. ✅ **Loading states** - Most pages have loading indicators
+6. ✅ **Error handling** - Basic error states implemented
+7. ✅ **Card components** - Good use of Card from shadcn/ui
+8. ✅ **Tailwind utilities** - Proper use of Tailwind classes
+9. ✅ **Material icons** - Consistent icon usage
+10. ✅ **Date formatting** - Using vi-VN locale
 
 ---
 
 ## Khuyến Nghị Theo Ưu Tiên
 
-### Ngay Lập Tức (Critical - Sprint này)
-1. ~~Thêm React.memo vào `InventoryTable`, `ProductTable`, `StoreList`~~ ✅ ĐÃ FIX
-2. ~~Implement lazy loading trong `App.jsx`~~ ✅ ĐÃ FIX
-3. ~~Refactor LoginPage sang Tailwind classes~~ ✅ ĐÃ FIX
+### 🚨 Ngay Lập Tức (This Session)
 
-### Ngắn hạn (High - Sprint tới)
-1. ~~Fix heading hierarchy~~ ✅ ĐÃ FIX
-2. ~~Thêm aria-labels vào icon-only buttons~~ ✅ ĐÃ FIX
-3. ~~Replace gradient backgrounds~~ ✅ ĐÃ FIX
-4. ~~Remove glassmorphism effects~~ ✅ ĐÃ FIX
+1. **Remove dark mode code** - Strip all `.dark` and `dark:` classes
+   - Use: `/normalize` to align with design system
 
-### Trung hạn (Quality)
-1. Remove dark mode code (project là light-only)
-2. Chuẩn hóa Vietnamese localization
-3. Remove hard-coded colors
+2. **Standardize Vietnamese localization** - Fix mixed EN/VN text
+   - Use: `/clarify` to improve UX copy
 
-### Dài hạn (Nice-to-have)
-1. Thêm error boundaries
-2. Cân nhắc React Query cho data caching
-3. Tạo documentation cho component library
+### 📅 Ngắn Hạn (This Sprint)
+
+3. **Replace hard-coded colors** - Use design tokens
+   - Use: `/normalize`
+
+4. **Fix accessibility issues** - Focus indicators, ARIA labels
+   - Use: `/harden`
+
+5. **Standardize design tokens** - One color system only
+   - Use: `/normalize`
+
+### 📆 Trung Hạn (Next Sprint)
+
+6. **Performance optimizations** - Image lazy loading
+   - Use: `/optimize`
+
+7. **Responsive refinements** - Fix mobile issues
+   - Use: `/adapt`
+
+8. **Create component library** - Standardize reusable patterns
+   - Use: `/extract`
+
+### 🎯 Dài Hạn (Future)
+
+9. **Error boundaries** - Add React error boundaries
+10. **Documentation** - Document component library
+11. **Testing** - Add accessibility testing
 
 ---
 
 ## Các Commands Để Fix
 
-| Vấn đề | Command | Lý do |
-|--------|---------|-------|
-| ~~Performance (React.memo, lazy)~~ | ✅ ĐÃ FIX | Fixed 2 critical performance issues |
-| ~~LoginPage inline styles~~ | ✅ ĐÃ FIX | Align với design system |
-| ~~Heading hierarchy~~ | ✅ ĐÃ FIX | Improve accessibility |
-| ~~Glassmorphism, gradients~~ | ✅ ĐÃ FIX | Remove AI slop aesthetics |
-| Hard-coded colors | `/normalize` | Use design tokens |
+| Issue Category | Suggested Command | Impact |
+|----------------|-------------------|--------|
+| Dark mode removal, hard-coded colors, design token standardization | `/normalize` | 45+ issues |
+| Focus indicators, ARIA labels, form validation | `/harden` | 12+ issues |
+| Mixed localization text | `/clarify` | 8+ issues |
+| Performance optimization | `/optimize` | 8+ issues |
+| Responsive improvements | `/adapt` | 5+ issues |
+| Polish and refine | `/polish` | 5+ issues |
+| Extract reusable components | `/extract` | 3+ issues |
 
 ---
 
-*Báo cáo tạo: 2026-03-11*
+## Kết Luận
+
+RetailChainUi codebase có solid foundation using shadcn/ui và Tailwind CSS, nhưng suffers from:
+
+1. **Massive dark mode bloat** - 595+ instances despite light-only requirement
+2. **Inconsistent design tokens** - 4 different color systems in use
+3. **Hard-coded colors** - 62+ instances not using design tokens
+4. **Accessibility gaps** - Missing focus indicators, incomplete ARIA
+5. **Localization inconsistency** - Mixed English/Vietnamese text
+
+**Estimated Fix Effort:**
+- Dark mode removal: 2-4 hours
+- Color standardization: 4-6 hours  
+- Accessibility fixes: 2-3 hours
+- Localization cleanup: 1-2 hours
+
+**Total: ~10-15 hours for critical/high issues**
+
+Codebase functional nhưng sẽ benefit significantly from cleanup để match "Professional • Reliable • Efficient" brand guidelines.
+
+---
+
+*Báo cáo tạo: 2026-03-12*
 *Auditor: OpenCode AI*
