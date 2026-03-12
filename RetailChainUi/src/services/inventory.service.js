@@ -81,6 +81,14 @@ const inventoryService = {
     return axiosPrivate.delete(`/inventory/documents/${id}`);
   },
 
+  importStockFromExcel: async (formData) => {
+    return axiosPrivate.post('/inventory/import/excel', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
   /**
    * Lấy danh sách lịch sử tồn kho (inventory history records).
    * GET /api/inventory-history/record

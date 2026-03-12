@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
 import {
@@ -43,6 +44,15 @@ const StockInList = () => {
     // Modal State
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+    // Delete Dialog State
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Excel Import State
+    const [isImporting, setIsImporting] = useState(false);
+    const fileInputRef = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,14 +104,81 @@ const StockInList = () => {
         setIsDetailOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (confirm('Bạn có chắc chắn muốn xóa phiếu nhập kho này?')) {
-            try {
-                await inventoryService.deleteDocument(id);
-                setOriginalRecords(prevRecords => prevRecords.filter(record => record.id !== id));
-            } catch (error) {
-                console.error("Failed to delete stock in record:", error);
-            }
+    const handleDeleteClick = (id) => {
+        setDeletingId(id);
+        setIsDeleteOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deletingId) return;
+        setIsDeleting(true);
+        try {
+            await inventoryService.deleteDocument(deletingId);
+            setOriginalRecords(prevRecords => prevRecords.filter(record => record.id !== deletingId));
+            toast.success("Xóa thành công", {
+                description: "Phiếu nhập kho đã được xóa.",
+            });
+        } catch (error) {
+            console.error("Failed to delete stock in record:", error);
+            toast.error("Xóa thất bại", {
+                description: error.response?.data?.message || "Đã xảy ra lỗi khi xóa phiếu.",
+            });
+        } finally {
+            setIsDeleting(false);
+            setIsDeleteOpen(false);
+            setDeletingId(null);
+        }
+    };
+
+    // Excel Import Handlers
+    const handleImportExcel = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel', // .xls
+        ];
+        const validExtensions = ['.xlsx', '.xls'];
+        const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+
+        if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+            toast.error("File không hợp lệ", {
+                description: "Vui lòng chọn file Excel (.xlsx, .xls)",
+            });
+            e.target.value = '';
+            return;
+        }
+
+        setIsImporting(true);
+        try {
+            // Read and parse the Excel file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Call backend API to import
+            const response = await inventoryService.importStockFromExcel(formData);
+
+            toast.success("Nhập thành công", {
+                description: `Đã nhập ${response.data?.length || 0} phiếu nhập từ Excel.`,
+            });
+
+            // Refresh the list
+            const data = await inventoryService.getStockInRecords();
+            setOriginalRecords(data || []);
+        } catch (error) {
+            console.error("Import Excel error:", error);
+            toast.error("Nhập thất bại", {
+                description: error.response?.data?.message || "Đã xảy ra lỗi khi nhập file Excel.",
+            });
+        } finally {
+            setIsImporting(false);
+            e.target.value = '';
         }
     };
 
@@ -136,9 +213,21 @@ const StockInList = () => {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <Button variant="outline" className="gap-2 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept=".xlsx,.xls"
+                                className="hidden"
+                            />
+                            <Button
+                                variant="outline"
+                                className="gap-2 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                                onClick={handleImportExcel}
+                                disabled={isImporting}
+                            >
                                 <Upload className="w-4 h-4" />
-                                <span>Nhập Excel</span>
+                                <span>{isImporting ? "Đang nhập..." : "Nhập Excel"}</span>
                             </Button>
                             <Link to="/stock-in/create">
                                 <Button className="gap-2 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 px-6">
@@ -306,7 +395,7 @@ const StockInList = () => {
                                                         <DropdownMenuSeparator className="bg-slate-100 dark:bg-slate-800" />
                                                         <DropdownMenuItem
                                                             className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-900/20 rounded-xl cursor-pointer"
-                                                            onClick={() => handleDelete(record.id)}
+                                                            onClick={() => handleDeleteClick(record.id)}
                                                         >
                                                             <Trash2 className="mr-2 h-4 w-4" /> Xóa Phiếu
                                                         </DropdownMenuItem>
@@ -476,6 +565,40 @@ const StockInList = () => {
                         <Button variant="outline" onClick={() => setIsDetailOpen(false)} className="rounded-xl px-8 border-border">Đóng</Button>
                         <Button className="rounded-xl px-8 shadow-lg shadow-primary/20">
                             <Upload className="w-4 h-4 mr-2 rotate-180" /> In Phiếu
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DialogContent className="max-w-md rounded-3xl border-none shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center">
+                                <Trash2 className="w-5 h-5 text-rose-600" />
+                            </div>
+                            Xác nhận xóa
+                        </DialogTitle>
+                        <DialogDescription className="text-base">
+                            Bạn có chắc chắn muốn xóa phiếu nhập kho này? Hành động này không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteOpen(false)}
+                            className="rounded-xl flex-1"
+                            disabled={isDeleting}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={handleConfirmDelete}
+                            className="rounded-xl flex-1 bg-rose-600 hover:bg-rose-700"
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "Đang xóa..." : "Xóa"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
