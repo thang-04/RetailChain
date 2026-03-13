@@ -31,6 +31,49 @@ import {
     TrendingUp, AlertCircle, PackageCheck
 } from 'lucide-react';
 
+const detectTimeframe = (startDate, endDate) => {
+    if (!startDate || !endDate) return 'current-month';
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+    
+    if (diffDays >= 25 && diffDays <= 35) return 'month';
+    if (diffDays >= 85 && diffDays <= 95) return 'quarter';
+    if (diffDays >= 350 && diffDays <= 380) return 'year';
+    
+    return 'custom';
+};
+
+const getBaselineRange = (timeframe, currentStart) => {
+    const start = new Date(currentStart);
+    
+    switch (timeframe) {
+        case 'month':
+            const prevMonthStart = new Date(start.getFullYear(), start.getMonth() - 1, 1);
+            const prevMonthEnd = new Date(start.getFullYear(), start.getMonth(), 0);
+            return { start: prevMonthStart, end: prevMonthEnd };
+        case 'quarter':
+            const quarter = Math.floor(start.getMonth() / 3);
+            const prevQuarterStart = new Date(start.getFullYear(), (quarter - 1) * 3, 1);
+            const prevQuarterEnd = new Date(start.getFullYear(), quarter * 3, 0);
+            return { start: prevQuarterStart, end: prevQuarterEnd };
+        case 'year':
+            return { 
+                start: new Date(start.getFullYear() - 1, 0, 1), 
+                end: new Date(start.getFullYear() - 1, 11, 31) 
+            };
+        default:
+            return null;
+    }
+};
+
+const formatCompactCurrency = (value) => {
+    if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
+    if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+    return value.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + 'đ';
+};
+
 const StatCard = ({ title, value, subtitle, icon: IconProp, variant = "default", trend }) => {
     const Icon = IconProp;
     const variants = {
@@ -171,21 +214,35 @@ const StockOutList = () => {
 
     const stats = useMemo(() => {
         const now = new Date();
-        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        const hasDateFilter = dateFilter.start && dateFilter.end;
+        
+        let currentStart, currentEnd;
+        
+        if (hasDateFilter) {
+            currentStart = new Date(dateFilter.start);
+            currentEnd = new Date(dateFilter.end + 'T23:59:59');
+        } else {
+            currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        }
+        
+        const timeframe = detectTimeframe(dateFilter.start, dateFilter.end);
+        const baselineRange = getBaselineRange(timeframe, currentStart);
         
         const currentRecords = records.filter(r => {
             if (!r.createdAt) return false;
             const d = new Date(r.createdAt);
-            return d >= currentMonthStart;
+            return d >= currentStart && d <= currentEnd;
         });
         
-        const previousRecords = records.filter(r => {
-            if (!r.createdAt) return false;
-            const d = new Date(r.createdAt);
-            return d >= previousMonthStart && d <= previousMonthEnd;
-        });
+        let previousRecords = [];
+        if (baselineRange && timeframe !== 'custom') {
+            previousRecords = records.filter(r => {
+                if (!r.createdAt) return false;
+                const d = new Date(r.createdAt);
+                return d >= baselineRange.start && d <= baselineRange.end;
+            });
+        }
         
         const total = currentRecords.length;
         const completed = currentRecords.filter(r => r.status === 'Completed').length;
@@ -197,15 +254,22 @@ const StockOutList = () => {
         const prevTotal = previousRecords.length;
         const prevValue = previousRecords.reduce((sum, r) => sum + (r.totalValue || 0), 0);
         
-        const totalTrend = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : 0;
-        const valueTrend = prevValue > 0 ? Math.round(((totalValue - prevValue) / prevValue) * 100) : 0;
-        const hasPreviousData = prevTotal > 0 || prevValue > 0;
+        const showTrend = baselineRange !== null && (prevTotal > 0 || prevValue > 0);
+        const totalTrend = showTrend && prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : null;
+        const valueTrend = showTrend && prevValue > 0 ? Math.round(((totalValue - prevValue) / prevValue) * 100) : null;
+        
+        const displayValue = totalValue >= 1e9 || totalValue >= 1e6 
+            ? formatCompactCurrency(totalValue) 
+            : totalValue.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + 'đ';
         
         return { 
-            total, completed, pending, cancelled, totalValue, totalItems,
-            totalTrend, valueTrend, hasPreviousData 
+            total, completed, pending, cancelled, 
+            totalValue: displayValue, 
+            totalItems: totalItems.toLocaleString('vi-VN'),
+            totalTrend, valueTrend, 
+            hasPreviousData: showTrend
         };
-    }, [records]);
+    }, [records, dateFilter]);
 
     const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
     const paginatedRecords = useMemo(() => {
@@ -320,8 +384,8 @@ const StockOutList = () => {
                             />
                             <StatCard
                                 title="Giá trị"
-                                value={stats.totalValue.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + 'đ'}
-                                subtitle={`${stats.totalItems.toLocaleString('vi-VN')} sản phẩm`}
+                                value={stats.totalValue}
+                                subtitle={`${stats.totalItems} sản phẩm`}
                                 icon={DollarSign}
                                 variant="info"
                                 trend={stats.hasPreviousData ? stats.valueTrend : undefined}
