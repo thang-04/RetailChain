@@ -99,12 +99,28 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [isLoadingDropdown, setIsLoadingDropdown] = useState(false);
 
-  // Load categories and suppliers when modal opens
-  useEffect(() => {
-    if (open) {
-      loadDropdownData();
+  const loadDropdownData = async () => {
+    setIsLoadingDropdown(true);
+    try {
+      const [catRes, supRes] = await Promise.all([
+        inventoryService.getAllCategories(),
+        inventoryService.getAllSuppliers(),
+      ]);
+      
+      const cats = Array.isArray(catRes) ? catRes : (catRes.data || []);
+      const sups = Array.isArray(supRes) ? supRes : (supRes.data || []);
+      
+      setCategories(cats);
+      setSuppliers(sups);
+      
+      return cats;
+    } catch (err) {
+      console.error("Error loading dropdown data:", err);
+      return [];
+    } finally {
+      setIsLoadingDropdown(false);
     }
-  }, [open]);
+  };
 
   const validateRow = useCallback((row, _index) => {
     const errors = [];
@@ -149,6 +165,13 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     };
   }, []);
 
+  // Load categories and suppliers when modal opens
+  useEffect(() => {
+    if (open) {
+      loadDropdownData();
+    }
+  }, [open]);
+
   // Re-map categoryId after categories are loaded
   useEffect(() => {
     if (categories.length > 0 && parsedData.length > 0) {
@@ -163,7 +186,6 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         });
         setParsedData(remappedData);
         
-        // Re-validate rows
         const newStates = {};
         remappedData.forEach((row, index) => {
           const validation = validateRow(row, index);
@@ -207,31 +229,6 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
       }
     }
   }, [suppliers, parsedData, rowStates, validateRow]);
-
-  const loadDropdownData = async () => {
-    setIsLoadingDropdown(true);
-    try {
-      const [catRes, supRes] = await Promise.all([
-        inventoryService.getAllCategories(),
-        inventoryService.getAllSuppliers(),
-      ]);
-      
-      // Handle both array response and wrapped response
-      const cats = Array.isArray(catRes) ? catRes : (catRes.data || []);
-      const sups = Array.isArray(supRes) ? supRes : (supRes.data || []);
-      
-      setCategories(cats);
-      setSuppliers(sups);
-      
-      // Return categories for immediate use
-      return cats;
-    } catch (err) {
-      console.error("Error loading dropdown data:", err);
-      return [];
-    } finally {
-      setIsLoadingDropdown(false);
-    }
-  };
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files?.[0];
