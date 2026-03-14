@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Plus, X, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -99,6 +99,10 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [isLoadingDropdown, setIsLoadingDropdown] = useState(false);
 
+  // Refs to track remap status to avoid infinite loops
+  const categoryRemapped = useRef(false);
+  const supplierRemapped = useRef(false);
+
   const loadDropdownData = async () => {
     setIsLoadingDropdown(true);
     try {
@@ -168,67 +172,76 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
   // Load categories and suppliers when modal opens
   useEffect(() => {
     if (open) {
+      categoryRemapped.current = false;
+      supplierRemapped.current = false;
       loadDropdownData();
     }
   }, [open]);
 
   // Re-map categoryId after categories are loaded
   useEffect(() => {
-    if (categories.length > 0 && parsedData.length > 0) {
+    if (categories.length > 0 && parsedData.length > 0 && !categoryRemapped.current) {
       const needsRemap = parsedData.some(row => row.categoryName && !row.categoryId);
       if (needsRemap) {
-        const remappedData = parsedData.map(row => {
-          if (row.categoryName && !row.categoryId) {
-            const foundCat = fuzzyMatch(row.categoryName, categories, 'name');
-            return { ...row, categoryId: foundCat ? foundCat.id : null };
-          }
-          return row;
+        categoryRemapped.current = true;
+        setParsedData(prevData => {
+          const remappedData = prevData.map(row => {
+            if (row.categoryName && !row.categoryId) {
+              const foundCat = fuzzyMatch(row.categoryName, categories, 'name');
+              return { ...row, categoryId: foundCat ? foundCat.id : null };
+            }
+            return row;
+          });
+          
+          const newStates = {};
+          remappedData.forEach((row, index) => {
+            const validation = validateRow(row, index);
+            newStates[index] = {
+              ...validation,
+              selected: validation.isValid,
+            };
+          });
+          setRowStates(newStates);
+          
+          return remappedData;
         });
-        setParsedData(remappedData);
-        
-        const newStates = {};
-        remappedData.forEach((row, index) => {
-          const validation = validateRow(row, index);
-          newStates[index] = {
-            ...rowStates[index],
-            ...validation,
-            selected: validation.isValid && (rowStates[index]?.selected || false),
-          };
-        });
-        setRowStates(newStates);
       }
     }
-  }, [categories, parsedData, rowStates, validateRow]);
+  }, [categories, validateRow]);
 
   // Re-map supplierId after suppliers are loaded
   useEffect(() => {
-    if (suppliers.length > 0 && parsedData.length > 0) {
+    if (suppliers.length > 0 && parsedData.length > 0 && !supplierRemapped.current) {
       const needsRemap = parsedData.some(row => row.supplierName && !row.supplierId);
       if (needsRemap) {
-        const remappedData = parsedData.map(row => {
-          if (row.supplierName && !row.supplierId) {
-            const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
-            if (!foundSupplier) {
-              return { ...row, supplierId: null };
+        supplierRemapped.current = true;
+        setParsedData(prevData => {
+          const remappedData = prevData.map(row => {
+            if (row.supplierName && !row.supplierId) {
+              const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
+              if (!foundSupplier) {
+                return { ...row, supplierId: null };
+              }
+              return { ...row, supplierId: foundSupplier.supplierId || foundSupplier.id };
             }
-            return { ...row, supplierId: foundSupplier.supplierId || foundSupplier.id };
-          }
-          return row;
+            return row;
+          });
+          
+          const newStates = {};
+          remappedData.forEach((row, index) => {
+            const validation = validateRow(row, index);
+            newStates[index] = {
+              ...validation,
+              selected: validation.isValid,
+            };
+          });
+          setRowStates(newStates);
+          
+          return remappedData;
         });
-        setParsedData(remappedData);
-        const newStates = {};
-        remappedData.forEach((row, index) => {
-          const validation = validateRow(row, index);
-          newStates[index] = {
-            ...rowStates[index],
-            ...validation,
-            selected: validation.isValid && (rowStates[index]?.selected || false),
-          };
-        });
-        setRowStates(newStates);
       }
     }
-  }, [suppliers, parsedData, rowStates, validateRow]);
+  }, [suppliers, validateRow]);
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files?.[0];
