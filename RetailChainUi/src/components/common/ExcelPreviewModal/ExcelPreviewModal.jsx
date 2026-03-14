@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Plus, X, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import inventoryService from "@/services/inventory.service";
 
 const SIZES = ["S", "M", "L", "XL", "26", "28", "30", "32", "34", "38", "39", "40", "41", "42", "43", "UNI"];
@@ -132,7 +133,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         setRowStates(newStates);
       }
     }
-  }, [categories]);
+  }, [categories, parsedData, rowStates, validateRow]);
 
   // Re-map supplierId after suppliers are loaded
   useEffect(() => {
@@ -305,32 +306,6 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         };
       });
 
-      const states = {};
-      const validationPromises = normalizedData.map(async (row, index) => {
-        const validation = validateRow(row, index);
-        states[index] = {
-          ...validation,
-          selected: validation.isValid,
-          skuExists: null,
-          isChecking: !validation.isValid ? false : true,
-        };
-
-        if (validation.isValid && row.sku) {
-          try {
-            const skuResult = await inventoryService.checkSkuExists(row.sku);
-            states[index].skuExists = skuResult.exists;
-            states[index].isChecking = false;
-          } catch (_err) {
-            states[index].skuExists = null;
-            states[index].isChecking = false;
-          }
-        }
-
-        return states;
-      });
-
-      await Promise.all(validationPromises.map(p => p.then ? p : Promise.resolve()));
-
       const finalStates = {};
       for (let i = 0; i < normalizedData.length; i++) {
         const validation = validateRow(normalizedData[i], i);
@@ -385,9 +360,9 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     setRowStates(newStates);
   };
 
-  const handleCategoryChange = (index, categoryId) => {
+  const handleFieldChange = useCallback((index, field, value) => {
     const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], categoryId };
+    updatedData[index] = { ...updatedData[index], [field]: value };
     setParsedData(updatedData);
     
     const validation = validateRow(updatedData[index], index);
@@ -399,39 +374,11 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         selected: validation.isValid && prev[index]?.selected,
       },
     }));
-  };
+  }, [parsedData, validateRow]);
 
-  const handleSizeChange = (index, size) => {
-    const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], size };
-    setParsedData(updatedData);
-    
-    const validation = validateRow(updatedData[index], index);
-    setRowStates((prev) => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        ...validation,
-        selected: validation.isValid && prev[index]?.selected,
-      },
-    }));
-  };
-
-  const handleColorChange = (index, color) => {
-    const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], color };
-    setParsedData(updatedData);
-    
-    const validation = validateRow(updatedData[index], index);
-    setRowStates((prev) => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        ...validation,
-        selected: validation.isValid && prev[index]?.selected,
-      },
-    }));
-  };
+  const handleCategoryChange = (index, value) => handleFieldChange(index, 'categoryId', Number(value));
+  const handleSizeChange = (index, value) => handleFieldChange(index, 'size', value);
+  const handleColorChange = (index, value) => handleFieldChange(index, 'color', value);
 
   const handleImport = () => {
     const invalidSupplierRows = parsedData.filter(
@@ -478,13 +425,13 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     onOpenChange(false);
   };
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: parsedData.length,
     valid: Object.values(rowStates).filter((s) => s?.isValid).length,
     invalid: Object.values(rowStates).filter((s) => s && !s.isValid).length,
     newProduct: Object.values(rowStates).filter((s) => s?.skuExists === false).length,
     selected: Object.values(rowStates).filter((s) => s?.selected).length,
-  };
+  }), [parsedData, rowStates]);
 
   const hasSelectedSupplier = selectedSupplier || parsedData.some(row => row.supplierId);
   const canImport = file && stats.selected > 0 && !isLoading && hasSelectedSupplier;
