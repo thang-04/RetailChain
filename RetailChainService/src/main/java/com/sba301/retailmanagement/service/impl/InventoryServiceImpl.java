@@ -41,6 +41,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
+    private final ProductCategoryRepository productCategoryRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -659,5 +660,163 @@ public class InventoryServiceImpl implements InventoryService {
             log.debug("No authenticated user found");
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void importStockFromExcel(List<Map<String, Object>> items) {
+        // Get default warehouse (central warehouse)
+        List<Warehouse> warehouses = warehouseRepository.findAll();
+        if (warehouses.isEmpty()) {
+            throw new RuntimeException("No warehouse found");
+        }
+        Warehouse warehouse = warehouses.stream()
+                .filter(w -> w.getIsCentral() != null && w.getIsCentral() == 1)
+                .findFirst()
+                .orElse(warehouses.get(0));
+
+        // Get default category
+        List<com.sba301.retailmanagement.entity.ProductCategory> categories = productCategoryRepository.findAll();
+        Long defaultCategoryId = categories.isEmpty() ? null : categories.get(0).getId();
+
+        // Get supplier from first item (common for entire import)
+        Long supplierId = null;
+        if (!items.isEmpty()) {
+            Object supplierIdObj = items.get(0).get("supplierId");
+            if (supplierIdObj != null) {
+                if (supplierIdObj instanceof Number) {
+                    supplierId = ((Number) supplierIdObj).longValue();
+                } else if (supplierIdObj instanceof String) {
+                    String supplierIdStr = (String) supplierIdObj;
+                    if (!supplierIdStr.isEmpty()) {
+                        supplierId = Long.parseLong(supplierIdStr);
+                    }
+                }
+            }
+        }
+
+        // Validate and load supplier if provided
+        Supplier supplier = null;
+        if (supplierId != null) {
+            supplier = supplierRepository.findById(supplierId).orElse(null);
+            if (supplier == null) {
+                log.warn("Supplier not found with id: {}, proceeding without supplier", supplierId);
+            }
+        }
+
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+
+        // Create Document
+        InventoryDocument document = new InventoryDocument();
+        document.setDocumentCode("IMP-EXCEL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        document.setDocumentType(InventoryDocumentType.IMPORT);
+        document.setTargetWarehouseId(warehouse.getId());
+        document.setTargetWarehouse(warehouse);
+        document.setNote("Nhập kho từ Excel");
+        document.setCreatedBy(createdByUserId);
+        document.setCreatedAt(LocalDateTime.now());
+        document.setTotalAmount(BigDecimal.ZERO);
+        document.setSupplierId(supplierId);
+        document.setSupplier(supplier);
+
+        InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : items) {
+            String sku = (String) item.get("sku");
+            String productName = (String) item.get("productName");
+            Integer quantity = item.get("quantity") != null ? ((Number) item.get("quantity")).intValue() : 0;
+            Double unitPrice = item.get("unitPrice") != null ? ((Number) item.get("unitPrice")).doubleValue() : 0.0;
+            String note = (String) item.get("note");
+
+            // Get categoryId from item (per row), fallback to default
+            Long categoryId = defaultCategoryId;
+            Object categoryIdObj = item.get("categoryId");
+            if (categoryIdObj != null) {
+                if (categoryIdObj instanceof Number) {
+                    categoryId = ((Number) categoryIdObj).longValue();
+                } else if (categoryIdObj instanceof String) {
+                    String categoryIdStr = (String) categoryIdObj;
+                    if (!categoryIdStr.isEmpty()) {
+                        categoryId = Long.parseLong(categoryIdStr);
+                    }
+                }
+            }
+
+            // Get size and color from item (per row)
+            String size = (String) item.get("size");
+            String color = (String) item.get("color");
+
+            if (sku == null || sku.trim().isEmpty()) {
+                log.warn("SKU is empty, skipping row");
+                continue;
+            }
+
+            // Find or create product
+            Product product = productRepository.findByCode(sku).orElse(null);
+            if (product == null) {
+                // Create new product
+                product = new Product();
+                product.setCode(sku);
+                product.setName(productName != null ? productName : sku);
+                product.setCategoryId(categoryId);
+                product.setStatus(1);
+                product.setCreatedAt(LocalDateTime.now());
+                product.setUpdatedAt(LocalDateTime.now());
+                product = productRepository.save(product);
+                log.info("Created new product: {} with categoryId: {}", sku, categoryId);
+            }
+
+            // Find or create variant
+            ProductVariant variant = productVariantRepository.findBySku(sku).orElse(null);
+            if (variant == null) {
+                // Create new variant
+                variant = new ProductVariant();
+                variant.setProductId(product.getId());
+                variant.setSku(sku);
+                variant.setPrice(BigDecimal.valueOf(unitPrice));
+                variant.setSize(size);
+                variant.setColor(color);
+                variant.setStatus(1);
+                variant.setCreatedAt(LocalDateTime.now());
+                variant.setUpdatedAt(LocalDateTime.now());
+                variant = productVariantRepository.save(variant);
+                log.info("Created new variant for product: {} with size: {}, color: {}", sku, size, color);
+            }
+
+            // Calculate amount
+            totalAmount = totalAmount.add(BigDecimal.valueOf(unitPrice * quantity));
+
+            // Save Document Item
+            InventoryDocumentItem docItem = new InventoryDocumentItem();
+            docItem.setDocumentId(savedDoc.getId());
+            docItem.setDocument(savedDoc);
+            docItem.setVariantId(variant.getId());
+            docItem.setVariant(variant);
+            docItem.setQuantity(quantity);
+            docItem.setNote(note);
+            InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
+
+            // Update Stock
+            InventoryStockId stockId = new InventoryStockId(warehouse.getId(), variant.getId());
+            InventoryStock stock = inventoryStockRepository.findById(stockId)
+                    .orElse(new InventoryStock(stockId, warehouse, variant, 0, LocalDateTime.now()));
+
+            int oldQuantity = stock.getQuantity();
+            int newQuantity = oldQuantity + quantity;
+            stock.setQuantity(newQuantity);
+            stock.setUpdatedAt(LocalDateTime.now());
+            inventoryStockRepository.save(stock);
+
+            // Log History
+            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, quantity, newQuantity);
+        }
+
+        // Update Total Amount
+        savedDoc.setTotalAmount(totalAmount);
+        inventoryDocumentRepository.save(savedDoc);
+
+        log.info("Excel import completed: {} items, total amount: {}", items.size(), totalAmount);
     }
 }
