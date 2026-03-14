@@ -12,7 +12,7 @@ const storeService = {
           address: store.address,
           manager: store.manager || "N/A",
           phone: store.phone || "N/A",
-          status: store.status || "Active",
+          status: store.status === 1 ? "Active" : (store.status === 0 ? "Inactive" : "Active"),
           revenue: store.revenue || "N/A",
           type: store.type || "Standard"
         }));
@@ -81,7 +81,7 @@ const storeService = {
           address: newStore.address,
           manager: newStore.manager || "N/A",
           phone: newStore.phone || "N/A",
-          status: newStore.status || "Active",
+          status: newStore.status === 1 ? "Active" : (newStore.status === 0 ? "Inactive" : "Active"),
           revenue: newStore.revenue || "N/A",
           type: newStore.type || "Standard"
         };

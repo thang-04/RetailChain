@@ -244,6 +244,7 @@ public class StoreServiceImpl implements StoreService {
             Warehouse savedWarehouse = warehouseRepository.save(warehouse);
 
             Store store = storeMapper.toEntity(request);
+            store.setWarehouse(savedWarehouse);
             store.setWarehouseId(savedWarehouse.getId());
             store.setCreatedAt(LocalDateTime.now());
             store.setUpdatedAt(LocalDateTime.now());

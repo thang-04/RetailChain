@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import AssignStaffShiftModal from "./components/AssignStaffShiftModal";
 import CreateShiftModal from "./components/CreateShiftModal";
 import shiftService from "@/services/shift.service";
+import useAuth from "@/contexts/AuthContext/useAuth";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getWeek, addMonths, subMonths, addYears, subYears, startOfYear, endOfYear, eachMonthOfInterval } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -46,8 +47,9 @@ const StaffShiftsPage = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // TODO: Lấy storeId từ context/route. Tạm dùng 1
-    const storeId = 1;
+    const { user } = useAuth();
+    // Lấy storeId từ user đang đăng nhập
+    const storeId = user?.storeId || null;
 
     // Calculate display range
     const { displayStart, displayEnd, displayDays } = useMemo(() => {

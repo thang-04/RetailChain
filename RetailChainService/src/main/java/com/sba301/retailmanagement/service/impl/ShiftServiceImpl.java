@@ -79,7 +79,7 @@ public class ShiftServiceImpl implements ShiftService {
 
         @Override
         public List<ShiftResponse> getShiftsByStore(Long storeId) {
-                return shiftRepository.findByStoreId(storeId).stream()
+                return shiftRepository.findByStoreIdIn(List.of(storeId, 0L)).stream()
                                 .map(shift -> {
                                         String storeName = storeRepository.findById(shift.getStoreId())
                                                         .map(Store::getName).orElse("Unknown");

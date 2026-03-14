@@ -22,7 +22,7 @@ const StoreStaffWidget = ({ staff }) => {
                 <div className="flex items-center gap-2">
                     <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Store Staff</CardTitle>
                     <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-0.5 rounded-full border-none shadow-none">
-                        {staffList.length} Active
+                        {staffList.filter(s => s.status === 'Active').length} Active
                     </Badge>
                 </div>
                 <Link to={`/store/${id}/staff`} className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer">

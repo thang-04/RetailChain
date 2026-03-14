@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ShiftRepository extends JpaRepository<Shift, Long> {
     List<Shift> findByStoreId(Long storeId);
+    List<Shift> findByStoreIdIn(List<Long> storeIds);
 }
