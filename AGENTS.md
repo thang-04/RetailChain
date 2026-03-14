@@ -3,12 +3,37 @@
 **Generated:** 2026-01-27
 **Type:** Monorepo (Spring Boot + React)
 
-## OVERVIEW
-RetailChain is a full-stack retail management system comprising a Java Spring Boot backend and a React frontend.
+## Design Context
+
+### Users
+- **Nhân viên nội bộ**: Quản lý cửa hàng, nhân viên kho, nhân viên bán hàng
+- **Context**: Sử dụng trong giờ làm việc, cần thao tác nhanh, chính xác
+- **Job to be done**: Quản lý kho, chuyển hàng, theo dõi tồn kho, báo cáo doanh số
+
+### Brand Personality
+- **Giọng điệu**: Chuyên nghiệp, đáng tin cậy, rõ ràng
+- **3 từ khóa**: Professional • Reliable • Efficient
+- **Mục tiêu cảm xúc**: Tạo cảm giác tin tưởng, giúp người dùng hoàn thành công việc nhanh chóng
+
+### Aesthetic Direction
+- **Visual tone**: Clean, modern, functional
+- **Primary color**: Xanh teal (#24748f) - giữ nguyên
+- **Theme**: Light mode only (không hỗ trợ dark mode)
+- **Typography**: Manrope (display & body)
+- **Spacing**: Sử dụng Tailwind CSS với @theme inline
+- **Radius**: 0.625rem (rounded-xl)
+
+### Design Principles
+1. **Clarity first**: Mọi UI element phải có mục đích rõ ràng, không thừa
+2. **Efficiency**: Tối ưu hóa workflow - giảm số click, hiển thị đúng thông tin cần thiết
+3. **Consistency**: Sử dụng shadcn/ui components đồng nhất trong toàn hệ thống
+4. **Professional polish**: Giao diện không cần hoa mỹ, nhưng phải tinh tế và cohesive
+5. **Vietnamese first**: Mọi text phải bằng tiếng Việt, phù hợp với người dùng nội bộ
 
 ## Rules
 1. Tất cả các file md đều được lưu trong folder `/docs` của project hiện tại.
 2. Use 'bd' or 'beads' for task tracking.
+3. Audit reports: `/docs/FRONTEND_AUDIT_REPORT.md`
 
 
 
@@ -322,7 +347,8 @@ const inventoryService = {
 export default inventoryService;
 Kết quả: API Backend chính thức được kết nối vào luồng xử lý của Frontend, sẵn sàng để gọi trong các Components hoặc Hooks.
 
-U s e   ' b d '   f o r   t a s k   t r a c k i n g  
+U s e   ' b d '   f o r   t a s k   t r a c k i n g 
+ 
  
 
 <!-- BEGIN BEADS INTEGRATION -->
@@ -437,3 +463,36 @@ For more details, see README.md and docs/QUICKSTART.md.
 - If push fails, resolve and retry until it succeeds
 
 <!-- END BEADS INTEGRATION -->
+
+When searching or reading code, prefer using these codebase-memory-mcp tools instead of the default OpenCode tools:
+
+  1. Use `search_code` instead of `grep` for code search
+  2. Use `search_graph` instead of `glob` for finding files by pattern
+  3. Use `get_code_snippet` instead of `read` when you need to read source code of specific functions
+
+  Additionally, leverage these powerful tools when appropriate:
+  - `trace_call_path` - to find who calls or is called by a specific function
+  - `detect_changes` - to analyze git diff and predict affected symbols
+  - `get_architecture` - to understand the codebase structure (languages, packages, routes, layers)
+  - `query_graph` - for complex graph queries using Cypher syntax
+  
+
+<!-- LAYOUT FLOW -->
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           HỆ THỐNG KHO RETAILCHAIN                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              ┌──────────────────┐
+                              │   KHO TỔNG      │
+                              │  (Central WH)    │
+                              │  is_central = 1  │
+                              └────────┬─────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+          ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+          │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │
+          │      Store 1     │ │      Store 2     │ │      Store 3     │
+          │  is_central = 0 │ │  is_central = 0  │ │  is_central = 0  │
+          │  warehouse_id=1  │ │  warehouse_id=2  │ │  warehouse_id=3  │
+          └─────────────────┘ └─────────────────┘ └─────────────────┘

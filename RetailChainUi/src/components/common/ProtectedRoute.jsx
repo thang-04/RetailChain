@@ -14,11 +14,12 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     if (allowedRoles && allowedRoles.length > 0) {
         const hasRoleAccess = allowedRoles.some(role => hasRole(role));
         if (!hasRoleAccess) {
-            return <Navigate to="/" replace />;
+            return <Navigate to="/403" replace />; // Nên redirect ra trang 403 thay vì "/"
         }
     }
 
-    return children ? children : <Outlet />;
+    // Nếu có children thì render children, nếu không thì dùng Outlet cho Nested Routes
+    return children ? children : <Outlet />; 
 };
 
 export default ProtectedRoute;

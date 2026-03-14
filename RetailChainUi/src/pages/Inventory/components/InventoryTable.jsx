@@ -1,5 +1,5 @@
 // src/pages/Inventory/components/InventoryTable.jsx
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,14 +38,14 @@ const ActionBadge = ({ action }) => {
   return <Badge variant={variant}>{a || "—"}</Badge>;
 };
 
-const InventoryTable = ({
+function InventoryTable({
   inventoryData = [],
   page = 1,
   pageSize = 10,
   total = 0,
   onPageChange,
   onFetchDetail,
-}) => {
+}) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -222,6 +222,6 @@ const InventoryTable = ({
       </Dialog>
     </>
   );
-};
+}
 
-export default InventoryTable;
+export default memo(InventoryTable);

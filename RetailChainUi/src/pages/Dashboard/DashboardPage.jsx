@@ -11,6 +11,8 @@ const DashboardPage = () => {
   const [kpiData, setKpiData] = useState([]);
   const [revenueData, setRevenueData] = useState([]);
   const [storeRanking, setStoreRanking] = useState([]);
+  const [storeTable, setStoreTable] = useState([]);
+  const [timeRange, setTimeRange] = useState("30days");
   const [loading, setLoading] = useState(true);
   
   const { hasRole, hasPermission, user } = useAuth();
@@ -20,25 +22,23 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [kpi, revenue, ranking] = await Promise.all([
-          dashboardService.getKPIData(),
-          dashboardService.getRevenueData(),
-          dashboardService.getStoreRanking()
-        ]);
-        setKpiData(kpi);
-        setRevenueData(revenue);
-        setStoreRanking(ranking);
+        setLoading(true);
+        const summary = await dashboardService.getSummary(timeRange);
+        setKpiData(summary?.kpis || []);
+        setRevenueData(summary?.revenueSeries || []);
+        setStoreRanking(summary?.storeRanking || []);
+        setStoreTable(summary?.storeTable || []);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        console.error("Không thể tải dữ liệu dashboard:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchDashboardData();
-  }, []);
+  }, [timeRange]);
 
   if (loading) {
-    return <div className="p-10 text-center">Loading dashboard...</div>;
+    return <div className="p-10 text-center">Đang tải dashboard...</div>;
   }
 
   return (
@@ -46,12 +46,15 @@ const DashboardPage = () => {
       {/* Page Heading */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
+          <h1 className="sr-only">
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+          </h1>
           <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">
-            {canViewAllStores ? "Chain Overview" : "Store Dashboard"}
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
           </h2>
           <p className="text-text-muted dark:text-gray-400 mt-1">
             {canViewAllStores 
-              ? "Real-time performance across 24 locations" 
+              ? "Hiệu suất thời gian thực" 
               : `Performance for ${user?.storeName || 'your store'}`}
           </p>
         </div>
@@ -59,11 +62,11 @@ const DashboardPage = () => {
           <div className="flex gap-3">
             <Button variant="outline" className="gap-2 bg-white dark:bg-surface-dark border-gray-200 dark:border-gray-600 text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
               <span className="material-symbols-outlined text-[20px]">download</span>
-              Export
+              Xuất
             </Button>
             <Button className="gap-2 bg-primary text-white hover:bg-primary-dark shadow-sm shadow-primary/30">
               <span className="material-symbols-outlined text-[20px]">assessment</span>
-              Generate Report
+              Tạo báo cáo
             </Button>
           </div>
         )}
@@ -75,13 +78,13 @@ const DashboardPage = () => {
       {/* Charts Section - Only for ADMIN/MANAGER */}
       {canViewAllStores && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <RevenueChart data={revenueData} />
+          <RevenueChart data={revenueData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
           <StoreRanking data={storeRanking} />
         </div>
       )}
 
       {/* Table Section - Only for ADMIN/MANAGER */}
-      {canViewAllStores && <StoreTable />}
+      {canViewAllStores && <StoreTable data={storeTable} />}
       
       <div className="pb-10"></div>
     </div>
@@ -89,4 +92,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-

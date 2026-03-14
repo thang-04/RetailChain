@@ -13,18 +13,24 @@ import com.sba301.retailmanagement.enums.InventoryDocumentType;
 import com.sba301.retailmanagement.repository.*;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryServiceImpl implements InventoryService {
 
     private final WarehouseRepository warehouseRepository;
@@ -35,6 +41,8 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryHistoryRepository inventoryHistoryRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductRepository productRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -132,6 +140,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Supplier not found: " + request.getSupplierId());
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("IMP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -140,7 +151,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouse(warehouse);
         document.setSupplierId(request.getSupplierId());
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
         document.setTotalAmount(java.math.BigDecimal.ZERO);
 
@@ -282,6 +293,9 @@ public class InventoryServiceImpl implements InventoryService {
             throw new RuntimeException("Source and Target warehouse cannot be the same");
         }
 
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+        
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("TRF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -291,14 +305,32 @@ public class InventoryServiceImpl implements InventoryService {
         document.setTargetWarehouseId(targetWarehouse.getId());
         document.setTargetWarehouse(targetWarehouse);
         document.setNote(request.getNote());
-        document.setCreatedBy(1L); // TODO: Get from SecurityContext
+        document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
+
+        // Fetch all variants and calculate totalAmount
+        List<Long> variantIds = request.getItems().stream()
+                .map(InventoryItemRequest::getVariantId)
+                .collect(Collectors.toList());
+        Map<Long, ProductVariant> variantMap = productVariantRepository.findAllById(variantIds).stream()
+                .collect(Collectors.toMap(ProductVariant::getId, v -> v));
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (InventoryItemRequest itemReq : request.getItems()) {
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
+            if (variant == null) {
+                throw new RuntimeException("Product Variant not found: " + itemReq.getVariantId());
+            }
+            BigDecimal unitPrice = variant.getPrice() != null ? variant.getPrice() : BigDecimal.ZERO;
+            totalAmount = totalAmount.add(unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+        }
+        document.setTotalAmount(totalAmount);
 
         InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
 
+        // Process items
         for (InventoryItemRequest itemReq : request.getItems()) {
-            ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
-                    .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
+            ProductVariant variant = variantMap.get(itemReq.getVariantId());
 
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
@@ -358,6 +390,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     private void createHistory(InventoryDocument doc, InventoryDocumentItem item, Warehouse warehouse,
             ProductVariant variant, InventoryAction action, int quantity, int balance) {
+        User currentUser = getCurrentUser();
+        Long actorUserId = currentUser != null ? currentUser.getId() : null;
+        
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
@@ -370,7 +405,7 @@ public class InventoryServiceImpl implements InventoryService {
         history.setAction(action);
         history.setQuantity(quantity);
         history.setBalanceAfter(balance);
-        history.setActorUserId(1L); // TODO: Get from SecurityContext
+        history.setActorUserId(actorUserId);
         history.setOccurredAt(LocalDateTime.now());
 
         inventoryHistoryRepository.save(history);
@@ -514,6 +549,33 @@ public class InventoryServiceImpl implements InventoryService {
 
             String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
 
+            // Map items
+            List<com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse> itemResponses = items.stream()
+                    .map(item -> {
+                        String productName = "Unknown";
+                        if (item.getVariant() != null && item.getVariant().getProduct() != null) {
+                            productName = item.getVariant().getProduct().getName();
+                        }
+                        String sku = item.getVariant() != null ? item.getVariant().getSku() : "N/A";
+                        String size = item.getVariant() != null ? item.getVariant().getSize() : "";
+                        String color = item.getVariant() != null ? item.getVariant().getColor() : "";
+                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice() : java.math.BigDecimal.ZERO;
+                        long unitPriceLong = unitPrice != null ? unitPrice.longValue() : 0L;
+                        long totalPriceLong = unitPriceLong * item.getQuantity();
+
+                        return com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse.builder()
+                                .variantId(item.getVariantId())
+                                .productName(productName)
+                                .sku(sku)
+                                .size(size)
+                                .color(color)
+                                .quantity(item.getQuantity())
+                                .unitPrice(unitPriceLong)
+                                .totalPrice(totalPriceLong)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
             return com.sba301.retailmanagement.dto.response.InventoryDocumentResponse.builder()
                     .id(doc.getId())
                     .documentCode(doc.getDocumentCode())
@@ -523,12 +585,13 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status("Completed") // Inventory transaction is immediate in this system logic
+                    .status(doc.getDocumentType() == InventoryDocumentType.IMPORT ? "Completed" : "Pending") // IMPORT = Completed, others = Pending
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
                     .totalValue(totalValue.longValue()) // DTO expects Long, converting BigDecimal
                     .supplier(supplierName)
+                    .items(itemResponses)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -584,5 +647,176 @@ public class InventoryServiceImpl implements InventoryService {
                 .criticalStoreCount((long) criticalWarehouses.size())
                 .growthPercentage(growthPercentage)
                 .build();
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String email = ((UserDetails) principal).getUsername();
+                return userRepository.findByEmail(email).orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("No authenticated user found");
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public void importStockFromExcel(List<Map<String, Object>> items) {
+        // Get default warehouse (central warehouse)
+        List<Warehouse> warehouses = warehouseRepository.findAll();
+        if (warehouses.isEmpty()) {
+            throw new RuntimeException("No warehouse found");
+        }
+        Warehouse warehouse = warehouses.stream()
+                .filter(w -> w.getIsCentral() != null && w.getIsCentral() == 1)
+                .findFirst()
+                .orElse(warehouses.get(0));
+
+        // Get default category
+        List<com.sba301.retailmanagement.entity.ProductCategory> categories = productCategoryRepository.findAll();
+        Long defaultCategoryId = categories.isEmpty() ? null : categories.get(0).getId();
+
+        // Get supplier from first item (common for entire import)
+        Long supplierId = null;
+        if (!items.isEmpty()) {
+            Object supplierIdObj = items.get(0).get("supplierId");
+            if (supplierIdObj != null) {
+                if (supplierIdObj instanceof Number) {
+                    supplierId = ((Number) supplierIdObj).longValue();
+                } else if (supplierIdObj instanceof String) {
+                    String supplierIdStr = (String) supplierIdObj;
+                    if (!supplierIdStr.isEmpty()) {
+                        supplierId = Long.parseLong(supplierIdStr);
+                    }
+                }
+            }
+        }
+
+        // Validate and load supplier if provided
+        Supplier supplier = null;
+        if (supplierId != null) {
+            supplier = supplierRepository.findById(supplierId).orElse(null);
+            if (supplier == null) {
+                log.warn("Supplier not found with id: {}, proceeding without supplier", supplierId);
+            }
+        }
+
+        User currentUser = getCurrentUser();
+        Long createdByUserId = currentUser != null ? currentUser.getId() : null;
+
+        // Create Document
+        InventoryDocument document = new InventoryDocument();
+        document.setDocumentCode("IMP-EXCEL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        document.setDocumentType(InventoryDocumentType.IMPORT);
+        document.setTargetWarehouseId(warehouse.getId());
+        document.setTargetWarehouse(warehouse);
+        document.setNote("Nhập kho từ Excel");
+        document.setCreatedBy(createdByUserId);
+        document.setCreatedAt(LocalDateTime.now());
+        document.setTotalAmount(BigDecimal.ZERO);
+        document.setSupplierId(supplierId);
+        document.setSupplier(supplier);
+
+        InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (Map<String, Object> item : items) {
+            String sku = (String) item.get("sku");
+            String productName = (String) item.get("productName");
+            Integer quantity = item.get("quantity") != null ? ((Number) item.get("quantity")).intValue() : 0;
+            Double unitPrice = item.get("unitPrice") != null ? ((Number) item.get("unitPrice")).doubleValue() : 0.0;
+            String note = (String) item.get("note");
+
+            // Get categoryId from item (per row), fallback to default
+            Long categoryId = defaultCategoryId;
+            Object categoryIdObj = item.get("categoryId");
+            if (categoryIdObj != null) {
+                if (categoryIdObj instanceof Number) {
+                    categoryId = ((Number) categoryIdObj).longValue();
+                } else if (categoryIdObj instanceof String) {
+                    String categoryIdStr = (String) categoryIdObj;
+                    if (!categoryIdStr.isEmpty()) {
+                        categoryId = Long.parseLong(categoryIdStr);
+                    }
+                }
+            }
+
+            // Get size and color from item (per row)
+            String size = (String) item.get("size");
+            String color = (String) item.get("color");
+
+            if (sku == null || sku.trim().isEmpty()) {
+                log.warn("SKU is empty, skipping row");
+                continue;
+            }
+
+            // Find or create product
+            Product product = productRepository.findByCode(sku).orElse(null);
+            if (product == null) {
+                // Create new product
+                product = new Product();
+                product.setCode(sku);
+                product.setName(productName != null ? productName : sku);
+                product.setCategoryId(categoryId);
+                product.setStatus(1);
+                product.setCreatedAt(LocalDateTime.now());
+                product.setUpdatedAt(LocalDateTime.now());
+                product = productRepository.save(product);
+                log.info("Created new product: {} with categoryId: {}", sku, categoryId);
+            }
+
+            // Find or create variant
+            ProductVariant variant = productVariantRepository.findBySku(sku).orElse(null);
+            if (variant == null) {
+                // Create new variant
+                variant = new ProductVariant();
+                variant.setProductId(product.getId());
+                variant.setSku(sku);
+                variant.setPrice(BigDecimal.valueOf(unitPrice));
+                variant.setSize(size);
+                variant.setColor(color);
+                variant.setStatus(1);
+                variant.setCreatedAt(LocalDateTime.now());
+                variant.setUpdatedAt(LocalDateTime.now());
+                variant = productVariantRepository.save(variant);
+                log.info("Created new variant for product: {} with size: {}, color: {}", sku, size, color);
+            }
+
+            // Calculate amount
+            totalAmount = totalAmount.add(BigDecimal.valueOf(unitPrice * quantity));
+
+            // Save Document Item
+            InventoryDocumentItem docItem = new InventoryDocumentItem();
+            docItem.setDocumentId(savedDoc.getId());
+            docItem.setDocument(savedDoc);
+            docItem.setVariantId(variant.getId());
+            docItem.setVariant(variant);
+            docItem.setQuantity(quantity);
+            docItem.setNote(note);
+            InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
+
+            // Update Stock
+            InventoryStockId stockId = new InventoryStockId(warehouse.getId(), variant.getId());
+            InventoryStock stock = inventoryStockRepository.findById(stockId)
+                    .orElse(new InventoryStock(stockId, warehouse, variant, 0, LocalDateTime.now()));
+
+            int oldQuantity = stock.getQuantity();
+            int newQuantity = oldQuantity + quantity;
+            stock.setQuantity(newQuantity);
+            stock.setUpdatedAt(LocalDateTime.now());
+            inventoryStockRepository.save(stock);
+
+            // Log History
+            createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.IN, quantity, newQuantity);
+        }
+
+        // Update Total Amount
+        savedDoc.setTotalAmount(totalAmount);
+        inventoryDocumentRepository.save(savedDoc);
+
+        log.info("Excel import completed: {} items, total amount: {}", items.size(), totalAmount);
     }
 }

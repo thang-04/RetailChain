@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     Optional<Store> findByCode(String code);
+
+    long countByStatus(Integer status);
 }

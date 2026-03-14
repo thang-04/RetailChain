@@ -2,6 +2,7 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
+import com.sba301.retailmanagement.dto.response.ProductExistsResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.service.ProductService;
@@ -183,6 +184,18 @@ public class ProductController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error creating variants: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
+    @GetMapping("/exists")
+    public String checkSkuExists(@RequestParam String sku) {
+        try {
+            ProductExistsResponse response = productService.checkSkuExists(sku);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "SKU check result", response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error checking SKU: " + e.getMessage());
         }
     }
 }

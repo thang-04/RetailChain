@@ -26,6 +26,10 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new RuntimeException("Warehouse code already exists");
         }
 
+        if (Boolean.TRUE.equals(request.getIsCentral()) && warehouseRepository.countByIsCentralTrue() > 0) {
+            throw new RuntimeException("Only one central warehouse allowed");
+        }
+
         Warehouse warehouse = new Warehouse();
         warehouse.setCode(request.getCode());
         warehouse.setName(request.getName());
@@ -107,8 +111,6 @@ public class WarehouseServiceImpl implements WarehouseService {
         }
 
         warehouse.setUpdatedAt(LocalDateTime.now());
-
-        warehouse.setUpdatedAt(LocalDateTime.now());
         Warehouse saved = warehouseRepository.save(warehouse);
         return mapToResponse(saved);
     }
@@ -128,7 +130,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     private WarehouseResponse mapToResponse(Warehouse warehouse) {
-
         return WarehouseResponse.builder()
                 .id(warehouse.getId())
                 .code(warehouse.getCode())
