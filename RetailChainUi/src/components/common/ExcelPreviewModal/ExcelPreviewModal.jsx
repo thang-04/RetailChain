@@ -432,7 +432,57 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     setRowStates({});
     setError(null);
     setSelectedSupplier(null);
+    categoryRemapped.current = false;
+    supplierRemapped.current = false;
     onOpenChange(false);
+  };
+
+  const handleSupplierChangeForAll = (supplierId) => {
+    if (!supplierId) return;
+    
+    const supplier = suppliers.find(s => String(s.supplierId || s.id) === String(supplierId));
+    const supplierName = supplier ? (supplier.supplierName || supplier.name) : '';
+    
+    const updatedData = parsedData.map(row => ({
+      ...row,
+      supplierId: Number(supplierId),
+      supplierName: supplierName || row.supplierName,
+    }));
+    
+    setParsedData(updatedData);
+    
+    const newStates = {};
+    updatedData.forEach((row, index) => {
+      const validation = validateRow(row, index);
+      newStates[index] = {
+        ...validation,
+        selected: validation.isValid,
+      };
+    });
+    setRowStates(newStates);
+  };
+
+  const handleSupplierChangeForRow = (index, supplierId) => {
+    const supplier = suppliers.find(s => String(s.supplierId || s.id) === String(supplierId));
+    const supplierName = supplier ? (supplier.supplierName || supplier.name) : '';
+    
+    const updatedData = [...parsedData];
+    updatedData[index] = {
+      ...updatedData[index],
+      supplierId: supplierId ? Number(supplierId) : null,
+      supplierName: supplierName || updatedData[index].supplierName,
+    };
+    
+    setParsedData(updatedData);
+    
+    const newStates = { ...rowStates };
+    const validation = validateRow(updatedData[index], index);
+    newStates[index] = {
+      ...newStates[index],
+      ...validation,
+      selected: validation.isValid,
+    };
+    setRowStates(newStates);
   };
 
   const stats = useMemo(() => ({
@@ -453,7 +503,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-green-600" />
@@ -512,7 +562,12 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                 </div>
                 <Select
                   value={selectedSupplier || ""}
-                  onValueChange={(value) => setSelectedSupplier(value)}
+                  onValueChange={(value) => {
+                    setSelectedSupplier(value);
+                    if (value) {
+                      handleSupplierChangeForAll(value);
+                    }
+                  }}
                   disabled={isLoadingDropdown}
                 >
                   <SelectTrigger className="w-[250px] bg-white">
@@ -526,8 +581,8 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                     ))}
                   </SelectContent>
                 </Select>
-                {!selectedSupplier && !parsedData.some(row => row.supplierId) && (
-                  <span className="text-sm text-muted-foreground">(Nếu Excel không có NCC)</span>
+                {selectedSupplier && (
+                  <span className="text-sm text-green-600">✓ Đã áp dụng cho tất cả dòng</span>
                 )}
               </div>
 
@@ -603,14 +658,23 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                           <TableCell className="font-mono text-xs">{row.sku}</TableCell>
                           <TableCell>{row.productName}</TableCell>
                           <TableCell>
-                            {row.supplierName ? (
-                              row.supplierId ? (
-                                <span className="text-green-600">{row.supplierName}</span>
-                              ) : (
-                                <span className="text-red-500">{row.supplierName} (không tìm thấy)</span>
-                              )
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
+                            <Select
+                              value={row.supplierId ? String(row.supplierId) : ""}
+                              onValueChange={(value) => handleSupplierChangeForRow(index, value)}
+                            >
+                              <SelectTrigger className="w-[180px] h-8 text-xs">
+                                <SelectValue placeholder="Chọn NCC..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {suppliers.map((supplier) => (
+                                  <SelectItem key={supplier.supplierId || supplier.id} value={String(supplier.supplierId || supplier.id)}>
+                                    {supplier.supplierName || supplier.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {row.supplierName && !row.supplierId && (
+                              <p className="text-xs text-red-500 mt-1">Không tìm thấy: {row.supplierName}</p>
                             )}
                           </TableCell>
                           <TableCell>
