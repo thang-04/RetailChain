@@ -2,6 +2,7 @@ package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
+import com.sba301.retailmanagement.dto.response.ProductExistsResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
@@ -371,5 +372,20 @@ public class ProductServiceImpl implements ProductService {
         }
         return warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + warehouseId));
+    }
+
+    @Override
+    public ProductExistsResponse checkSkuExists(String sku) {
+        return productRepository.findByCode(sku)
+                .map(product -> ProductExistsResponse.builder()
+                        .exists(true)
+                        .productId(product.getId())
+                        .code(product.getCode())
+                        .build())
+                .orElse(ProductExistsResponse.builder()
+                        .exists(false)
+                        .productId(null)
+                        .code(sku)
+                        .build());
     }
 }

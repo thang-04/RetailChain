@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
+function ProductTable({ products, categories, onEditClick, onViewClick }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -171,7 +171,6 @@ const ProductTable = ({ products, categories, onEditClick, onViewClick }) => {
       </div>
     </div>
   );
-};
+}
 
-
-export default ProductTable;
+export default memo(ProductTable);

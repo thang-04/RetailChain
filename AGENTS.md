@@ -3,12 +3,37 @@
 **Generated:** 2026-01-27
 **Type:** Monorepo (Spring Boot + React)
 
-## OVERVIEW
-RetailChain is a full-stack retail management system comprising a Java Spring Boot backend and a React frontend.
+## Design Context
+
+### Users
+- **Nhân viên nội bộ**: Quản lý cửa hàng, nhân viên kho, nhân viên bán hàng
+- **Context**: Sử dụng trong giờ làm việc, cần thao tác nhanh, chính xác
+- **Job to be done**: Quản lý kho, chuyển hàng, theo dõi tồn kho, báo cáo doanh số
+
+### Brand Personality
+- **Giọng điệu**: Chuyên nghiệp, đáng tin cậy, rõ ràng
+- **3 từ khóa**: Professional • Reliable • Efficient
+- **Mục tiêu cảm xúc**: Tạo cảm giác tin tưởng, giúp người dùng hoàn thành công việc nhanh chóng
+
+### Aesthetic Direction
+- **Visual tone**: Clean, modern, functional
+- **Primary color**: Xanh teal (#24748f) - giữ nguyên
+- **Theme**: Light mode only (không hỗ trợ dark mode)
+- **Typography**: Manrope (display & body)
+- **Spacing**: Sử dụng Tailwind CSS với @theme inline
+- **Radius**: 0.625rem (rounded-xl)
+
+### Design Principles
+1. **Clarity first**: Mọi UI element phải có mục đích rõ ràng, không thừa
+2. **Efficiency**: Tối ưu hóa workflow - giảm số click, hiển thị đúng thông tin cần thiết
+3. **Consistency**: Sử dụng shadcn/ui components đồng nhất trong toàn hệ thống
+4. **Professional polish**: Giao diện không cần hoa mỹ, nhưng phải tinh tế và cohesive
+5. **Vietnamese first**: Mọi text phải bằng tiếng Việt, phù hợp với người dùng nội bộ
 
 ## Rules
 1. Tất cả các file md đều được lưu trong folder `/docs` của project hiện tại.
 2. Use 'bd' or 'beads' for task tracking.
+3. Audit reports: `/docs/FRONTEND_AUDIT_REPORT.md`
 
 
 

@@ -11,32 +11,32 @@ const StepThreeConfirm = ({ formData, items, centralWarehouses, storeWarehouses 
 
     return (
         <div className="space-y-6">
-            <Card className="border-amber-100 shadow-sm">
-                <CardHeader className="bg-amber-50 border-b border-amber-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+            <Card className="border-border shadow-sm">
+                <CardHeader className="bg-primary/5 border-b border-border">
+                    <CardTitle className="text-lg flex items-center gap-2 text-primary">
                         <Building2 className="w-5 h-5" />
-                        Thông tin kho
+                        Thông tin xuất - nhận kho
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
                     <div className="grid grid-cols-2 gap-6">
-                        <div className="p-4 bg-amber-50 rounded-lg">
+                        <div className="p-4 bg-primary/5 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <Building2 className="w-4 h-4 text-amber-600" />
-                                <span className="text-sm font-medium text-amber-800">Kho xuất (Kho tổng)</span>
+                                <Building2 className="w-4 h-4 text-primary" />
+                                <span className="text-sm font-medium text-foreground">Kho xuất</span>
                             </div>
-                            <p className="font-medium text-amber-900">{selectedSourceWarehouse?.name || 'N/A'}</p>
+                            <p className="font-medium text-foreground">{selectedSourceWarehouse?.name || 'N/A'}</p>
                             {selectedSourceWarehouse?.address && (
                                 <p className="text-sm text-muted-foreground mt-1">{selectedSourceWarehouse.address}</p>
                             )}
                         </div>
                         
-                        <div className="p-4 bg-green-50 rounded-lg">
+                        <div className="p-4 bg-primary/5 rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <Store className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-800">Kho nhận (Kho cửa hàng)</span>
+                                <Store className="w-4 h-4 text-primary" />
+                                <span className="text-sm font-medium text-foreground">Kho nhận</span>
                             </div>
-                            <p className="font-medium text-green-900">{selectedTargetWarehouse?.name || 'N/A'}</p>
+                            <p className="font-medium text-foreground">{selectedTargetWarehouse?.name || 'N/A'}</p>
                             {selectedTargetWarehouse?.address && (
                                 <p className="text-sm text-muted-foreground mt-1">{selectedTargetWarehouse.address}</p>
                             )}
@@ -44,20 +44,20 @@ const StepThreeConfirm = ({ formData, items, centralWarehouses, storeWarehouses 
                     </div>
                     
                     {formData.note && (
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="mt-4 p-4 bg-muted rounded-lg">
                             <div className="flex items-center gap-2 mb-2">
-                                <FileText className="w-4 h-4 text-gray-600" />
-                                <span className="text-sm font-medium text-gray-800">Ghi chú</span>
+                                <FileText className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm font-medium text-foreground">Ghi chú</span>
                             </div>
-                            <p className="text-sm text-gray-600">{formData.note}</p>
+                            <p className="text-sm text-muted-foreground">{formData.note}</p>
                         </div>
                     )}
                 </CardContent>
             </Card>
 
-            <Card className="border-amber-100 shadow-sm">
-                <CardHeader className="bg-amber-50 border-b border-amber-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+            <Card className="border-border shadow-sm">
+                <CardHeader className="bg-primary/5 border-b border-border">
+                    <CardTitle className="text-lg flex items-center gap-2 text-primary">
                         <Package className="w-5 h-5" />
                         Danh sách sản phẩm xuất
                     </CardTitle>
@@ -67,7 +67,7 @@ const StepThreeConfirm = ({ formData, items, centralWarehouses, storeWarehouses 
                 </CardHeader>
                 <CardContent className="pt-6">
                     <Table>
-                        <TableHeader className="bg-gray-50">
+                        <TableHeader className="bg-muted">
                             <TableRow>
                                 <TableHead className="font-medium">STT</TableHead>
                                 <TableHead className="font-medium">Sản phẩm</TableHead>
@@ -85,7 +85,7 @@ const StepThreeConfirm = ({ formData, items, centralWarehouses, storeWarehouses 
                                     <TableCell className="text-sm text-muted-foreground">
                                         {item.size} / {item.color}
                                     </TableCell>
-                                    <TableCell className="text-right font-bold text-amber-600">
+                                    <TableCell className="text-right font-bold text-primary">
                                         {item.quantity}
                                     </TableCell>
                                 </TableRow>
@@ -93,9 +93,9 @@ const StepThreeConfirm = ({ formData, items, centralWarehouses, storeWarehouses 
                         </TableBody>
                     </Table>
                     
-                    <div className="mt-6 p-4 bg-amber-50 rounded-lg flex justify-between items-center">
-                        <span className="font-medium text-amber-800">Tổng cộng:</span>
-                        <span className="text-2xl font-bold text-amber-600">{totalQuantity}</span>
+                    <div className="mt-6 p-4 bg-primary/5 rounded-lg flex justify-between items-center">
+                        <span className="font-medium text-foreground">Tổng cộng:</span>
+                        <span className="text-2xl font-bold text-primary">{totalQuantity}</span>
                     </div>
                 </CardContent>
             </Card>

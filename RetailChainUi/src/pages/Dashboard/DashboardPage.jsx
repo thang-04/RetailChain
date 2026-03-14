@@ -46,6 +46,9 @@ const DashboardPage = () => {
       {/* Page Heading */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
+          <h1 className="sr-only">
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+          </h1>
           <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">
             {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
           </h2>

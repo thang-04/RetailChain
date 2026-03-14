@@ -71,6 +71,21 @@ public class InventoryController {
     }
 
     @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
+    @PostMapping("/import/excel")
+    public String importStockFromExcel(@RequestBody java.util.List<java.util.Map<String, Object>> items) {
+        String prefix = "[importStockFromExcel]";
+        log.info("{}|START|itemsCount={}", prefix, items.size());
+        try {
+            inventoryService.importStockFromExcel(items);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Excel imported successfully", items.size());
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error importing Excel: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + INVENTORY_CREATE + "')")
     @PostMapping("/export")
     public String exportStock(@RequestBody StockRequest request) {
         String prefix = "[exportStock]";

@@ -1,0 +1,6 @@
+{
+  "enabledPlugins": {
+    "rune@rune-kit": true,
+    "@rune/ui@rune-kit": true
+  }
+}
