@@ -38,6 +38,7 @@ const EXCEL_COLUMNS = [
   { key: "productName", label: "Tên sản phẩm", required: true },
   { key: "quantity", label: "Số lượng", required: true },
   { key: "unitPrice", label: "Đơn giá", required: true },
+  { key: "supplierName", label: "Nhà cung cấp", required: false },
   { key: "note", label: "Ghi chú", required: false },
 ];
 
@@ -133,6 +134,36 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     }
   }, [categories]);
 
+  // Re-map supplierId after suppliers are loaded
+  useEffect(() => {
+    if (suppliers.length > 0 && parsedData.length > 0) {
+      const needsRemap = parsedData.some(row => row.supplierName && !row.supplierId);
+      if (needsRemap) {
+        const remappedData = parsedData.map(row => {
+          if (row.supplierName && !row.supplierId) {
+            const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
+            if (!foundSupplier) {
+              return { ...row, supplierId: null };
+            }
+            return { ...row, supplierId: foundSupplier.supplierId || foundSupplier.id };
+          }
+          return row;
+        });
+        setParsedData(remappedData);
+        const newStates = {};
+        remappedData.forEach((row, index) => {
+          const validation = validateRow(row, index);
+          newStates[index] = {
+            ...rowStates[index],
+            ...validation,
+            selected: validation.isValid && (rowStates[index]?.selected || false),
+          };
+        });
+        setRowStates(newStates);
+      }
+    }
+  }, [suppliers]);
+
   const loadDropdownData = async () => {
     setIsLoadingDropdown(true);
     try {
@@ -191,6 +222,10 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
       errors.push("Đơn giá phải lớn hơn 0");
     }
 
+    if (row.supplierName && !row.supplierId) {
+      errors.push("Không tìm thấy NCC: " + row.supplierName);
+    }
+
     return {
       isValid: errors.length === 0,
       errors: errors,
@@ -247,6 +282,11 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         const colorFromExcelRaw = row.Màu || row.Color || row["Màu sắc"] || row.MauSac || row.mau || null;
         const colorFromExcel = colorFromExcelRaw ? fuzzyMatchSimple(colorFromExcelRaw, COLORS) : null;
 
+        // Map supplier name from Excel
+        const supplierNameFromExcel = row["Nhà cung cấp"] || row.Supplier || row.SupplierName || row.NCC || row.ncc || null;
+        const supplierNameRaw = supplierNameFromExcel;
+        let supplierId = null;
+
         return {
           stt: index + 1,
           sku: row.SKU || row.sku || row.Mã || row.Mã_SP || "",
@@ -260,6 +300,8 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
           quantity: row["Số lượng"] || row.quantity || row.Quantity || row.qty || 0,
           unitPrice: row["Đơn giá"] || row.unitPrice || row.Price || row.price || row["Giá"] || 0,
           note: row["Ghi chú"] || row.note || row.Note || "",
+          supplierName: supplierNameRaw,
+          supplierId: supplierId,
         };
       });
 
@@ -392,13 +434,20 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
   };
 
   const handleImport = () => {
-    if (!selectedSupplier) {
-      setError("Vui lòng chọn nhà cung cấp");
-      return;
+    const invalidSupplierRows = parsedData.filter(
+      (_, index) => rowStates[index]?.selected && rowStates[index]?.errors?.some(e => e.includes("Không tìm thấy NCC"))
+    );
+
+    if (invalidSupplierRows.length > 0) {
+      toast.warning(`${invalidSupplierRows.length} dòng có NCC không hợp lệ và sẽ bị bỏ qua`);
     }
 
     const selectedRows = parsedData
-      .filter((_, index) => rowStates[index]?.selected)
+      .filter((_, index) => {
+        const isSelected = rowStates[index]?.selected;
+        const hasSupplierError = rowStates[index]?.errors?.some(e => e.includes("Không tìm thấy NCC"));
+        return isSelected && !hasSupplierError;
+      })
       .map((row) => ({
         sku: row.sku,
         productName: row.productName,
@@ -408,10 +457,11 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         quantity: parseInt(row.quantity, 10),
         unitPrice: parseFloat(row.unitPrice),
         note: row.note,
-        supplierId: selectedSupplier,
+        supplierId: row.supplierId || (selectedSupplier ? Number(selectedSupplier) : null),
       }));
 
     if (selectedRows.length === 0) {
+      setError("Không có dòng nào hợp lệ để import");
       return;
     }
 
@@ -436,9 +486,9 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     selected: Object.values(rowStates).filter((s) => s?.selected).length,
   };
 
-  const hasSupplierError = !selectedSupplier;
-  const canImport = file && stats.selected > 0 && !isLoading && !hasSupplierError;
-  const importButtonText = hasSupplierError 
+  const hasSelectedSupplier = selectedSupplier || parsedData.some(row => row.supplierId);
+  const canImport = file && stats.selected > 0 && !isLoading && hasSelectedSupplier;
+  const importButtonText = !hasSelectedSupplier 
     ? "Chưa chọn nhà cung cấp" 
     : stats.invalid > 0 
       ? `Nhập (${stats.selected} dòng, ${stats.invalid} lỗi)` 
@@ -519,8 +569,8 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                     ))}
                   </SelectContent>
                 </Select>
-                {!selectedSupplier && (
-                  <span className="text-sm text-red-500">* Bắt buộc chọn</span>
+                {!selectedSupplier && !parsedData.some(row => row.supplierId) && (
+                  <span className="text-sm text-muted-foreground">(Nếu Excel không có NCC)</span>
                 )}
               </div>
 
@@ -558,6 +608,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                       <TableHead>STT</TableHead>
                       <TableHead>SKU</TableHead>
                       <TableHead>Tên sản phẩm</TableHead>
+                      <TableHead>Nhà cung cấp</TableHead>
                       <TableHead>Danh mục</TableHead>
                       <TableHead>Size</TableHead>
                       <TableHead>Màu</TableHead>
@@ -594,6 +645,17 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                           <TableCell>{row.stt}</TableCell>
                           <TableCell className="font-mono text-xs">{row.sku}</TableCell>
                           <TableCell>{row.productName}</TableCell>
+                          <TableCell>
+                            {row.supplierName ? (
+                              row.supplierId ? (
+                                <span className="text-green-600">{row.supplierName}</span>
+                              ) : (
+                                <span className="text-red-500">{row.supplierName} (không tìm thấy)</span>
+                              )
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <Select
                               value={String(row.categoryId) || ""}
