@@ -462,31 +462,6 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     setRowStates(newStates);
   };
 
-  const handleCategoryChangeForAll = (categoryId) => {
-    if (!categoryId) return;
-    
-    const category = categories.find(c => String(c.categoryId || c.id) === String(categoryId));
-    const categoryName = category ? (category.categoryName || category.name) : '';
-    
-    const updatedData = parsedData.map(row => ({
-      ...row,
-      categoryId: Number(categoryId),
-      categoryName: categoryName || row.categoryName,
-    }));
-    
-    setParsedData(updatedData);
-    
-    const newStates = {};
-    updatedData.forEach((row, index) => {
-      const validation = validateRow(row, index);
-      newStates[index] = {
-        ...validation,
-        selected: validation.isValid,
-      };
-    });
-    setRowStates(newStates);
-  };
-
   const handleSupplierChangeForRow = (index, supplierId) => {
     const supplier = suppliers.find(s => String(s.supplierId || s.id) === String(supplierId));
     const supplierName = supplier ? (supplier.supplierName || supplier.name) : '';
@@ -705,7 +680,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                           <TableCell>
                             <Select
                               value={String(row.categoryId) || ""}
-                              onValueChange={(value) => handleCategoryChangeForAll(value)}
+                              onValueChange={(value) => handleCategoryChange(index, Number(value))}
                             >
                               <SelectTrigger className="w-[140px] h-8 text-xs">
                                 <SelectValue placeholder="Chọn..." />
