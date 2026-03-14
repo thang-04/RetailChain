@@ -163,7 +163,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         setRowStates(newStates);
       }
     }
-  }, [suppliers]);
+  }, [suppliers, parsedData, rowStates, validateRow]);
 
   const loadDropdownData = async () => {
     setIsLoadingDropdown(true);
