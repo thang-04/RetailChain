@@ -5,6 +5,7 @@ import StoreRanking from "./components/StoreRanking";
 import StoreTable from "./components/StoreTable";
 import { Button } from "@/components/ui/button";
 import dashboardService from "../../services/dashboard.service";
+import useAuth from "../../contexts/AuthContext/useAuth";
 
 const DashboardPage = () => {
   const [kpiData, setKpiData] = useState([]);
@@ -13,6 +14,10 @@ const DashboardPage = () => {
   const [storeTable, setStoreTable] = useState([]);
   const [timeRange, setTimeRange] = useState("30days");
   const [loading, setLoading] = useState(true);
+  
+  const { hasRole, hasPermission, user } = useAuth();
+  const canViewReports = hasPermission('REPORT_VIEW') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
+  const canViewAllStores = hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -41,32 +46,45 @@ const DashboardPage = () => {
       {/* Page Heading */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">Tổng quan chuỗi bán lẻ</h2>
-          <p className="text-text-muted dark:text-gray-400 mt-1">Hiệu suất thời gian thực</p>
+          <h1 className="sr-only">
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+          </h1>
+          <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+          </h2>
+          <p className="text-text-muted dark:text-gray-400 mt-1">
+            {canViewAllStores 
+              ? "Hiệu suất thời gian thực" 
+              : `Performance for ${user?.storeName || 'your store'}`}
+          </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 bg-white dark:bg-surface-dark border-gray-200 dark:border-gray-600 text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
-            <span className="material-symbols-outlined text-[20px]">download</span>
-            Xuất
-          </Button>
-          <Button className="gap-2 bg-primary text-white hover:bg-primary-dark shadow-sm shadow-primary/30">
-            <span className="material-symbols-outlined text-[20px]">assessment</span>
-            Tạo báo cáo
-          </Button>
-        </div>
+        {canViewReports && (
+          <div className="flex gap-3">
+            <Button variant="outline" className="gap-2 bg-white dark:bg-surface-dark border-gray-200 dark:border-gray-600 text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
+              <span className="material-symbols-outlined text-[20px]">download</span>
+              Xuất
+            </Button>
+            <Button className="gap-2 bg-primary text-white hover:bg-primary-dark shadow-sm shadow-primary/30">
+              <span className="material-symbols-outlined text-[20px]">assessment</span>
+              Tạo báo cáo
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}
       <KPIGrid data={kpiData} />
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <RevenueChart data={revenueData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
-        <StoreRanking data={storeRanking} />
-      </div>
+      {/* Charts Section - Only for ADMIN/MANAGER */}
+      {canViewAllStores && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <RevenueChart data={revenueData} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+          <StoreRanking data={storeRanking} />
+        </div>
+      )}
 
-      {/* Table Section */}
-      <StoreTable data={storeTable} />
+      {/* Table Section - Only for ADMIN/MANAGER */}
+      {canViewAllStores && <StoreTable data={storeTable} />}
       
       <div className="pb-10"></div>
     </div>
@@ -74,4 +92,3 @@ const DashboardPage = () => {
 };
 
 export default DashboardPage;
-

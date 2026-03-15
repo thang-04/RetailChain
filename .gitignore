@@ -44,3 +44,8 @@ RetailChainUi/template/
 # bv (beads viewer) local config and caches
 .bv/
 .docs/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
+.worktrees/

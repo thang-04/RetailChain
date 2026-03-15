@@ -3,8 +3,32 @@
 **Generated:** 2026-01-27
 **Type:** Monorepo (Spring Boot + React)
 
-## OVERVIEW
-RetailChain is a full-stack retail management system comprising a Java Spring Boot backend and a React frontend.
+## Design Context
+
+### Users
+- **Nhân viên nội bộ**: Quản lý cửa hàng, nhân viên kho, nhân viên bán hàng
+- **Context**: Sử dụng trong giờ làm việc, cần thao tác nhanh, chính xác
+- **Job to be done**: Quản lý kho, chuyển hàng, theo dõi tồn kho, báo cáo doanh số
+
+### Brand Personality
+- **Giọng điệu**: Chuyên nghiệp, đáng tin cậy, rõ ràng
+- **3 từ khóa**: Professional • Reliable • Efficient
+- **Mục tiêu cảm xúc**: Tạo cảm giác tin tưởng, giúp người dùng hoàn thành công việc nhanh chóng
+
+### Aesthetic Direction
+- **Visual tone**: Clean, modern, functional
+- **Primary color**: Xanh teal (#24748f) - giữ nguyên
+- **Theme**: Light mode only (không hỗ trợ dark mode)
+- **Typography**: Manrope (display & body)
+- **Spacing**: Sử dụng Tailwind CSS với @theme inline
+- **Radius**: 0.625rem (rounded-xl)
+
+### Design Principles
+1. **Clarity first**: Mọi UI element phải có mục đích rõ ràng, không thừa
+2. **Efficiency**: Tối ưu hóa workflow - giảm số click, hiển thị đúng thông tin cần thiết
+3. **Consistency**: Sử dụng shadcn/ui components đồng nhất trong toàn hệ thống
+4. **Professional polish**: Giao diện không cần hoa mỹ, nhưng phải tinh tế và cohesive
+5. **Vietnamese first**: Mọi text phải bằng tiếng Việt, phù hợp với người dùng nội bộ
 
 ## Rules
 1. Tất cả các file md đều được lưu trong folder `/docs` của project hiện tại.
@@ -321,70 +345,3 @@ const inventoryService = {
 };
 export default inventoryService;
 Kết quả: API Backend chính thức được kết nối vào luồng xử lý của Frontend, sẵn sàng để gọi trong các Components hoặc Hooks.
-
-
-## Triggers
-1. Nếu trong yêu cấu có từ 'bd' hoặc 'beads' bắt buộc bạn sử dụng đọc file `/docs/BEADS_WORKFLOW_GUIDE.md` để hiểu rõ hơn về cách sử dụng beads.
-
-<!-- bv-agent-instructions-v1 -->
-
----
-
-## Beads Workflow Integration
-
-This project uses [beads_viewer](https://github.com/Dicklesworthstone/beads_viewer) for issue tracking. Issues are stored in `.beads/` and tracked in git.
-
-### Essential Commands
-
-```bash
-# View issues (launches TUI - avoid in automated sessions)
-bv
-
-# CLI commands for agents (use these instead)
-bd ready              # Show issues ready to work (no blockers)
-bd list --status=open # All open issues
-bd show <id>          # Full issue details with dependencies
-bd create --title="..." --type=task --priority=2
-bd update <id> --status=in_progress
-bd close <id> --reason="Completed"
-bd close <id1> <id2>  # Close multiple issues at once
-bd sync               # Commit and push changes
-```
-
-### Workflow Pattern
-
-1. **Start**: Run `bd ready` to find actionable work
-2. **Claim**: Use `bd update <id> --status=in_progress`
-3. **Work**: Implement the task
-4. **Complete**: Use `bd close <id>`
-5. **Sync**: Always run `bd sync` at session end
-
-### Key Concepts
-
-- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
-- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog (use numbers, not words)
-- **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: `bd dep add <issue> <depends-on>` to add dependencies
-
-### Session Protocol
-
-**Before ending any session, run this checklist:**
-
-```bash
-git status              # Check what changed
-git add <files>         # Stage code changes
-bd sync                 # Commit beads changes
-git commit -m "..."     # Commit code
-bd sync                 # Commit any new beads changes
-git push                # Push to remote
-```
-
-### Best Practices
-
-- Check `bd ready` at session start to find available work
-- Update status as you work (in_progress → closed)
-- Create new issues with `bd create` when you discover tasks
-- Use descriptive titles and set appropriate priority/type
-- Always `bd sync` before ending session
-
-<!-- end-bv-agent-instructions -->

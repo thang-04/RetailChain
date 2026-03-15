@@ -1,6 +1,7 @@
 package com.sba301.retailmanagement.repository;
 
 import com.sba301.retailmanagement.entity.ShiftAssignment;
+import com.sba301.retailmanagement.enums.ShiftStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,13 +11,23 @@ import java.util.Optional;
 
 @Repository
 public interface ShiftAssignmentRepository extends JpaRepository<ShiftAssignment, Long> {
+
     List<ShiftAssignment> findByUserId(Long userId);
-    
+
     List<ShiftAssignment> findByUserIdAndWorkDate(Long userId, LocalDate workDate);
-    
+
     Optional<ShiftAssignment> findByUserIdAndShiftIdAndWorkDate(Long userId, Long shiftId, LocalDate workDate);
-    
+
     List<ShiftAssignment> findByShiftId(Long shiftId);
-    
+
     List<ShiftAssignment> findByShiftIdAndWorkDate(Long shiftId, LocalDate workDate);
+
+    // Added by me
+    List<ShiftAssignment> findByWorkDateBetween(LocalDate from, LocalDate to);
+    
+    List<ShiftAssignment> findByUser_StoreIdAndWorkDateBetween(Long storeId, LocalDate from, LocalDate to);
+
+    List<ShiftAssignment> findByShift_StoreIdAndWorkDateBetween(Long storeId, LocalDate from, LocalDate to);
+
+    List<ShiftAssignment> findByUserIdAndWorkDateAndStatus(Long userId, LocalDate workDate, ShiftStatus status);
 }

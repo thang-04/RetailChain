@@ -1,112 +1,258 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import shiftService from "@/services/shift.service";
+import { axiosPrivate } from "@/services/api/axiosClient";
+import { cn } from "@/lib/utils";
+import useAuth from "@/contexts/AuthContext/useAuth";
 
-const AssignStaffShiftModal = ({ isOpen, onClose }) => {
+const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) => {
+    const { user } = useAuth();
+    // State form
+    const [selectedUserId, setSelectedUserId] = useState("");
+    const [selectedShiftIds, setSelectedShiftIds] = useState([]); // Chuyển sang mảng
+    const [workDate, setWorkDate] = useState("");
+    const [notes, setNotes] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    // State data từ API
+    const [staffList, setStaffList] = useState([]);
+    const [shiftList, setShiftList] = useState([]);
+
+    // Load danh sách nhân viên & ca làm khi modal mở
+    useEffect(() => {
+        if (isOpen && storeId) {
+            loadStaffAndShifts();
+        }
+    }, [isOpen, storeId]);
+
+    // Reset form khi đóng modal
+    useEffect(() => {
+        if (!isOpen) {
+            setSelectedUserId("");
+            setSelectedShiftIds([]);
+            setWorkDate("");
+            setNotes("");
+            setError("");
+        }
+    }, [isOpen]);
+
+    const loadStaffAndShifts = async () => {
+        try {
+            // Load nhân viên theo store
+            const staffRes = await axiosPrivate.get(`/stores/${storeId}/staff-list`);
+            if (staffRes?.code === 200 && staffRes?.data) {
+                setStaffList(staffRes.data);
+            }
+
+            // Load ca làm theo store
+            const shiftRes = await shiftService.getShiftsByStore(storeId);
+            if (shiftRes?.code === 200 && shiftRes?.data) {
+                setShiftList(shiftRes.data);
+            }
+        } catch (err) {
+            console.error("Error loading data:", err);
+        }
+    };
+
+    const toggleShift = (shiftId) => {
+        setSelectedShiftIds(prev => 
+            prev.includes(shiftId) 
+                ? prev.filter(id => id !== shiftId) 
+                : [...prev, shiftId]
+        );
+    };
+
+    const handleAssign = async () => {
+        // Validate
+        if (!selectedUserId) {
+            setError("Vui lòng chọn nhân viên");
+            return;
+        }
+        if (!workDate) {
+            setError("Vui lòng chọn ngày làm việc");
+            return;
+        }
+        if (selectedShiftIds.length === 0) {
+            setError("Vui lòng chọn ít nhất một ca làm");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        try {
+            const result = await shiftService.assignShifts({
+                shiftIds: selectedShiftIds.map(id => Number(id)),
+                userId: Number(selectedUserId),
+                workDate: workDate,
+                createdBy: user?.id || 1, // Dùng ID người dùng hiện tại
+            });
+
+            if (result?.code === 200) {
+                if (onAssignSuccess) onAssignSuccess();
+                onClose(false);
+            } else {
+                setError(result?.desc || "Có lỗi xảy ra khi phân công ca");
+            }
+        } catch (err) {
+            let errorMsg = "Có lỗi xảy ra khi phân công ca";
+            if (err?.response?.data) {
+                const data = err.response.data;
+                if (typeof data === "string") {
+                    try {
+                        const parsed = JSON.parse(data);
+                        errorMsg = parsed?.desc || errorMsg;
+                    } catch {
+                        errorMsg = data;
+                    }
+                } else {
+                    errorMsg = data?.desc || errorMsg;
+                }
+            }
+            setError(errorMsg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-lg p-0 overflow-hidden bg-white dark:bg-surface-dark border-border-light dark:border-border-dark gap-0">
                 <DialogHeader className="p-6 pb-4 border-b border-border-light dark:border-border-dark flex flex-row justify-between items-start space-y-0">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Store A</span>
+                            <span className="bg-[#24748f]/10 text-[#24748f] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Store {storeId || "—"}
+                            </span>
                         </div>
-                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Assign Shift</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Phân Công Ca Làm</DialogTitle>
                         <DialogDescription className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                            Schedule a team member for an upcoming shift.
+                            Lên lịch làm việc cho nhân viên. Bạn có thể chọn nhiều ca cùng lúc.
                         </DialogDescription>
                     </div>
                 </DialogHeader>
 
                 <div className="p-6 flex flex-col gap-6 max-h-[70vh] overflow-y-auto">
-                    {/* Staff Selection */}
+                    {/* Thông báo lỗi */}
+                    {error && (
+                        <div className="flex items-center gap-2 text-red-600 bg-red-50 dark:bg-red-900/20 px-4 py-3 rounded-lg text-sm border border-red-200 dark:border-red-800">
+                            <span className="material-symbols-outlined text-[18px]">error</span>
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    {/* Chọn nhân viên */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Select Staff Member</label>
-                        <Select>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Chọn Nhân Viên</label>
+                        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                             <SelectTrigger className="w-full h-12 rounded-xl border-slate-300 dark:border-slate-600 dark:bg-surface-dark dark:text-white">
-                                <SelectValue placeholder="Search or select employee..." />
+                                <SelectValue placeholder="Tìm hoặc chọn nhân viên..." />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="1">Sarah Jenkins (Manager)</SelectItem>
-                                <SelectItem value="2">Michael Chen (Associate)</SelectItem>
-                                <SelectItem value="3">David Miller (Associate)</SelectItem>
-                                <SelectItem value="4">Emily Ross (Trainee)</SelectItem>
+                                {staffList.length > 0 ? (
+                                    staffList.map(staff => (
+                                        <SelectItem key={staff.id} value={String(staff.id)}>
+                                            {staff.fullName || staff.username} {staff.phone ? `(${staff.phone})` : ""}
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <div className="p-4 text-center">
+                                        <p className="text-sm text-slate-500 mb-2">Cửa hàng này chưa có nhân viên nào.</p>
+                                        <p className="text-xs text-slate-400">Bạn cần vào phần "Quản lý nhân sự" của cửa hàng để thêm nhân viên trước.</p>
+                                    </div>
+                                )}
                             </SelectContent>
                         </Select>
                     </div>
 
-                    {/* Date & Time Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Date</label>
-                            <input
-                                type="date"
-                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-base text-slate-900 dark:text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            />
-                        </div>
-
-                        {/* Helper Info */}
-                        <div className="flex flex-col gap-2 justify-end pb-3">
-                            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg text-sm border border-green-100 dark:border-green-800 h-12">
-                                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                                <span>Store is open (09:00 - 21:00)</span>
-                            </div>
-                        </div>
+                    {/* Ngày làm việc */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ngày Làm Việc</label>
+                        <input
+                            type="date"
+                            value={workDate}
+                            onChange={(e) => setWorkDate(e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-base text-slate-900 dark:text-white focus:border-[#24748f] focus:outline-none focus:ring-1 focus:ring-[#24748f]"
+                        />
                     </div>
 
-                    {/* Shift Type (Radio Cards) */}
+                    {/* Chọn ca làm (Pill Cards) */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Shift Type</label>
-                        <div className="grid grid-cols-3 gap-3">
-                            {/* Option 1 */}
-                            <label className="cursor-pointer relative">
-                                <input type="radio" name="shift_type" className="peer sr-only" defaultChecked />
-                                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary transition-all h-full text-center">
-                                    <span className="material-symbols-outlined text-orange-500 mb-1">wb_sunny</span>
-                                    <span className="text-sm font-bold text-slate-900 dark:text-white">Opening</span>
-                                    <span className="text-xs text-slate-500">9am - 3pm</span>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                            Chọn Ca Làm Việc
+                            {selectedShiftIds.length > 0 && (
+                                <span className="text-[#24748f] text-xs font-normal">Đã chọn {selectedShiftIds.length} ca</span>
+                            )}
+                        </label>
+                        <div className="grid grid-cols-1 gap-2">
+                            {shiftList.length > 0 ? (
+                                shiftList.map((shift, index) => {
+                                    const isSelected = selectedShiftIds.includes(String(shift.id));
+                                    const icons = ["wb_sunny", "light_mode", "nights_stay"];
+                                    const colors = ["text-amber-500", "text-sky-500", "text-indigo-500"];
+                                    
+                                    return (
+                                        <div 
+                                            key={shift.id}
+                                            onClick={() => toggleShift(String(shift.id))}
+                                            className={cn(
+                                                "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group",
+                                                isSelected 
+                                                    ? "border-[#24748f] bg-[#24748f]/5 ring-1 ring-[#24748f]" 
+                                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-[#24748f]/50"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={cn(
+                                                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                                                    isSelected ? "bg-[#24748f] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-[#24748f]"
+                                                )}>
+                                                    <span className="material-symbols-outlined text-[20px]">
+                                                        {icons[index % icons.length]}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="text-sm font-bold text-slate-900 dark:text-white">{shift.name}</div>
+                                                        {shift.isDefault && (
+                                                            <span className="bg-primary/10 text-primary text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-tighter border border-primary/20">Hệ thống</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">{shift.startTime} - {shift.endTime}</div>
+                                                </div>
+                                            </div>
+                                            <div className={cn(
+                                                "w-6 h-6 rounded-full border flex items-center justify-center transition-all",
+                                                isSelected 
+                                                    ? "bg-[#24748f] border-[#24748f] text-white" 
+                                                    : "border-slate-300 dark:border-slate-600"
+                                            )}>
+                                                {isSelected && <span className="material-symbols-outlined text-[16px]">check</span>}
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-center text-sm text-slate-400 py-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                    <span className="material-symbols-outlined text-[32px] mb-2 block opacity-20">history_toggle_off</span>
+                                    Chưa có dữ liệu ca làm việc.
                                 </div>
-                                <div className="absolute top-[-6px] right-[-6px] bg-primary text-white rounded-full p-0.5 hidden peer-checked:block shadow-sm">
-                                    <span className="material-symbols-outlined text-[14px] block">check</span>
-                                </div>
-                            </label>
-
-                            {/* Option 2 */}
-                            <label className="cursor-pointer relative">
-                                <input type="radio" name="shift_type" className="peer sr-only" />
-                                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary transition-all h-full text-center">
-                                    <span className="material-symbols-outlined text-blue-500 mb-1">light_mode</span>
-                                    <span className="text-sm font-bold text-slate-900 dark:text-white">Mid-Day</span>
-                                    <span className="text-xs text-slate-500">12pm - 6pm</span>
-                                </div>
-                                <div className="absolute top-[-6px] right-[-6px] bg-primary text-white rounded-full p-0.5 hidden peer-checked:block shadow-sm">
-                                    <span className="material-symbols-outlined text-[14px] block">check</span>
-                                </div>
-                            </label>
-
-                            {/* Option 3 */}
-                            <label className="cursor-pointer relative">
-                                <input type="radio" name="shift_type" className="peer sr-only" />
-                                <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary transition-all h-full text-center">
-                                    <span className="material-symbols-outlined text-indigo-500 mb-1">nights_stay</span>
-                                    <span className="text-sm font-bold text-slate-900 dark:text-white">Closing</span>
-                                    <span className="text-xs text-slate-500">3pm - 9pm</span>
-                                </div>
-                                <div className="absolute top-[-6px] right-[-6px] bg-primary text-white rounded-full p-0.5 hidden peer-checked:block shadow-sm">
-                                    <span className="material-symbols-outlined text-[14px] block">check</span>
-                                </div>
-                            </label>
+                            )}
                         </div>
                     </div>
 
                     {/* Notes */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
-                            Notes <span className="text-slate-400 font-normal text-xs">Optional</span>
+                            Ghi chú <span className="text-slate-400 font-normal text-xs italic">Tùy chọn</span>
                         </label>
                         <textarea
-                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-slate-400 min-h-[80px]"
-                            placeholder="Add special instructions or tasks for this shift..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-[#24748f] focus:outline-none focus:ring-1 focus:ring-[#24748f] placeholder:text-slate-400 min-h-[80px]"
+                            placeholder="Thêm hướng dẫn đặc biệt cho nhân viên..."
                         ></textarea>
                     </div>
                 </div>
@@ -115,13 +261,27 @@ const AssignStaffShiftModal = ({ isOpen, onClose }) => {
                 <div className="p-6 bg-slate-50 dark:bg-black/20 border-t border-border-light dark:border-border-dark flex justify-end gap-3 rounded-b-lg">
                     <button
                         onClick={() => onClose(false)}
-                        className="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                        disabled={loading}
+                        className="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        Cancel
+                        Hủy
                     </button>
-                    <button className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[20px]">person_add</span>
-                        Assign Shift
+                    <button
+                        onClick={handleAssign}
+                        disabled={loading || selectedShiftIds.length === 0}
+                        className="px-6 py-2.5 rounded-lg bg-[#24748f] hover:bg-[#1a5b71] text-white font-semibold shadow-md shadow-[#24748f]/20 hover:shadow-lg hover:shadow-[#24748f]/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                    >
+                        {loading ? (
+                            <>
+                                <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+                                Đang xử lý...
+                            </>
+                        ) : (
+                            <>
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                                Phân Công {selectedShiftIds.length > 1 ? `(${selectedShiftIds.length} ca)` : ""}
+                            </>
+                        )}
                     </button>
                 </div>
             </DialogContent>

@@ -67,6 +67,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDTO> getUnassignedStaff() {
+        // Staff that doesn't belong to any store
+        List<User> unassigned = userRepository.findByStoreIdIsNullAndRoles_CodeIgnoreCase(RoleConstant.STAFF.name());
+        return unassigned.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -170,6 +179,10 @@ public class UserServiceImpl implements UserService {
 
         if (request.getStoreId() != null) {
             user.setStoreId(request.getStoreId());
+        }
+
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
         }
 
         User savedUser = userRepository.save(user);
@@ -298,10 +311,10 @@ public class UserServiceImpl implements UserService {
         List<String> permissions = user.getRoles() != null
                 ? user.getRoles().stream()
                         .flatMap(role -> {
-                                if (role.getPermissions() != null) {
-                                        return role.getPermissions().stream();
-                                }
-                                return java.util.stream.Stream.empty();
+                            if (role.getPermissions() != null) {
+                                return role.getPermissions().stream();
+                            }
+                            return java.util.stream.Stream.empty();
                         })
                         .map(com.sba301.retailmanagement.entity.Permission::getName)
                         .distinct()
@@ -320,14 +333,14 @@ public class UserServiceImpl implements UserService {
                 // Scope info
                 .storeId(user.getStoreId())
                 .build();
-                
+
         if (user.getStoreId() != null) {
             storeRepository.findById(user.getStoreId()).ifPresent(store -> {
                 dto.setStoreCode(store.getCode());
                 dto.setStoreName(store.getName());
             });
         }
-        
+
         return dto;
     }
 }

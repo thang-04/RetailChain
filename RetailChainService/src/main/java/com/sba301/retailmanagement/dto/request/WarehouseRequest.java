@@ -13,8 +13,6 @@ public class WarehouseRequest {
     private String contactName;
     private String contactPhone;
     private String description;
-    private Integer isDefault;
+    private Integer isCentral;
     private Integer status;
-    private Integer warehouseLevel;
-    private Long parentId;
 }

@@ -1,120 +1,207 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "../components/layout/MainLayout/MainLayout";
-
-// Dashboard
-import DashboardPage from "../pages/Dashboard/DashboardPage";
-import ExecutiveReport from "../pages/Reports/ExecutiveReport";
-
-// Store
-import StorePage from "../pages/Store/StorePage";
-import StoreDashboardPage from "../pages/StoreDashboard/StoreDashboardPage";
-import StoreInventoryDetail from "../pages/StoreDashboard/StoreInventoryDetail";
-import StoreStaffPage from "../pages/StoreDashboard/StoreStaffPage";
-
-// Product
-import ProductPage from "../pages/Product/ProductPage";
-import ProductDetailPage from "../pages/Product/ProductDetailPage";
-import ProductEditPage from "../pages/Product/ProductEditPage";
-
-// Inventory
-import InventoryPage from "../pages/Inventory/InventoryPage";
-import StockLedger from "../pages/Inventory/StockLedger";
-import StockInList from "../pages/StockIn/StockInList";
-import CreateStockIn from "../pages/StockIn/CreateStockIn";
-
-// Stock Out
-import StockOutList from "../pages/StockOut/StockOutList";
-import CreateStockOut from "../pages/StockOut/CreateStockOut";
-
-// Staff
-import StaffList from "../pages/Staff/StaffList/StaffList";
-import StaffCalendar from "../pages/Staff/ShiftCalendar/StaffCalendar";
-import StaffShiftsPage from "../pages/Staff/StaffShifts/StaffShiftsPage";
-import StaffAttendance from "../pages/Staff/Attendance/StaffAttendance";
-import StaffProfile from "../pages/Staff/Profile/StaffProfile";
-import ResourceAssignment from "../pages/Staff/ResourceAssignment/ResourceAssignment";
-
-// Warehouse
-import WarehouseListPage from "../pages/Warehouse/WarehouseListPage";
-
-import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
-
-// User Management
-import UserManagementPage from "../pages/UserManagement/UserManagementPage";
-
-// Profile
-import ProfilePage from "../pages/Profile/ProfilePage";
-
-// Auth
-import LoginPage from "../pages/Auth/LoginPage";
-import ForbiddenPage from "../pages/Auth/ForbiddenPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+import { Loader2 } from "lucide-react";
+
+// Lazy load all page components for code splitting
+const LoginPage = lazy(() => import("../pages/Auth/LoginPage"));
+const ForbiddenPage = lazy(() => import("../pages/Auth/ForbiddenPage"));
+
+const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
+const ExecutiveReport = lazy(() => import("../pages/Reports/ExecutiveReport"));
+
+const StorePage = lazy(() => import("../pages/Store/StorePage"));
+const StoreDashboardPage = lazy(() => import("../pages/StoreDashboard/StoreDashboardPage"));
+const StoreInventoryDetail = lazy(() => import("../pages/StoreDashboard/StoreInventoryDetail"));
+const StoreStaffPage = lazy(() => import("../pages/StoreDashboard/StoreStaffPage"));
+
+const ProductPage = lazy(() => import("../pages/Product/ProductPage"));
+const ProductDetailPage = lazy(() => import("../pages/Product/ProductDetailPage"));
+const ProductEditPage = lazy(() => import("../pages/Product/ProductEditPage"));
+
+const InventoryPage = lazy(() => import("../pages/Inventory/InventoryPage"));
+const StockLedger = lazy(() => import("../pages/Inventory/StockLedger"));
+const StockInList = lazy(() => import("../pages/StockIn/StockInList"));
+const CreateStockIn = lazy(() => import("../pages/StockIn/CreateStockIn"));
+
+const StockOutList = lazy(() => import("../pages/StockOut/StockOutList"));
+const CreateStockOut = lazy(() => import("../pages/StockOut/CreateStockOut"));
+
+const StaffList = lazy(() => import("../pages/Staff/StaffList/StaffList"));
+const StaffCalendar = lazy(() => import("../pages/Staff/ShiftCalendar/StaffCalendar"));
+const StaffShiftsPage = lazy(() => import("../pages/Staff/StaffShifts/StaffShiftsPage"));
+const StaffAttendance = lazy(() => import("../pages/Staff/Attendance/StaffAttendance"));
+const StaffProfile = lazy(() => import("../pages/Staff/Profile/StaffProfile"));
+const ResourceAssignment = lazy(() => import("../pages/Staff/ResourceAssignment/ResourceAssignment"));
+
+const WarehouseListPage = lazy(() => import("../pages/Warehouse/WarehouseListPage"));
+
+const RolePermissionPage = lazy(() => import("../pages/RolePermission/RolePermissionPage"));
+
+const UserManagementPage = lazy(() => import("../pages/UserManagement/UserManagementPage"));
+
+const ProfilePage = lazy(() => import("../pages/Profile/ProfilePage"));
+
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+);
 
 const AppRoutes = () => {
     return (
-        <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/403" element={<ForbiddenPage />} />
+        <Suspense fallback={<PageLoader />}>
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/403" element={<ForbiddenPage />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-                <Route element={<MainLayout />}>
-                    {/* Dashboard & Reports */}
-                    <Route path="/" element={<DashboardPage />} />
-                    <Route path="/reports" element={<ExecutiveReport />} />
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                    <Route element={<MainLayout />}>
+                        {/* Dashboard & Reports - All authenticated users */}
+                        <Route path="/" element={<DashboardPage />} />
+                        <Route 
+                            path="/reports" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ExecutiveReport />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    {/* Store Module */}
-                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-                        <Route path="/store" element={<StorePage />} />
-                    </Route>
-                    <Route path="/store/:id" element={<StoreDashboardPage />} />
-                    <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
-                    <Route path="/store/:id/staff" element={<StoreStaffPage />} />
+                        {/* Store Module - SUPER_ADMIN only */}
+                        <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                            <Route path="/store" element={<StorePage />} />
+                        </Route>
+                        <Route path="/store/:id" element={<StoreDashboardPage />} />
+                        <Route path="/store/:id/inventory" element={<StoreInventoryDetail />} />
+                        <Route 
+                            path="/store/:id/staff" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StoreStaffPage />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-                        {/* Warehouse Module */}
-                        <Route path="/warehouse" element={<WarehouseListPage />} />
-                    </Route>
+                        {/* Warehouse Module - SUPER_ADMIN only */}
+                        <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                            <Route path="/warehouse" element={<WarehouseListPage />} />
+                        </Route>
 
-                    {/* Product Module */}
-                    <Route path="/products" element={<ProductPage />} />
-                    <Route path="/products/create" element={<ProductEditPage />} />
-                    <Route path="/products/:slug" element={<ProductDetailPage />} />
-                    <Route path="/products/:slug/edit" element={<ProductEditPage />} />
+                        {/* Product Module - All roles can view */}
+                        <Route path="/products" element={<ProductPage />} />
+                        <Route 
+                            path="/products/create" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ProductEditPage />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route path="/products/:slug" element={<ProductDetailPage />} />
+                        <Route 
+                            path="/products/:slug/edit" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ProductEditPage />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    {/* Inventory Module */}
-                    <Route path="/inventory" element={<InventoryPage />} />
-                    <Route path="/inventory/ledger" element={<StockLedger />} />
+                        {/* Inventory Module - All roles can view */}
+                        <Route path="/inventory" element={<InventoryPage />} />
+                        <Route path="/inventory/ledger" element={<StockLedger />} />
 
-                    {/* Stock In, Out */}
-                    <Route path="/stock-in" element={<StockInList />} />
-                    <Route path="/stock-in/create" element={<CreateStockIn />} />
+                        {/* Stock In - VIEW for all, CREATE for STORE_MANAGER+ */}
+                        <Route path="/stock-in" element={<StockInList />} />
+                        <Route 
+                            path="/stock-in/create" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <CreateStockIn />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    <Route path="/stock-out" element={<StockOutList />} />
-                    <Route path="/stock-out/create" element={<CreateStockOut />} />
+                        {/* Stock Out - VIEW for all, CREATE for STORE_MANAGER+ */}
+                        <Route path="/stock-out" element={<StockOutList />} />
+                        <Route 
+                            path="/stock-out/create" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <CreateStockOut />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    {/* Staff Module */}
-                    <Route path="/staff" element={<StaffList />} />
-                    <Route path="/staff/shifts" element={<StaffShiftsPage />} />
-                    <Route path="/staff/calendar" element={<StaffCalendar />} />
-                    <Route path="/staff/attendance" element={<StaffAttendance />} />
-                    <Route path="/staff/profile/:id" element={<StaffProfile />} />
-                    <Route path="/staff/resource" element={<ResourceAssignment />} />
+                        {/* Staff Module - STORE_MANAGER+ for management */}
+                        <Route 
+                            path="/staff" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StaffList />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/staff/shifts" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StaffShiftsPage />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/store/:id/shifts" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StaffShiftsPage />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route path="/staff/calendar" element={<StaffCalendar />} />
+                        <Route 
+                            path="/staff/attendance" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StaffAttendance />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route path="/staff/profile/:id" element={<StaffProfile />} />
+                        <Route 
+                            path="/staff/resource" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ResourceAssignment />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    {/* User Management */}
-                    <Route path="/users" element={<UserManagementPage />} />
+                        {/* User Management - STORE_MANAGER+ */}
+                        <Route 
+                            path="/users" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <UserManagementPage />
+                                </ProtectedRoute>
+                            } 
+                        />
 
-                    {/* Profile */}
-                    <Route path="/profile" element={<ProfilePage />} />
+                        {/* Profile - All authenticated users */}
+                        <Route path="/profile" element={<ProfilePage />} />
 
-                    <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-                        {/* Role & Permission Management */}
-                        <Route path="/roles" element={<RolePermissionPage />} />
+                        {/* Role & Permission - SUPER_ADMIN only */}
+                        <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                            <Route path="/roles" element={<RolePermissionPage />} />
+                        </Route>
                     </Route>
                 </Route>
-            </Route>
-        </Routes>
+            </Routes>
+        </Suspense>
     );
 };
 

@@ -52,7 +52,11 @@ public class DataSeeder implements CommandLineRunner {
                 SecurityConstants.PRODUCT_VIEW, SecurityConstants.PRODUCT_CREATE, SecurityConstants.PRODUCT_UPDATE,
                 SecurityConstants.PRODUCT_DELETE,
                 SecurityConstants.INVENTORY_VIEW, SecurityConstants.INVENTORY_CREATE,
-                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER);
+                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER,
+                SecurityConstants.SUPPLIER_VIEW,
+                SecurityConstants.SUPPLIER_CREATE,
+                SecurityConstants.SUPPLIER_UPDATE,
+                SecurityConstants.SUPPLIER_DELETE);
 
         for (String permCode : allPermissions) {
             if (!permissionRepository.existsByCode(permCode)) {
@@ -81,7 +85,10 @@ public class DataSeeder implements CommandLineRunner {
                 SecurityConstants.PRODUCT_VIEW, SecurityConstants.PRODUCT_CREATE, SecurityConstants.PRODUCT_UPDATE,
                 SecurityConstants.PRODUCT_DELETE,
                 SecurityConstants.INVENTORY_VIEW, SecurityConstants.INVENTORY_CREATE,
-                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER));
+                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER,SecurityConstants.SUPPLIER_VIEW,
+                SecurityConstants.SUPPLIER_CREATE,
+                SecurityConstants.SUPPLIER_UPDATE,
+                SecurityConstants.SUPPLIER_DELETE));
 
         // Store Manager: Stockin, Stockout, Report, Human Resource, User Manager(tạo
         // tài khoản staff), Product, Inventory, Store, Staff Shift
@@ -93,7 +100,10 @@ public class DataSeeder implements CommandLineRunner {
                 SecurityConstants.PRODUCT_VIEW,
                 SecurityConstants.INVENTORY_VIEW, SecurityConstants.INVENTORY_UPDATE,
                 SecurityConstants.INVENTORY_TRANSFER,
-                SecurityConstants.STORE_VIEW));
+                SecurityConstants.STORE_VIEW,SecurityConstants.SUPPLIER_VIEW,
+                SecurityConstants.SUPPLIER_CREATE,
+                SecurityConstants.SUPPLIER_UPDATE,
+                SecurityConstants.SUPPLIER_DELETE));
 
         // Staff: Store, Product, Inventory
         Set<String> staffPerms = new HashSet<>(Arrays.asList(

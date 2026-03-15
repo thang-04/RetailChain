@@ -1,0 +1,8 @@
+Columns: ['SKU', 'Tên sản phẩm', 'Danh mục', 'Size', 'Màu', 'Số lượng', 'Đơn giá', 'Nhà cung cấp', 'Ghi chú']
+Row count: 5
+
+Row 1: {'SKU': 'SKU001', 'Tên sản phẩm': 'Áo Thun Nam Cotton', 'Danh mục': 'Áo Thun', 'Size': 'S', 'Màu': 'Đen', 'Số lượng': 100, 'Đơn giá': 150000, 'Nhà cung cấp': 'Công Ty TNHH Thời Trang ABC', 'Ghi chú': 'Test nhập hàng'}
+Row 2: {'SKU': 'SKU002', 'Tên sản phẩm': 'Quần Jeans Slim', 'Danh mục': 'Quần Jean', 'Size': '32', 'Màu': 'Xanh Navy', 'Số lượng': 50, 'Đơn giá': 350000, 'Nhà cung cấp': 'Công Ty TNHH Thời Trang ABC', 'Ghi chú': nan}
+Row 3: {'SKU': 'SKU003', 'Tên sản phẩm': 'Áo Sơ Mi Trắng', 'Danh mục': 'Áo Sơ Mi', 'Size': 'M', 'Màu': 'Trắng', 'Số lượng': 80, 'Đơn giá': 200000, 'Nhà cung cấp': nan, 'Ghi chú': 'Test không có NCC'}
+Row 4: {'SKU': 'SKU004', 'Tên sản phẩm': 'Giày Sneaker Nam', 'Danh mục': 'Giày', 'Size': '42', 'Màu': 'Đen', 'Số lượng': 30, 'Đơn giá': 450000, 'Nhà cung cấp': 'Nhà Cung Cấp Không Tồn Tại', 'Ghi chú': 'Test lỗi NCC'}
+Row 5: {'SKU': 'SKU005', 'Tên sản phẩm': 'Áo Khoác Nam', 'Danh mục': 'Áo Khoác', 'Size': 'L', 'Màu': 'Xám', 'Số lượng': 25, 'Đơn giá': 550000, 'Nhà cung cấp': 'Công Ty TNHH Thời Trang ABC', 'Ghi chú': nan}

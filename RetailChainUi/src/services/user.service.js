@@ -11,6 +11,13 @@ export const userService = {
     },
 
     /**
+     * Get unassigned staff
+     */
+    getUnassignedStaff: async () => {
+        return await axiosPrivate.get(`${USER_API_URL}/unassigned-staff`);
+    },
+
+    /**
      * Get user by ID
      */
     getUserById: async (id) => {

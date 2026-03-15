@@ -3,42 +3,19 @@ import LocationPicker from '../../../components/ui/locationPicker';
 import useGeoLocation from '../../../hooks/useGeoLocation';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import storeService from '../../../services/store.service';
-import inventoryService from '../../../services/inventory.service';
+import { toast } from 'sonner';
 
 const EditStoreModal = ({ isOpen, onClose, storeData }) => {
     const [formData, setFormData] = useState({
         name: '',
         address: '',
         type: '',
-        warehouseId: '',
         status: 'Active'
     });
     const [searchQuery, setSearchQuery] = useState("");
     const [mapPosition, setMapPosition] = useState(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const [warehouses, setWarehouses] = useState([]);
     const { loading, searchLocation, getAddressFromCoords } = useGeoLocation();
-
-    useEffect(() => {
-        if (isOpen) {
-            const fetchWarehouses = async () => {
-                try {
-                    const raw = await inventoryService.getAllWarehouses();
-                    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
-                    if (res && (res.code === 200 || res.status === 200) && res.data) {
-                        setWarehouses(res.data);
-                    } else if (Array.isArray(res)) {
-                        setWarehouses(res);
-                    } else if (res?.data && Array.isArray(res.data)) {
-                        setWarehouses(res.data);
-                    }
-                } catch (error) {
-                    console.error('Error fetching warehouses:', error);
-                }
-            };
-            fetchWarehouses();
-        }
-    }, [isOpen]);
 
     useEffect(() => {
         if (storeData) {
@@ -46,7 +23,6 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                 name: storeData.name || '',
                 address: storeData.address || '',
                 type: storeData.type || '',
-                warehouseId: storeData.warehouseId ? String(storeData.warehouseId) : '',
                 status: storeData.status || 'Active'
             });
 
@@ -96,12 +72,12 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
         try {
             console.log('Updating store:', formData);
             await storeService.updateStore(storeData.id, formData);
+            toast.success('Cập nhật cửa hàng thành công!');
             setIsConfirmOpen(false);
             onClose();
-
-            window.location.reload();
         } catch (error) {
             console.error('Failed to update store:', error);
+            toast.error('Lỗi khi cập nhật cửa hàng. Vui lòng thử lại.');
         } finally {
             setIsSaving(false);
         }
@@ -111,8 +87,8 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
 
     return (
         <div aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8" role="dialog">
-            <div aria-hidden="true" className="absolute inset-0 bg-[#131c1f]/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#1e282c] text-left shadow-lift transition-all flex flex-col h-[85vh]">
+            <div aria-hidden="true" className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-card text-left shadow-lift transition-all flex flex-col h-[85vh]">
                 <div className="flex items-center justify-between border-b border-[#f1f3f4] dark:border-gray-700 px-8 py-4 bg-white dark:bg-[#1e282c] shrink-0">
                     <div>
                         <h3 className="text-xl font-bold leading-6 text-[#121617] dark:text-white tracking-tight">Edit Store Location</h3>
@@ -187,28 +163,6 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
                                 <div className="h-px bg-[#f1f3f4] dark:bg-gray-700"></div>
                                 <div className="space-y-4">
                                     <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Operations</h4>
-                                    <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="warehouse">
-                                            Assigned Warehouse
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                className="block w-full appearance-none rounded-lg border-[#dde2e4] dark:border-gray-600 bg-white dark:bg-[#131c1f] px-4 py-3 pr-10 text-sm text-[#121617] dark:text-white focus:border-primary focus:ring-primary"
-                                                id="warehouse"
-                                                name="warehouseId"
-                                                value={formData.warehouseId}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option value="">-- Select a predefined warehouse (Optional) --</option>
-                                                {warehouses.map(w => (
-                                                    <option key={w.id} value={String(w.id)}>{w.name}</option>
-                                                ))}
-                                            </select>
-                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                                <span className="material-symbols-outlined text-[20px]">expand_more</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                     <div className="space-y-2">
                                         <label className="block text-sm font-semibold text-[#121617] dark:text-gray-200" htmlFor="status">
                                             Operational Status
