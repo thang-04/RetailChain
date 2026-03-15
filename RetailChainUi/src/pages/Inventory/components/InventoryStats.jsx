@@ -5,10 +5,10 @@ import { Card } from "@/components/ui/card";
 const formatCurrency = (value) => {
   if (value == null) return "—";
   try {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("vi-VN", {
       style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 1,
+      currency: "VND",
+      maximumFractionDigits: 0,
     }).format(value);
   } catch {
     return value.toString();

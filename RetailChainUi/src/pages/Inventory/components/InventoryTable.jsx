@@ -1,5 +1,5 @@
 // src/pages/Inventory/components/InventoryTable.jsx
-import React, { useState, memo } from "react";
+import React, { memo } from "react";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,25 +17,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 
-/** Format datetime từ API (ISO string hoặc object) sang hiển thị */
-const formatOccurredAt = (value) => {
-  if (!value) return "—";
-  const str = typeof value === "string" ? value : value?.toString?.() ?? "";
-  if (!str) return "—";
-  try {
-    const d = new Date(str);
-    return Number.isNaN(d.getTime()) ? str : d.toLocaleString("vi-VN");
-  } catch {
-    return str;
+const StatusBadge = ({ quantity }) => {
+  const q = typeof quantity === "number" ? quantity : Number(quantity || 0);
+  let label = "Out of Stock";
+  let variant = "destructive";
+
+  if (q > 10) {
+    label = "Còn hàng";
+    variant = "default";
+  } else if (q > 0) {
+    label = "Sắp hết ";
+    variant = "secondary";
   }
-};
 
-/** Hiển thị action dạng badge (IN, OUT, ADJUST, ...) */
-const ActionBadge = ({ action }) => {
-  const a = (action && typeof action === "string" ? action : action?.toString?.() ?? "").toUpperCase();
-  const variant = a === "IN" ? "default" : a === "OUT" ? "destructive" : "secondary";
-  return <Badge variant={variant}>{a || "—"}</Badge>;
+  return <Badge variant={variant}>{label}</Badge>;
 };
 
 function InventoryTable({
@@ -44,28 +41,9 @@ function InventoryTable({
   pageSize = 10,
   total = 0,
   onPageChange,
-  onFetchDetail,
+  canEdit = false,
 }) {
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [detail, setDetail] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [detailError, setDetailError] = useState(null);
-
-  const handleRowClick = async (id) => {
-    if (!onFetchDetail || !id) return;
-    setDetailOpen(true);
-    setDetail(null);
-    setDetailError(null);
-    setLoadingDetail(true);
-    try {
-      const data = await onFetchDetail(id);
-      setDetail(data);
-    } catch (err) {
-      setDetailError(err?.message || "Không tải được chi tiết.");
-    } finally {
-      setLoadingDetail(false);
-    }
-  };
+  const navigate = useNavigate();
 
   const from = (page - 1) * pageSize;
   const to = Math.min(from + pageSize, total);
@@ -80,65 +58,80 @@ function InventoryTable({
             <TableHeader className="bg-slate-50 dark:bg-white/5">
               <TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
                 <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-12 text-center">STT</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Mã chứng từ</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Kho</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Sản phẩm</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Hành động</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-left">SKU</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-left">Sản phẩm</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-left">Phiên bản</TableHead>
                 <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Số lượng</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Tồn sau</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Thời gian</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-20 text-center">Chi tiết</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Trạng thái</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-32 text-center">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">
               {pageData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="px-6 py-12 text-center text-slate-500">
-                    Chưa có bản ghi lịch sử tồn kho.
+                  <TableCell colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    Chưa có dữ liệu tồn kho cho cửa hàng này.
                   </TableCell>
                 </TableRow>
               ) : (
                 pageData.map((item, index) => (
                   <TableRow
-                    key={item.id}
+                    key={item.inventoryId || `${item.warehouseId}-${item.variantId}-${index}`}
                     className="group hover:bg-slate-50 dark:hover:bg-white/5 border-b border-slate-100 dark:border-slate-800"
                   >
                     <TableCell className="px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 text-center">
                       {from + index + 1}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
-                      {item.documentName ?? item.documentId ?? "—"}
+                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-left">
+                      {item.sku ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
-                      {item.warehouseName ?? item.warehouseId ?? "—"}
+                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-200 text-left">
+                      {item.productName ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
-                      {item.variantName ?? item.variantId ?? "—"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-center">
-                      <ActionBadge action={item.action} />
+                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-left">
+                      {item.variantName ?? "—"}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-center">
-                      {item.quantity ?? "—"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-center">
-                      {item.balanceAfter ?? "—"}
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-500 text-center">
-                      {formatOccurredAt(item.occurredAt)}
+                      {item.quantity ?? 0}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-center">
+                      <StatusBadge quantity={item.quantity} />
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3 text-center space-x-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRowClick(item.id);
+                        className="h-8 px-2"
+                        onClick={() => {
+                          if (!item.inventoryId && item.warehouseId && item.variantId) {
+                            const invId = `${item.warehouseId}-${item.variantId}`;
+                            navigate(`/inventory/${encodeURIComponent(invId)}`);
+                          } else if (item.inventoryId) {
+                            navigate(`/inventory/${encodeURIComponent(item.inventoryId)}`);
+                          }
                         }}
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" />
+                        Xem
                       </Button>
+                      {canEdit && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={() => {
+                            if (!item.inventoryId && item.warehouseId && item.variantId) {
+                              const invId = `${item.warehouseId}-${item.variantId}`;
+                              navigate(`/inventory/${encodeURIComponent(invId)}`);
+                            } else if (item.inventoryId) {
+                              navigate(`/inventory/${encodeURIComponent(item.inventoryId)}`);
+                            }
+                          }}
+                        >
+                          Sửa
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -191,35 +184,6 @@ function InventoryTable({
           </div>
         </div>
       </div>
-
-      {/* Modal chi tiết bản ghi - GET /api/inventory-history/record/{id} */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="w-[900px] max-w-[95vw]">
-          <DialogHeader>
-            <DialogTitle>Chi tiết lịch sử tồn kho</DialogTitle>
-          </DialogHeader>
-          {loadingDetail && (
-            <div className="py-8 text-center text-slate-500">Đang tải...</div>
-          )}
-          {detailError && (
-            <div className="py-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
-              {detailError}
-            </div>
-          )}
-          {!loadingDetail && !detailError && detail && (
-            <dl className="grid grid-cols-1 gap-3 text-sm">
-              <div><dt className="text-slate-500">Mã</dt><dd>{detail.documentName ?? detail.documentId ?? "—"}</dd></div>
-              <div><dt className="text-slate-500">Kho</dt><dd>{detail.warehouseName ?? detail.warehouseId ?? "—"}</dd></div>
-              <div><dt className="text-slate-500">Biến thể sản phẩm</dt><dd>{detail.variantName ?? detail.variantId ?? "—"}</dd></div>
-              <div><dt className="text-slate-500">Hành động</dt><dd><ActionBadge action={detail.action} /></dd></div>
-              <div><dt className="text-slate-500">Số lượng</dt><dd>{detail.quantity ?? "—"}</dd></div>
-              <div><dt className="text-slate-500">Tồn sau</dt><dd>{detail.balanceAfter ?? "—"}</dd></div>
-              <div><dt className="text-slate-500">Thời gian</dt><dd>{formatOccurredAt(detail.occurredAt)}</dd></div>
-              <div><dt className="text-slate-500">Người thực hiện</dt><dd>{detail.actorUserName ?? detail.actorUserId ?? "—"}</dd></div>
-            </dl>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

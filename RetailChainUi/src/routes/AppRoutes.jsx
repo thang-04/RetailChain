@@ -21,6 +21,7 @@ const ProductDetailPage = lazy(() => import("../pages/Product/ProductDetailPage"
 const ProductEditPage = lazy(() => import("../pages/Product/ProductEditPage"));
 
 const InventoryPage = lazy(() => import("../pages/Inventory/InventoryPage"));
+const InventoryDetailPage = lazy(() => import("../pages/Inventory/InventoryDetailPage"));
 const StockLedger = lazy(() => import("../pages/Inventory/StockLedger"));
 const StockInList = lazy(() => import("../pages/StockIn/StockInList"));
 const CreateStockIn = lazy(() => import("../pages/StockIn/CreateStockIn"));
@@ -114,6 +115,7 @@ const AppRoutes = () => {
                         {/* Inventory Module - All roles can view */}
                         <Route path="/inventory" element={<InventoryPage />} />
                         <Route path="/inventory/ledger" element={<StockLedger />} />
+                        <Route path="/inventory/:inventoryId" element={<InventoryDetailPage />} />
 
                         {/* Stock In - VIEW for all, CREATE for STORE_MANAGER+ */}
                         <Route path="/stock-in" element={<StockInList />} />
