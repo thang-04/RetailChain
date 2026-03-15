@@ -185,57 +185,57 @@ const WarehouseListPage = () => {
 
       {/* Stats Overview Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-6">
             <div className="flex">
               <div items-center justify-between>
-                <p className="text-sm text-blue-600 font-medium">Tổng Số Kho</p>
-                <p className="text-3xl font-bold text-blue-700">{stats.total}</p>
+                <p className="text-sm text-primary font-medium">Tổng Số Kho</p>
+                <p className="text-3xl font-bold text-primary">{stats.total}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                <Warehouse className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-purple-600 font-medium">Kho Tổng</p>
-                <p className="text-3xl font-bold text-purple-700">{stats.central}</p>
-              </div>
-              <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <Warehouse className="w-6 h-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="bg-secondary border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 font-medium">Kho Cửa Hàng</p>
-                <p className="text-3xl font-bold text-green-700">{stats.store}</p>
+                <p className="text-sm text-muted-foreground font-medium">Kho Tổng</p>
+                <p className="text-3xl font-bold text-foreground">{stats.central}</p>
               </div>
-              <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                <Box className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-muted-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200">
+        <Card className="bg-accent border-border">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-emerald-600 font-medium">Đang Hoạt Động</p>
-                <p className="text-3xl font-bold text-emerald-700">{stats.active}</p>
+                <p className="text-sm text-muted-foreground font-medium">Kho Cửa Hàng</p>
+                <p className="text-3xl font-bold text-foreground">{stats.store}</p>
               </div>
-              <div className="w-12 h-12 bg-emerald-200 rounded-full flex items-center justify-center">
-                <List className="w-6 h-6 text-emerald-600" />
+              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+                <Box className="w-6 h-6 text-muted-foreground" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-primary font-medium">Đang Hoạt Động</p>
+                <p className="text-3xl font-bold text-primary">{stats.active}</p>
+              </div>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <List className="w-6 h-6 text-primary" />
               </div>
             </div>
           </CardContent>

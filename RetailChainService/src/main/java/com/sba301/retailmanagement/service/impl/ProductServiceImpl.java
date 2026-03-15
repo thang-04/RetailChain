@@ -4,6 +4,7 @@ import com.sba301.retailmanagement.dto.request.CategoryRequest;
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
 import com.sba301.retailmanagement.dto.response.CategoryResponse;
+import com.sba301.retailmanagement.dto.response.ProductExistsResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.entity.Product;
@@ -295,6 +296,22 @@ public class ProductServiceImpl implements ProductService {
         ProductCategory saved = productCategoryRepository.save(category);
         long count = productRepository.countByCategoryId(saved.getId());
         return new CategoryResponse(saved.getId(), saved.getName(), count);
+    }
+
+    @Override
+    public ProductExistsResponse checkSkuExists(String sku) {
+        return productVariantRepository.findBySku(sku)
+                .map(variant -> {
+                    Product product = productRepository.findById(variant.getProductId()).orElse(null);
+                    return ProductExistsResponse.builder()
+                            .exists(true)
+                            .productId(variant.getProductId())
+                            .code(product != null ? product.getCode() : null)
+                            .build();
+                })
+                .orElse(ProductExistsResponse.builder()
+                        .exists(false)
+                        .build());
     }
 
     @Override

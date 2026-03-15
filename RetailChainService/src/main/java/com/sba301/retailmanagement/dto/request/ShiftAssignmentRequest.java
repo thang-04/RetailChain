@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShiftAssignmentRequest {
-    private Long shiftId;
+    private List<Long> shiftIds;
     private Long userId;
     private String workDate; // Format: "yyyy-MM-dd"
     private Long createdBy;
