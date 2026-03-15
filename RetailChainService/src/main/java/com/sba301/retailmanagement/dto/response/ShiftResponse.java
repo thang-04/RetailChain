@@ -17,4 +17,5 @@ public class ShiftResponse {
     private String startTime;
     private String endTime;
     private String createdAt;
+    private boolean isDefault;
 }

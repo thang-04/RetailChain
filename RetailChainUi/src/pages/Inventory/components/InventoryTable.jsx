@@ -1,5 +1,5 @@
 // src/pages/Inventory/components/InventoryTable.jsx
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,14 +38,14 @@ const ActionBadge = ({ action }) => {
   return <Badge variant={variant}>{a || "—"}</Badge>;
 };
 
-const InventoryTable = ({
+function InventoryTable({
   inventoryData = [],
   page = 1,
   pageSize = 10,
   total = 0,
   onPageChange,
   onFetchDetail,
-}) => {
+}) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -79,15 +79,15 @@ const InventoryTable = ({
           <Table>
             <TableHeader className="bg-slate-50 dark:bg-white/5">
               <TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-12">STT</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Document</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Kho</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Variant</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Hành động</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Số lượng</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Tồn sau</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Thời gian</TableHead>
-                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-20">Chi tiết</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-12 text-center">STT</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Mã chứng từ</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Kho</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Sản phẩm</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Hành động</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Số lượng</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Tồn sau</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Thời gian</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs w-20 text-center">Chi tiết</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -103,31 +103,31 @@ const InventoryTable = ({
                     key={item.id}
                     className="group hover:bg-slate-50 dark:hover:bg-white/5 border-b border-slate-100 dark:border-slate-800"
                   >
-                    <TableCell className="px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <TableCell className="px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 text-center">
                       {from + index + 1}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
                       {item.documentName ?? item.documentId ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
                       {item.warehouseName ?? item.warehouseId ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-600 dark:text-slate-400 text-center">
                       {item.variantName ?? item.variantId ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3">
+                    <TableCell className="px-4 py-3 text-center">
                       <ActionBadge action={item.action} />
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-center">
                       {item.quantity ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300 text-center">
                       {item.balanceAfter ?? "—"}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-slate-500 text-right">
+                    <TableCell className="px-4 py-3 text-sm text-slate-500 text-center">
                       {formatOccurredAt(item.occurredAt)}
                     </TableCell>
-                    <TableCell className="px-4 py-3">
+                    <TableCell className="px-4 py-3 text-center">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -194,7 +194,7 @@ const InventoryTable = ({
 
       {/* Modal chi tiết bản ghi - GET /api/inventory-history/record/{id} */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[900px] max-w-[95vw]">
           <DialogHeader>
             <DialogTitle>Chi tiết lịch sử tồn kho</DialogTitle>
           </DialogHeader>
@@ -208,7 +208,7 @@ const InventoryTable = ({
           )}
           {!loadingDetail && !detailError && detail && (
             <dl className="grid grid-cols-1 gap-3 text-sm">
-              <div><dt className="text-slate-500">Phiếu</dt><dd>{detail.documentName ?? detail.documentId ?? "—"}</dd></div>
+              <div><dt className="text-slate-500">Mã</dt><dd>{detail.documentName ?? detail.documentId ?? "—"}</dd></div>
               <div><dt className="text-slate-500">Kho</dt><dd>{detail.warehouseName ?? detail.warehouseId ?? "—"}</dd></div>
               <div><dt className="text-slate-500">Biến thể sản phẩm</dt><dd>{detail.variantName ?? detail.variantId ?? "—"}</dd></div>
               <div><dt className="text-slate-500">Hành động</dt><dd><ActionBadge action={detail.action} /></dd></div>
@@ -222,6 +222,6 @@ const InventoryTable = ({
       </Dialog>
     </>
   );
-};
+}
 
-export default InventoryTable;
+export default memo(InventoryTable);

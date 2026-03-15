@@ -9,8 +9,10 @@ public class ProductResponse {
     private Long id;
     private Long categoryId;
     private String code;
+    private String slug;
     private String name;
     private String description;
+    private String image;
     private String gender;
     private Integer status;
     private LocalDateTime createdAt;

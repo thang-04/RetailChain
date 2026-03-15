@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { Package, AlertTriangle, CheckCircle2 } from "lucide-react";
 
+const INVENTORY_PREVIEW_LIMIT = 5;
+
 const StoreInventoryTable = ({ inventory }) => {
     const { id } = useParams();
     // Use mock default if no inventory provided
@@ -22,6 +24,9 @@ const StoreInventoryTable = ({ inventory }) => {
         { id: 4, name: "Running Sneakers", sku: "RS-888", category: "Footwear", stock: 0, price: "$85.00", status: "Out of Stock" },
         { id: 5, name: "Coffee Maker Pro", sku: "CM-200", category: "Home", stock: 32, price: "$149.99", status: "In Stock" },
     ];
+
+    const previewList = inventoryList.slice(0, INVENTORY_PREVIEW_LIMIT);
+    const remainingCount = inventoryList.length - INVENTORY_PREVIEW_LIMIT;
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -50,35 +55,34 @@ const StoreInventoryTable = ({ inventory }) => {
             <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border-light dark:border-border-dark space-y-0">
                 <div className="flex items-center gap-2">
                     <Package className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Store Inventory</CardTitle>
+                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Tồn kho cửa hàng</CardTitle>
+                    <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-0.5 rounded-full border-none shadow-none">
+                        {inventoryList.length}
+                    </Badge>
                 </div>
                 <Link
                     to={`/store/${id}/inventory`}
                     className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer"
                 >
-                    View All Inventory
+                    View All
                 </Link>
             </CardHeader>
             <CardContent className="p-0">
                 <Table>
                     <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
                         <TableRow className="hover:bg-transparent border-b border-border-light dark:border-border-dark">
-                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Product Name</TableHead>
-                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">SKU</TableHead>
-                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Category</TableHead>
-                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Stock</TableHead>
-                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Status</TableHead>
+                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Sản phẩm</TableHead>
+                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider text-right">Tồn kho</TableHead>
+                            <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Trạng thái</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-border-light dark:divide-border-dark">
-                        {inventoryList.map((item) => (
+                        {previewList.map((item) => (
                             <TableRow key={item.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer border-none">
                                 <TableCell className="px-6 py-3 text-sm font-medium text-slate-900 dark:text-white">
                                     {item.name}
                                 </TableCell>
-                                <TableCell className="px-6 py-3 text-sm text-slate-500 font-mono">{item.sku}</TableCell>
-                                <TableCell className="px-6 py-3 text-sm text-slate-700 dark:text-slate-300">{item.category}</TableCell>
-                                <TableCell className="px-6 py-3 text-sm font-semibold text-slate-900 dark:text-white">{item.stock}</TableCell>
+                                <TableCell className="px-6 py-3 text-sm font-semibold text-slate-900 dark:text-white text-right">{item.stock}</TableCell>
                                 <TableCell className="px-6 py-3">
                                     <Badge variant="secondary" className={`border-none shadow-none text-xs flex w-fit items-center ${getStatusColor(item.status)}`}>
                                         {getStatusIcon(item.status)}
@@ -90,6 +94,7 @@ const StoreInventoryTable = ({ inventory }) => {
                     </TableBody>
                 </Table>
             </CardContent>
+
         </Card>
     );
 };

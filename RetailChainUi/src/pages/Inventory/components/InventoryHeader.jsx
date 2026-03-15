@@ -31,10 +31,10 @@ const InventoryHeader = ({ onExport, dateRange, onDateChange, canExport }) => {
     <div className="flex items-center justify-between mb-6">
       <div className="flex flex-col">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-          Global Inventory Overview
+          Tổng quan tồn kho toàn hệ thống
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Real-time stock levels across all active locations
+           Mức tồn kho theo thời gian thực tại tất cả các địa điểm đang hoạt động
         </p>
       </div>
       <div className="flex gap-3">
@@ -68,7 +68,7 @@ const InventoryHeader = ({ onExport, dateRange, onDateChange, canExport }) => {
           disabled={!canExport}
         >
           <Download className="w-[18px] h-[18px]" />
-          <span>Export Report</span>
+          <span>Xuất báo cáo</span>
         </Button>
       </div>
     </div>

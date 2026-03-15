@@ -7,6 +7,7 @@ import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import java.util.List;
+import java.util.Map;
 
 public interface InventoryService {
     WarehouseResponse createWarehouse(WarehouseRequest request);
@@ -14,6 +15,8 @@ public interface InventoryService {
     List<WarehouseResponse> getAllWarehouses();
 
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
+
+    List<InventoryStockResponse> getStockByProduct(Long productId);
 
     void importStock(StockRequest request);
 
@@ -33,4 +36,10 @@ public interface InventoryService {
      * Lấy thông tin tổng quan tồn kho toàn hệ thống (dùng cho dashboard Inventory).
      */
     InventoryOverviewResponse getInventoryOverview();
+
+    /**
+     * Nhập kho từ Excel data.
+     * @param items List of items with sku, productName, quantity, unitPrice, note
+     */
+    void importStockFromExcel(List<Map<String, Object>> items);
 }

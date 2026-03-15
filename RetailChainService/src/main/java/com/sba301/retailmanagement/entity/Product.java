@@ -37,6 +37,29 @@ public class Product {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image")
+    private String image;
+
+    @Column(name = "slug", unique = true)
+    private String slug;
+
+    @PrePersist
+    @PreUpdate
+    public void generateSlug() {
+        if (this.name != null && this.code != null) {
+            String raw = this.name + "-" + this.code;
+            this.slug = toSlug(raw);
+        }
+    }
+
+    private String toSlug(String input) {
+        if (input == null)
+            return null;
+        return input.toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "") // Remove special chars
+                .replaceAll("\\s+", "-"); // Replace spaces with -
+    }
+
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", length = 10)
     private Gender gender;

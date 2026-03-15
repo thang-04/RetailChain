@@ -2,7 +2,7 @@ import React from "react";
 import { Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ProductHeader = () => {
+const ProductHeader = ({ onAddClick }) => {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
       <div className="flex flex-col gap-2">
@@ -18,10 +18,15 @@ const ProductHeader = () => {
           <Upload className="w-5 h-5" />
           <span>Import</span>
         </Button>
-        <Button className="h-11 px-5 gap-2 font-bold shadow-md shadow-primary/20">
-          <Plus className="w-5 h-5" />
-          <span>Add Product</span>
-        </Button>
+        {onAddClick && (
+          <Button
+            className="h-11 px-5 gap-2 font-bold shadow-md shadow-primary/20"
+            onClick={onAddClick}
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Product</span>
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChevronDown } from "lucide-react"
 
-export function DataTable({ columns, data, searchKey, searchPlaceholder, showColumnVisibility = true }) {
+const DataTable = React.memo(function DataTable({ columns, data, searchKey, searchPlaceholder, showColumnVisibility = true }) {
   const [sorting, setSorting] = React.useState([])
   const [columnFilters, setColumnFilters] = React.useState([])
   const [columnVisibility, setColumnVisibility] = React.useState({})

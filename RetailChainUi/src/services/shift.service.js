@@ -1,7 +1,7 @@
 // src/services/shift.service.js
 // API service cho chức năng quản lý ca làm việc (Shift)
 
-import { axiosPublic } from './api/axiosClient';
+import { axiosPrivate } from './api/axiosClient';
 
 const shiftService = {
     // ==================== SHIFT CRUD ====================
@@ -10,7 +10,7 @@ const shiftService = {
      * Lấy tất cả ca làm
      */
     getAllShifts: async () => {
-        const response = await axiosPublic.get('/shifts');
+        const response = await axiosPrivate.get('/shifts');
         return response;
     },
 
@@ -19,7 +19,7 @@ const shiftService = {
      * @param {number} storeId
      */
     getShiftsByStore: async (storeId) => {
-        const response = await axiosPublic.get(`/shifts/store/${storeId}`);
+        const response = await axiosPrivate.get(`/shifts/store/${storeId}`);
         return response;
     },
 
@@ -28,18 +28,42 @@ const shiftService = {
      * @param {{ storeId: number, name: string, startTime: string, endTime: string }} data
      */
     createShift: async (data) => {
-        const response = await axiosPublic.post('/shifts', data);
+        const response = await axiosPrivate.post('/shifts', data);
+        return response;
+    },
+
+    /**
+     * Cập nhật ca làm việc
+     */
+    updateShift: async (id, data) => {
+        const response = await axiosPrivate.put(`/shifts/${id}`, data);
+        return response;
+    },
+
+    /**
+     * Lấy danh sách ca làm mẫu (Global Templates)
+     */
+    getTemplates: async () => {
+        const response = await axiosPrivate.get('/shifts/templates');
+        return response;
+    },
+
+    /**
+     * Import ca làm từ mẫu cho cửa hàng
+     */
+    importTemplates: async (storeId, templateIds) => {
+        const response = await axiosPrivate.post(`/shifts/store/${storeId}/import-templates`, templateIds);
         return response;
     },
 
     // ==================== SHIFT ASSIGNMENT ====================
 
     /**
-     * Phân công ca cho nhân viên
-     * @param {{ shiftId: number, userId: number, workDate: string, createdBy: number }} data
+     * Phân công ca cho nhân viên (Hỗ trợ nhiều ca cùng lúc)
+     * @param {{ shiftIds: number[], userId: number, workDate: string, createdBy: number }} data
      */
-    assignShift: async (data) => {
-        const response = await axiosPublic.post('/shifts/assign', data);
+    assignShifts: async (data) => {
+        const response = await axiosPrivate.post('/shifts/assign', data);
         return response;
     },
 
@@ -48,7 +72,7 @@ const shiftService = {
      * @param {number} assignmentId
      */
     cancelAssignment: async (assignmentId) => {
-        const response = await axiosPublic.put(`/shifts/assign/${assignmentId}/cancel`);
+        const response = await axiosPrivate.put(`/shifts/assign/${assignmentId}/cancel`);
         return response;
     },
 
@@ -59,7 +83,7 @@ const shiftService = {
      * @param {string} to - Format: yyyy-MM-dd
      */
     getAssignments: async (storeId, from, to) => {
-        const response = await axiosPublic.get('/shifts/assignments', {
+        const response = await axiosPrivate.get('/shifts/assignments', {
             params: { storeId, from, to }
         });
         return response;
@@ -70,7 +94,7 @@ const shiftService = {
      * @param {number} userId
      */
     getAssignmentsByUser: async (userId) => {
-        const response = await axiosPublic.get(`/shifts/assignments/user/${userId}`);
+        const response = await axiosPrivate.get(`/shifts/assignments/user/${userId}`);
         return response;
     }
 };

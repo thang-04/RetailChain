@@ -32,7 +32,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CreateWarehouseModal from './CreateWarehouseModal';
 import StockViewModal from './StockViewModal';
-import { Plus, Search, Edit, Trash2, Box } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Box, Grid3X3, List, MapPin, Phone, User, Calendar, Building2, Warehouse } from 'lucide-react';
 
 const WarehouseListPage = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -42,6 +42,9 @@ const WarehouseListPage = () => {
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [viewStockId, setViewStockId] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  
+  // View mode: 'table' or 'grid'
+  const [viewMode, setViewMode] = useState('table');
 
   // Filter States
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,7 +54,7 @@ const WarehouseListPage = () => {
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = viewMode === 'grid' ? 12 : 10;
 
   const fetchWarehouses = async () => {
     try {
@@ -79,6 +82,14 @@ const WarehouseListPage = () => {
     };
     fetchStores();
   }, []);
+
+  // Calculate statistics
+  const stats = {
+    total: warehouses.length,
+    central: warehouses.filter(w => w.warehouseType === 1).length,
+    store: warehouses.filter(w => w.warehouseType === 2).length,
+    active: warehouses.filter(w => w.status === 1).length,
+  };
 
   const handleCreate = () => {
     setEditingWarehouse(null);
@@ -124,12 +135,6 @@ const WarehouseListPage = () => {
       wh.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'ALL' ? true : String(wh.warehouseType) === filterType;
     const matchesStatus = filterStatus === 'ALL' ? true : String(wh.status) === filterStatus;
-
-    // Store Filter Logic: 
-    // If Filter is ALL, show all.
-    // If Filter is selected (e.g. storeId 'S001' or DB ID), match against warehouse.storeId?
-    // Note: warehouse.storeId is Number (DB ID), while Store Select usually uses DB ID now.
-    // Need to ensure filterStore stores the DB ID.
     const matchesStore = filterStore === 'ALL' ? true : String(wh.storeId) === filterStore;
 
     return matchesSearch && matchesType && matchesStatus && matchesStore;
@@ -140,14 +145,34 @@ const WarehouseListPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentWarehouses = filteredWarehouses.slice(startIndex, startIndex + itemsPerPage);
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType, filterStatus, filterStore, viewMode]);
+
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  // Get store name by ID
+  const getStoreName = (storeId) => {
+    if (!storeId) return '-';
+    const store = stores.find(s => s.dbId === storeId);
+    return store ? store.name : `Store #${storeId}`;
+  };
+
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Quản Lý Kho</h1>
@@ -158,9 +183,70 @@ const WarehouseListPage = () => {
         </Button>
       </div>
 
+      {/* Stats Overview Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex">
+              <div items-center justify-between>
+                <p className="text-sm text-primary font-medium">Tổng Số Kho</p>
+                <p className="text-3xl font-bold text-primary">{stats.total}</p>
+              </div>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <Warehouse className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-secondary border-border">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Kho Tổng</p>
+                <p className="text-3xl font-bold text-foreground">{stats.central}</p>
+              </div>
+              <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-muted-foreground" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-accent border-border">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Kho Cửa Hàng</p>
+                <p className="text-3xl font-bold text-foreground">{stats.store}</p>
+              </div>
+              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+                <Box className="w-6 h-6 text-muted-foreground" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-primary font-medium">Đang Hoạt Động</p>
+                <p className="text-3xl font-bold text-primary">{stats.active}</p>
+              </div>
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                <List className="w-6 h-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters & View Toggle */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col md:flex-row items-center gap-4">
+            {/* Search */}
             <div className="flex items-center gap-2 flex-1">
               <Search className="w-4 h-4 text-muted-foreground" />
               <Input
@@ -171,7 +257,8 @@ const WarehouseListPage = () => {
               />
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Filters */}
+            <div className="flex items-center gap-4 flex-wrap">
               {/* Status Filter */}
               <div className="w-[180px]">
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -182,6 +269,20 @@ const WarehouseListPage = () => {
                     <SelectItem value="ALL">Tất cả Trạng thái</SelectItem>
                     <SelectItem value="1">Đang hoạt động</SelectItem>
                     <SelectItem value="0">Đã khóa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Type Filter */}
+              <div className="w-[160px]">
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Loại kho" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tất cả Loại</SelectItem>
+                    <SelectItem value="1">Kho Tổng</SelectItem>
+                    <SelectItem value="2">Kho Cửa Hàng</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -202,38 +303,53 @@ const WarehouseListPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* View Toggle */}
+              <div className="flex items-center gap-1 border rounded-md p-1">
+                <Button
+                  variant={viewMode === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setViewMode('table')}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">STT</TableHead>
-                  <TableHead>Mã Kho</TableHead>
-                  <TableHead>Tên Kho</TableHead>
-                  <TableHead>Loại</TableHead>
-                  <TableHead>Store Link</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead className="text-right">Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Đang tải dữ liệu...</div>
+          ) : filteredWarehouses.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">Không tìm thấy kho nào phù hợp.</div>
+          ) : viewMode === 'table' ? (
+            // Table View
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      Đang tải dữ liệu...
-                    </TableCell>
+                    <TableHead className="w-[50px]">STT</TableHead>
+                    <TableHead>Mã Kho</TableHead>
+                    <TableHead>Tên Kho</TableHead>
+                    <TableHead>Loại</TableHead>
+                    <TableHead>Cửa Hàng</TableHead>
+                    <TableHead>Trạng Thái</TableHead>
+                    <TableHead>Ngày Tạo</TableHead>
+                    <TableHead className="text-right">Hành Động</TableHead>
                   </TableRow>
-                ) : currentWarehouses.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                      Không tìm thấy kho nào phù hợp.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  currentWarehouses.map((wh, index) => (
+                </TableHeader>
+                <TableBody>
+                  {currentWarehouses.map((wh, index) => (
                     <TableRow key={wh.id}>
                       <TableCell>{(currentPage - 1) * itemsPerPage + index + 1}</TableCell>
                       <TableCell className="font-medium">{wh.code}</TableCell>
@@ -244,12 +360,15 @@ const WarehouseListPage = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {wh.storeId ? `Store #${wh.storeId}` : '-'}
+                        {wh.storeId ? getStoreName(wh.storeId) : '-'}
                       </TableCell>
                       <TableCell>
                         <Badge variant={wh.status === 1 ? "outline" : "destructive"}>
                           {wh.status === 1 ? 'Hoạt động' : 'Đã khóa'}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {formatDate(wh.createdAt)}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button
@@ -279,34 +398,109 @@ const WarehouseListPage = () => {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            // Grid View
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {currentWarehouses.map((wh) => (
+                <Card key={wh.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground font-mono">{wh.code}</p>
+                        <CardTitle className="text-lg truncate">{wh.name}</CardTitle>
+                      </div>
+                      <div className="flex gap-1">
+                        <Badge variant={wh.warehouseType === 1 ? "default" : "secondary"} className="text-xs">
+                          {wh.warehouseType === 1 ? 'Kho Tổng' : 'Kho Cửa Hàng'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Store */}
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="truncate">
+                        {wh.storeId ? getStoreName(wh.storeId) : 'Không có cửa hàng'}
+                      </span>
+                    </div>
+                    
+                    {/* Status */}
+                    <div className="flex items-center justify-between">
+                      <Badge variant={wh.status === 1 ? "outline" : "destructive"}>
+                        {wh.status === 1 ? 'Hoạt động' : 'Đã khóa'}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(wh.createdAt)}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-1 pt-2 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Xem Tồn Kho"
+                        onClick={(e) => { e.stopPropagation(); setViewStockId(wh.id); }}
+                      >
+                        <Box className="w-4 h-4 mr-1" /> Tồn kho
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Chỉnh sửa"
+                        onClick={(e) => { e.stopPropagation(); handleEdit(wh); }}
+                      >
+                        <Edit className="w-4 h-4 text-blue-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Xóa"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteClick(wh.id); }}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-end space-x-2 py-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Trước
-              </Button>
-              <div className="text-sm font-medium">
-                Trang {currentPage} / {totalPages}
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-muted-foreground">
+                Hiển thị {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredWarehouses.length)} / {filteredWarehouses.length} kho
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Sau
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Trước
+                </Button>
+                <div className="text-sm font-medium">
+                  Trang {currentPage} / {totalPages}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Sau
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
@@ -348,7 +542,6 @@ const WarehouseListPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   );
 };

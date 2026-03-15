@@ -4,28 +4,36 @@ import com.sba301.retailmanagement.dto.request.CreateStoreRequest;
 import com.sba301.retailmanagement.dto.request.UpdateStoreRequest;
 import com.sba301.retailmanagement.dto.response.*;
 import com.sba301.retailmanagement.entity.Store;
-import com.sba301.retailmanagement.entity.StoreWarehouse;
-import com.sba301.retailmanagement.entity.StoreWarehouseId;
 import com.sba301.retailmanagement.entity.Warehouse;
-import com.sba301.retailmanagement.mapper.StoreMapper;
-import com.sba301.retailmanagement.repository.StoreRepository;
-import com.sba301.retailmanagement.repository.StoreWarehouseRepository;
-import com.sba301.retailmanagement.repository.WarehouseRepository;
-import com.sba301.retailmanagement.repository.UserRepository;
-import com.sba301.retailmanagement.repository.InventoryStockRepository;
 import com.sba301.retailmanagement.entity.InventoryStock;
 import com.sba301.retailmanagement.entity.User;
 import com.sba301.retailmanagement.entity.Product;
 import com.sba301.retailmanagement.entity.ProductVariant;
+import com.sba301.retailmanagement.enums.RoleConstant;
+import com.sba301.retailmanagement.exception.ResourceNotFoundException;
+import com.sba301.retailmanagement.mapper.StoreMapper;
+import com.sba301.retailmanagement.entity.Shift;
+import com.sba301.retailmanagement.repository.ShiftRepository;
+import com.sba301.retailmanagement.repository.StoreRepository;
+import com.sba301.retailmanagement.repository.WarehouseRepository;
+import com.sba301.retailmanagement.repository.UserRepository;
+import com.sba301.retailmanagement.repository.InventoryStockRepository;
 import com.sba301.retailmanagement.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -33,24 +41,64 @@ import java.util.Optional;
 public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
-    private final StoreMapper storeMapper;
-    private final StoreWarehouseRepository storeWarehouseRepository;
-    private final WarehouseRepository warehouseRepository;
     private final UserRepository userRepository;
+    private final StoreMapper storeMapper;
+    private final WarehouseRepository warehouseRepository;
     private final InventoryStockRepository inventoryStockRepository;
+    private final ShiftRepository shiftRepository;
 
     @Override
     public List<StoreResponse> getAllStores() {
         String prefix = "[getAllStores]";
         log.info("{}|START", prefix);
         try {
-            List<Store> stores = storeRepository.findAll();
+            User currentUser = getCurrentUser();
+            List<Store> stores;
+
+            if (currentUser != null && !isSuperAdmin(currentUser) && currentUser.getStoreId() != null) {
+                // If not Super Admin, return only their own store
+                Optional<Store> myStore = storeRepository.findById(currentUser.getStoreId());
+                stores = myStore.map(Collections::singletonList).orElse(Collections.emptyList());
+            } else {
+                stores = storeRepository.findAll();
+            }
+
             List<StoreResponse> response = stores.stream().map(storeMapper::toResponse).toList();
             log.info("{}|END|size={}", prefix, response.size());
             return response;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error retrieving stores: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy danh sách stores có phân trang
+     */
+    public Page<StoreResponse> getAllStoresPaged(int page, int size) {
+        String prefix = "[getAllStoresPaged]";
+        log.info("{}|START|page={}, size={}", prefix, page, size);
+        try {
+            User currentUser = getCurrentUser();
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Store> storesPage;
+
+            if (currentUser != null && !isSuperAdmin(currentUser) && currentUser.getStoreId() != null) {
+                // Return only their own store
+                Optional<Store> myStore = storeRepository.findById(currentUser.getStoreId());
+                List<Store> storeList = myStore.map(Collections::singletonList).orElse(Collections.emptyList());
+                storesPage = new org.springframework.data.domain.PageImpl<>(storeList, pageable, storeList.size());
+            } else {
+                storesPage = storeRepository.findAll(pageable);
+            }
+
+            Page<StoreResponse> response = storesPage.map(storeMapper::toResponse);
+            log.info("{}|END|totalElements={}, totalPages={}",
+                    prefix, response.getTotalElements(), response.getTotalPages());
+            return response;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error retrieving stores: " + e.getMessage());
         }
     }
 
@@ -62,14 +110,13 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
             StoreDetailResponse response = storeMapper.toDetailResponse(store);
 
-            List<StoreWarehouse> storeWarehouses = storeWarehouseRepository.findByStoreId(store.getId());
-            if (!storeWarehouses.isEmpty()) {
-                response.setWarehouseId(storeWarehouses.get(0).getWarehouse().getId());
+            if (store.getWarehouse() != null) {
+                response.setWarehouseId(store.getWarehouse().getId());
             }
 
             List<User> users = userRepository.findByStoreId(store.getId());
@@ -135,10 +182,22 @@ public class StoreServiceImpl implements StoreService {
 
             List<StoreStaffDTO> staff = users.stream().map(user -> {
                 String roleName = user.getRoles().isEmpty() ? "Staff" : user.getRoles().iterator().next().getName();
-                String status = user.getStatus() == 1 ? "Active" : "Inactive";
-                String statusColor = user.getStatus() == 1 ? "text-emerald-700 bg-emerald-50"
-                        : "text-red-700 bg-red-50";
-                String dotColor = user.getStatus() == 1 ? "bg-emerald-500" : "bg-red-500";
+                
+                String status = "Inactive";
+                String statusColor = "text-red-700 bg-red-50";
+                String dotColor = "bg-red-500";
+                
+                if (user.getStatus() != null) {
+                    if (user.getStatus() == 1) {
+                        status = "Active";
+                        statusColor = "text-emerald-700 bg-emerald-50";
+                        dotColor = "bg-emerald-500";
+                    } else if (user.getStatus() == 2) {
+                        status = "On Leave";
+                        statusColor = "text-amber-700 bg-amber-50";
+                        dotColor = "bg-amber-500";
+                    }
+                }
 
                 String initials = "";
                 if (user.getFullName() != null && !user.getFullName().isEmpty()) {
@@ -165,52 +224,62 @@ public class StoreServiceImpl implements StoreService {
 
             log.info("{}|END", prefix);
             return response;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error retrieving store: " + e.getMessage());
         }
     }
 
     @Override
     public StoreResponse createStore(CreateStoreRequest request) {
-        String prefix = "[createStore]|code=" + (request != null ? request.getCode() : "null");
+        String prefix = "[createStore]|name=" + (request != null ? request.getName() : "null");
         log.info("{}|START", prefix);
         try {
-            if (request == null || request.getCode() == null) {
-                log.error("{}|FAILED|Request or code is null", prefix);
-                return null;
+            if (request == null) {
+                log.error("{}|FAILED|Request is null", prefix);
+                throw new IllegalArgumentException("Request cannot be null");
+            }
+            if (request.getCode() == null || request.getCode().trim().isEmpty()) {
+                request.setCode("ST" + System.currentTimeMillis());
             }
             if (storeRepository.findByCode(request.getCode()).isPresent()) {
                 log.error("{}|Store code already exists", prefix);
-                return null;
+                throw new IllegalArgumentException("Store code already exists");
             }
 
+            Warehouse warehouse = new Warehouse();
+            warehouse.setCode("WH_" + request.getCode());
+            warehouse.setName("Kho " + request.getName());
+            warehouse.setAddress(request.getAddress());
+            warehouse.setIsCentral(0);
+            warehouse.setStatus(1);
+            warehouse.setCreatedAt(LocalDateTime.now());
+            warehouse.setUpdatedAt(LocalDateTime.now());
+            Warehouse savedWarehouse = warehouseRepository.save(warehouse);
+
             Store store = storeMapper.toEntity(request);
+            store.setWarehouse(savedWarehouse);
+            store.setWarehouseId(savedWarehouse.getId());
             store.setCreatedAt(LocalDateTime.now());
             store.setUpdatedAt(LocalDateTime.now());
 
             Store savedStore = storeRepository.save(store);
-
-            if (request.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
-                if (warehouseOpt.isPresent()) {
-                    Warehouse warehouse = warehouseOpt.get();
-                    StoreWarehouse storeWarehouse = new StoreWarehouse();
-                    StoreWarehouseId id = new StoreWarehouseId(savedStore.getId(), warehouse.getId());
-                    storeWarehouse.setId(id);
-                    storeWarehouse.setStore(savedStore);
-                    storeWarehouse.setWarehouse(warehouse);
-                    storeWarehouseRepository.save(storeWarehouse);
-                }
-            }
-
+            
+            // Seed default shifts for new store
+            seedDefaultShifts(savedStore.getId());
+            
             StoreResponse response = storeMapper.toResponse(savedStore);
+            response.setWarehouseId(savedWarehouse.getId());
 
-            log.info("{}|END|id={}", prefix, savedStore.getId());
+            log.info("{}|END|id={}, warehouseId={}", prefix, savedStore.getId(), savedWarehouse.getId());
             return response;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error creating store: " + e.getMessage());
         }
     }
 
@@ -222,7 +291,7 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
 
@@ -231,28 +300,18 @@ public class StoreServiceImpl implements StoreService {
 
             Store updatedStore = storeRepository.save(store);
 
-            storeWarehouseRepository.deleteByStoreId(store.getId());
-
-            if (request.getWarehouseId() != null) {
-                Optional<Warehouse> warehouseOpt = warehouseRepository.findById(request.getWarehouseId());
-                if (warehouseOpt.isPresent()) {
-                    Warehouse warehouse = warehouseOpt.get();
-                    StoreWarehouse storeWarehouse = new StoreWarehouse();
-                    StoreWarehouseId id = new StoreWarehouseId(updatedStore.getId(), warehouse.getId());
-                    storeWarehouse.setId(id);
-                    storeWarehouse.setStore(updatedStore);
-                    storeWarehouse.setWarehouse(warehouse);
-                    storeWarehouseRepository.save(storeWarehouse);
-                }
-            }
-
             StoreResponse response = storeMapper.toResponse(updatedStore);
+            if (updatedStore.getWarehouseId() != null) {
+                response.setWarehouseId(updatedStore.getWarehouseId());
+            }
 
             log.info("{}|END", prefix);
             return response;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error updating store: " + e.getMessage());
         }
     }
 
@@ -264,16 +323,147 @@ public class StoreServiceImpl implements StoreService {
             Optional<Store> storeOptional = storeRepository.findByCode(slug);
             if (storeOptional.isEmpty()) {
                 log.error("{}|Store not found", prefix);
-                return null;
+                throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
             storeRepository.delete(store);
 
             log.info("{}|END", prefix);
             return true;
+        } catch (ResourceNotFoundException e) {
+            throw e;
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return null;
+            throw new RuntimeException("Error deleting store: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<StaffResponse> getStaffByStoreId(Long storeId) {
+        String prefix = "[getStaffByStoreId]|storeId=" + storeId;
+        log.info("{}|START", prefix);
+        try {
+            if (!storeRepository.existsById(storeId)) {
+                log.error("{}|Store not found", prefix);
+                throw new ResourceNotFoundException("Store not found with id: " + storeId);
+            }
+
+            var users = userRepository.findByStoreId(storeId);
+            List<StaffResponse> staffList = users.stream()
+                    .map(user -> StaffResponse.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .fullName(user.getFullName())
+                            .phone(user.getPhone())
+                            .email(user.getEmail())
+                            .status(user.getStatus())
+                            .roleName(user.getRoles() != null && !user.getRoles().isEmpty()
+                                    ? user.getRoles().iterator().next().getName()
+                                    : "Staff")
+                            .createdAt(user.getCreatedAt())
+                            .build())
+                    .toList();
+
+            log.info("{}|END|size={}", prefix, staffList.size());
+            return staffList;
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error retrieving staff: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void assignStaffToStore(Long storeId, List<Long> staffIds) {
+        String prefix = "[assignStaffToStore]|storeId=" + storeId;
+        log.info("{}|START|staffIds={}", prefix, staffIds);
+        try {
+            if (!storeRepository.existsById(storeId)) {
+                log.error("{}|Store not found", prefix);
+                throw new ResourceNotFoundException("Store not found with id: " + storeId);
+            }
+
+            if (staffIds == null || staffIds.isEmpty()) {
+                log.info("{}|END|No staff to assign", prefix);
+                return;
+            }
+
+            List<User> staffList = userRepository.findAllById(staffIds);
+            for (User staff : staffList) {
+                // Ensure they are STAFF
+                boolean isStaff = staff.getRoles() != null && staff.getRoles().stream()
+                        .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.STAFF.name()));
+                if (isStaff) {
+                    staff.setStoreId(storeId);
+                } else {
+                    log.warn("{}|User {} is not STAFF, skipping assignment", prefix, staff.getId());
+                }
+            }
+            userRepository.saveAll(staffList);
+
+            log.info("{}|END|Assigned {} staff members", prefix, staffList.size());
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            throw new RuntimeException("Error assigning staff: " + e.getMessage());
+        }
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof UserDetails) {
+                String email = ((UserDetails) principal).getUsername();
+                return userRepository.findByEmail(email).orElse(null);
+            }
+        } catch (Exception e) {
+            log.debug("No authenticated user found");
+        }
+        return null;
+    }
+
+    private boolean isSuperAdmin(User user) {
+        return user != null && user.getRoles() != null && user.getRoles().stream()
+                .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.SUPER_ADMIN.name()));
+    }
+
+    private void seedDefaultShifts(Long storeId) {
+        log.info("[seedDefaultShifts]|storeId={}|START", storeId);
+        List<Shift> defaultShifts = new ArrayList<>();
+        
+        // Morning Shift: 06:00 - 14:00
+        Shift morning = new Shift();
+        morning.setStoreId(storeId);
+        morning.setName("Ca Sáng");
+        morning.setStartTime(LocalTime.of(6, 0));
+        morning.setEndTime(LocalTime.of(14, 0));
+        morning.setCreatedAt(LocalDateTime.now());
+        morning.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(morning);
+
+        // Afternoon Shift: 14:00 - 22:00
+        Shift afternoon = new Shift();
+        afternoon.setStoreId(storeId);
+        afternoon.setName("Ca Chiều");
+        afternoon.setStartTime(LocalTime.of(14, 0));
+        afternoon.setEndTime(LocalTime.of(22, 0));
+        afternoon.setCreatedAt(LocalDateTime.now());
+        afternoon.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(afternoon);
+
+        // Night Shift: 22:00 - 06:00
+        Shift night = new Shift();
+        night.setStoreId(storeId);
+        night.setName("Ca Đêm");
+        night.setStartTime(LocalTime.of(22, 0));
+        night.setEndTime(LocalTime.of(6, 0));
+        night.setCreatedAt(LocalDateTime.now());
+        night.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(night);
+
+        shiftRepository.saveAll(defaultShifts);
+        log.info("[seedDefaultShifts]|storeId={}|END|Seeded {} shifts", storeId, defaultShifts.size());
     }
 }

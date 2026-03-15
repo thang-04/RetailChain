@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,25 +7,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { userService } from '../../../services/user.service';
 
 const StaffProfile = () => {
     const { id } = useParams();
-    // In real app, fetch data based on ID
-    const staff = {
-        name: "Nguyen Van A",
-        role: "Store Manager",
-        id: id || "ST001",
-        email: "nguyenvana@example.com",
-        phone: "0901234567",
-        address: "123 Le Loi, District 1, HCMC",
-        department: "Management",
-        joinDate: "2023-01-15",
-        status: "Active"
-    };
+    const [staff, setStaff] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                // TODO: Replace with proper user fetch by ID when auth is re-implemented
+                const response = await userService.getUserById(id);
+                if (response && response.data) {
+                    setStaff({
+                        ...response.data,
+                        name: response.data.fullName || 'User',
+                        role: response.data.roles && response.data.roles.length > 0 ? response.data.roles[0].name : "Standard User",
+                        address: response.data.address || "N/A",
+                        department: response.data.department || "N/A",
+                        joinDate: response.data.createdAt ? new Date(response.data.createdAt).toLocaleDateString() : "N/A",
+                        status: response.data.status === 1 ? "Active" : "Inactive"
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load profile", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUserData();
+    }, [id]);
+
+    if (loading) {
+        return <div className="p-6">Loading profile...</div>;
+    }
+
+    if (!staff) {
+        return <div className="p-6">Error loading profile data.</div>;
+    }
 
     return (
         <div className="p-6 space-y-6">
-             <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center">
                 <h2 className="text-3xl font-bold tracking-tight">Employee Profile</h2>
                 <Button variant="outline">Edit Profile</Button>
             </div>

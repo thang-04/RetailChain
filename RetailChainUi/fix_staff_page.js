@@ -1,1 +1,0 @@
-const fs = require("fs"); const file = "src/pages/StoreDashboard/StoreStaffPage.jsx"; let content = fs.readFileSync(file, "utf8"); content = content.replace("const data = await storeService.getStoreStaff(id);", "const data = await storeService.getStoreById(id);"); content = content.replace("setStaffList(data);", "setStaffList(data.staff || []);"); fs.writeFileSync(file, content);

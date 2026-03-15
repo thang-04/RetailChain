@@ -6,6 +6,13 @@ import lombok.Data;
 public class WarehouseRequest {
     private String code;
     private String name;
-    private Integer warehouseType; // 1: Main, 2: Store
-    private Long storeId; // Nullable if type is Main
+    private String address;
+    private String province;
+    private String district;
+    private String ward;
+    private String contactName;
+    private String contactPhone;
+    private String description;
+    private Integer isCentral;
+    private Integer status;
 }

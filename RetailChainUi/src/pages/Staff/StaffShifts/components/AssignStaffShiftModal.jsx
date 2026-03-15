@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import shiftService from "@/services/shift.service";
-import { axiosPublic } from "@/services/api/axiosClient";
+import { axiosPrivate } from "@/services/api/axiosClient";
+import { cn } from "@/lib/utils";
+import useAuth from "@/contexts/AuthContext/useAuth";
 
 const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) => {
+    const { user } = useAuth();
     // State form
     const [selectedUserId, setSelectedUserId] = useState("");
-    const [selectedShiftId, setSelectedShiftId] = useState("");
+    const [selectedShiftIds, setSelectedShiftIds] = useState([]); // Chuyển sang mảng
     const [workDate, setWorkDate] = useState("");
     const [notes, setNotes] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // State data dari API
+    // State data từ API
     const [staffList, setStaffList] = useState([]);
     const [shiftList, setShiftList] = useState([]);
 
@@ -28,7 +31,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
     useEffect(() => {
         if (!isOpen) {
             setSelectedUserId("");
-            setSelectedShiftId("");
+            setSelectedShiftIds([]);
             setWorkDate("");
             setNotes("");
             setError("");
@@ -38,7 +41,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
     const loadStaffAndShifts = async () => {
         try {
             // Load nhân viên theo store
-            const staffRes = await axiosPublic.get(`/stores/${storeId}/staff-list`);
+            const staffRes = await axiosPrivate.get(`/stores/${storeId}/staff-list`);
             if (staffRes?.code === 200 && staffRes?.data) {
                 setStaffList(staffRes.data);
             }
@@ -53,6 +56,14 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
         }
     };
 
+    const toggleShift = (shiftId) => {
+        setSelectedShiftIds(prev => 
+            prev.includes(shiftId) 
+                ? prev.filter(id => id !== shiftId) 
+                : [...prev, shiftId]
+        );
+    };
+
     const handleAssign = async () => {
         // Validate
         if (!selectedUserId) {
@@ -63,8 +74,8 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
             setError("Vui lòng chọn ngày làm việc");
             return;
         }
-        if (!selectedShiftId) {
-            setError("Vui lòng chọn ca làm");
+        if (selectedShiftIds.length === 0) {
+            setError("Vui lòng chọn ít nhất một ca làm");
             return;
         }
 
@@ -72,29 +83,39 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
         setError("");
 
         try {
-            const result = await shiftService.assignShift({
-                shiftId: Number(selectedShiftId),
+            const result = await shiftService.assignShifts({
+                shiftIds: selectedShiftIds.map(id => Number(id)),
                 userId: Number(selectedUserId),
                 workDate: workDate,
-                createdBy: 1, // TODO: lấy từ AuthContext user hiện tại
+                createdBy: user?.id || 1, // Dùng ID người dùng hiện tại
             });
 
             if (result?.code === 200) {
-                // Thành công → đóng modal + reload lịch
                 if (onAssignSuccess) onAssignSuccess();
                 onClose(false);
             } else {
                 setError(result?.desc || "Có lỗi xảy ra khi phân công ca");
             }
         } catch (err) {
-            setError(err?.response?.data?.desc || "Có lỗi xảy ra khi phân công ca");
+            let errorMsg = "Có lỗi xảy ra khi phân công ca";
+            if (err?.response?.data) {
+                const data = err.response.data;
+                if (typeof data === "string") {
+                    try {
+                        const parsed = JSON.parse(data);
+                        errorMsg = parsed?.desc || errorMsg;
+                    } catch {
+                        errorMsg = data;
+                    }
+                } else {
+                    errorMsg = data?.desc || errorMsg;
+                }
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
     };
-
-    // Tìm shift đã chọn để hiện thông tin thời gian
-    const selectedShift = shiftList.find(s => String(s.id) === String(selectedShiftId));
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -102,13 +123,13 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                 <DialogHeader className="p-6 pb-4 border-b border-border-light dark:border-border-dark flex flex-row justify-between items-start space-y-0">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            <span className="bg-[#24748f]/10 text-[#24748f] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                                 Store {storeId || "—"}
                             </span>
                         </div>
-                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Assign Shift</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Phân Công Ca Làm</DialogTitle>
                         <DialogDescription className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                            Schedule a team member for an upcoming shift.
+                            Lên lịch làm việc cho nhân viên. Bạn có thể chọn nhiều ca cùng lúc.
                         </DialogDescription>
                     </div>
                 </DialogHeader>
@@ -124,10 +145,10 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
 
                     {/* Chọn nhân viên */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Select Staff Member</label>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Chọn Nhân Viên</label>
                         <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                             <SelectTrigger className="w-full h-12 rounded-xl border-slate-300 dark:border-slate-600 dark:bg-surface-dark dark:text-white">
-                                <SelectValue placeholder="Search or select employee..." />
+                                <SelectValue placeholder="Tìm hoặc chọn nhân viên..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {staffList.length > 0 ? (
@@ -137,68 +158,86 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                                         </SelectItem>
                                     ))
                                 ) : (
-                                    <SelectItem value="__empty" disabled>Không có nhân viên</SelectItem>
+                                    <div className="p-4 text-center">
+                                        <p className="text-sm text-slate-500 mb-2">Cửa hàng này chưa có nhân viên nào.</p>
+                                        <p className="text-xs text-slate-400">Bạn cần vào phần "Quản lý nhân sự" của cửa hàng để thêm nhân viên trước.</p>
+                                    </div>
                                 )}
                             </SelectContent>
                         </Select>
                     </div>
 
-                    {/* Ngày + Thông tin */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Date</label>
-                            <input
-                                type="date"
-                                value={workDate}
-                                onChange={(e) => setWorkDate(e.target.value)}
-                                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-base text-slate-900 dark:text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-2 justify-end pb-3">
-                            {selectedShift && (
-                                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg text-sm border border-green-100 dark:border-green-800 h-12">
-                                    <span className="material-symbols-outlined text-[18px]">schedule</span>
-                                    <span>{selectedShift.startTime} - {selectedShift.endTime}</span>
-                                </div>
-                            )}
-                        </div>
+                    {/* Ngày làm việc */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ngày Làm Việc</label>
+                        <input
+                            type="date"
+                            value={workDate}
+                            onChange={(e) => setWorkDate(e.target.value)}
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-base text-slate-900 dark:text-white focus:border-[#24748f] focus:outline-none focus:ring-1 focus:ring-[#24748f]"
+                        />
                     </div>
 
-                    {/* Chọn ca làm (Radio Cards) */}
+                    {/* Chọn ca làm (Pill Cards) */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Shift Type</label>
-                        <div className="grid grid-cols-3 gap-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
+                            Chọn Ca Làm Việc
+                            {selectedShiftIds.length > 0 && (
+                                <span className="text-[#24748f] text-xs font-normal">Đã chọn {selectedShiftIds.length} ca</span>
+                            )}
+                        </label>
+                        <div className="grid grid-cols-1 gap-2">
                             {shiftList.length > 0 ? (
                                 shiftList.map((shift, index) => {
+                                    const isSelected = selectedShiftIds.includes(String(shift.id));
                                     const icons = ["wb_sunny", "light_mode", "nights_stay"];
-                                    const colors = ["text-orange-500", "text-blue-500", "text-indigo-500"];
+                                    const colors = ["text-amber-500", "text-sky-500", "text-indigo-500"];
+                                    
                                     return (
-                                        <label key={shift.id} className="cursor-pointer relative">
-                                            <input
-                                                type="radio"
-                                                name="shift_type"
-                                                className="peer sr-only"
-                                                value={shift.id}
-                                                checked={String(selectedShiftId) === String(shift.id)}
-                                                onChange={() => setSelectedShiftId(String(shift.id))}
-                                            />
-                                            <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-primary/50 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:ring-1 peer-checked:ring-primary transition-all h-full text-center">
-                                                <span className={`material-symbols-outlined ${colors[index % colors.length]} mb-1`}>
-                                                    {icons[index % icons.length]}
-                                                </span>
-                                                <span className="text-sm font-bold text-slate-900 dark:text-white">{shift.name}</span>
-                                                <span className="text-xs text-slate-500">{shift.startTime} - {shift.endTime}</span>
+                                        <div 
+                                            key={shift.id}
+                                            onClick={() => toggleShift(String(shift.id))}
+                                            className={cn(
+                                                "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group",
+                                                isSelected 
+                                                    ? "border-[#24748f] bg-[#24748f]/5 ring-1 ring-[#24748f]" 
+                                                    : "border-slate-200 dark:border-slate-700 bg-white dark:bg-surface-dark hover:border-[#24748f]/50"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={cn(
+                                                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                                                    isSelected ? "bg-[#24748f] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-[#24748f]"
+                                                )}>
+                                                    <span className="material-symbols-outlined text-[20px]">
+                                                        {icons[index % icons.length]}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="text-sm font-bold text-slate-900 dark:text-white">{shift.name}</div>
+                                                        {shift.isDefault && (
+                                                            <span className="bg-primary/10 text-primary text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-tighter border border-primary/20">Hệ thống</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-xs text-slate-500">{shift.startTime} - {shift.endTime}</div>
+                                                </div>
                                             </div>
-                                            <div className="absolute top-[-6px] right-[-6px] bg-primary text-white rounded-full p-0.5 hidden peer-checked:block shadow-sm">
-                                                <span className="material-symbols-outlined text-[14px] block">check</span>
+                                            <div className={cn(
+                                                "w-6 h-6 rounded-full border flex items-center justify-center transition-all",
+                                                isSelected 
+                                                    ? "bg-[#24748f] border-[#24748f] text-white" 
+                                                    : "border-slate-300 dark:border-slate-600"
+                                            )}>
+                                                {isSelected && <span className="material-symbols-outlined text-[16px]">check</span>}
                                             </div>
-                                        </label>
+                                        </div>
                                     );
                                 })
                             ) : (
-                                <div className="col-span-3 text-center text-sm text-slate-400 py-4">
-                                    Chưa có ca làm nào. Hãy tạo ca làm trước.
+                                <div className="text-center text-sm text-slate-400 py-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                    <span className="material-symbols-outlined text-[32px] mb-2 block opacity-20">history_toggle_off</span>
+                                    Chưa có dữ liệu ca làm việc.
                                 </div>
                             )}
                         </div>
@@ -207,13 +246,13 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                     {/* Notes */}
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex justify-between">
-                            Notes <span className="text-slate-400 font-normal text-xs">Optional</span>
+                            Ghi chú <span className="text-slate-400 font-normal text-xs italic">Tùy chọn</span>
                         </label>
                         <textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-slate-400 min-h-[80px]"
-                            placeholder="Add special instructions or tasks for this shift..."
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-surface-dark px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-[#24748f] focus:outline-none focus:ring-1 focus:ring-[#24748f] placeholder:text-slate-400 min-h-[80px]"
+                            placeholder="Thêm hướng dẫn đặc biệt cho nhân viên..."
                         ></textarea>
                     </div>
                 </div>
@@ -225,12 +264,12 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                         disabled={loading}
                         className="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         onClick={handleAssign}
-                        disabled={loading}
-                        className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                        disabled={loading || selectedShiftIds.length === 0}
+                        className="px-6 py-2.5 rounded-lg bg-[#24748f] hover:bg-[#1a5b71] text-white font-semibold shadow-md shadow-[#24748f]/20 hover:shadow-lg hover:shadow-[#24748f]/30 transition-all flex items-center gap-2 disabled:opacity-50"
                     >
                         {loading ? (
                             <>
@@ -240,7 +279,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                         ) : (
                             <>
                                 <span className="material-symbols-outlined text-[20px]">person_add</span>
-                                Assign Shift
+                                Phân Công {selectedShiftIds.length > 1 ? `(${selectedShiftIds.length} ca)` : ""}
                             </>
                         )}
                     </button>

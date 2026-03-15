@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/retail-chain') + '/api';
 
@@ -6,17 +7,26 @@ const defaultHeaders = {
   'Content-Type': 'application/json',
 };
 
-// --- Public API Client ---
-export const axiosPublic = axios.create({
+// --- Single API Client (no auth) ---
+const axiosClient = axios.create({
   baseURL: baseURL,
   headers: defaultHeaders,
   timeout: 10000,
 });
 
-// Response interceptor for public client 
-axiosPublic.interceptors.response.use(
+// Response interceptor
+axiosClient.interceptors.response.use(
   (response) => {
     if (response && response.data) {
+      // Backend controllers return String type -> content-type is text/plain
+      // Axios won't auto-parse text/plain as JSON, so we parse it manually
+      if (typeof response.data === 'string') {
+        try {
+          return JSON.parse(response.data);
+        } catch (e) {
+          return response.data;
+        }
+      }
       return response.data;
     }
     return response;
@@ -32,57 +42,56 @@ axiosPublic.interceptors.response.use(
   }
 );
 
-// --- Private API Client ---
+// Export aliases to avoid breaking existing service imports
+export const axiosPublic = axiosClient;
+
 export const axiosPrivate = axios.create({
   baseURL: baseURL,
   headers: defaultHeaders,
   timeout: 10000,
-  withCredentials: true, 
 });
 
-// Request Interceptor: Attach Token
+// Request interceptor for token
 axiosPrivate.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined') {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle Token Expiration
+// Response interceptor for parsing and 401
 axiosPrivate.interceptors.response.use(
   (response) => {
     if (response && response.data) {
+      if (typeof response.data === 'string') {
+        try { return JSON.parse(response.data); } catch (e) { return response.data; }
+      }
       return response.data;
     }
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
 
-    // Handle 401 Unauthorized (Token expired or invalid)
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      console.warn("Unauthorized access - 401");
-      
+    // Catch 403 Forbidden from Backend @PreAuthorize 
+    if (error.response?.status === 403) {
+      toast.error('Bạn không có quyền thực hiện hành động này!');
       return Promise.reject(error);
     }
 
-    if (error.response) {
-      return Promise.reject(error);
-    } else if (error.request) {
-      throw new Error('Không kết nối được server');
-    } else {
-      throw new Error(error.message || 'Có lỗi xảy ra');
-    }
+    if (error.response) return Promise.reject(error);
+    if (error.request) throw new Error('Không kết nối được server');
+    throw new Error(error.message || 'Có lỗi xảy ra');
   }
 );
 
-
-
+export default axiosClient;

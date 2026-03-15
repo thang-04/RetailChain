@@ -1,4 +1,5 @@
 import { axiosPrivate } from './api/axiosClient';
+import productService from './product.service';
 
 const inventoryService = {
   // --- Real Backend APIs ---
@@ -7,7 +8,12 @@ const inventoryService = {
   },
 
   getAllWarehouses: async () => {
-    return axiosPrivate.get('/inventory/warehouse');
+    return axiosPrivate.get('/warehouse');
+  },
+
+  // Wrapper for product service
+  getAllProducts: async () => {
+    return productService.getAllProducts();
   },
 
   updateWarehouse: async (id, data) => {
@@ -20,6 +26,10 @@ const inventoryService = {
 
   getStockByWarehouse: async (warehouseId) => {
     return axiosPrivate.get(`/inventory/stock/${warehouseId}`);
+  },
+
+  getStockByProduct: async (productId) => {
+    return axiosPrivate.get(`/inventory/product/${productId}`);
   },
 
   importStock: async (data) => {
@@ -49,7 +59,7 @@ const inventoryService = {
 
   getStockOutRecords: async () => {
     try {
-      const response = await axiosPrivate.get('/inventory/documents?type=EXPORT');
+      const response = await axiosPrivate.get('/inventory/documents?type=TRANSFER');
       return response.data || [];
     } catch (error) {
       console.error("Fetch stock out error", error);
@@ -69,6 +79,30 @@ const inventoryService = {
 
   deleteDocument: async (id) => {
     return axiosPrivate.delete(`/inventory/documents/${id}`);
+  },
+
+  importStockFromExcel: async (data) => {
+    return axiosPrivate.post('/inventory/import/excel', data);
+  },
+
+  /**
+   * Kiểm tra SKU có tồn tại trong hệ thống không.
+   * GET /api/product/exists?sku={sku}
+   * @param {string} sku - Mã SKU cần kiểm tra
+   * @returns {Promise<{exists: boolean, productId: number|null, code: string}>}
+   */
+  checkSkuExists: async (sku) => {
+    try {
+      const response = await axiosPrivate.get(`/product/exists?sku=${encodeURIComponent(sku)}`);
+      const res = typeof response === 'string' ? JSON.parse(response) : response;
+      if (res && res.code === 200 && res.data) {
+        return res.data;
+      }
+      return { exists: false, productId: null, code: sku };
+    } catch (error) {
+      console.error("Check SKU exists error:", error);
+      return { exists: false, productId: null, code: sku, error: true };
+    }
   },
 
   /**
@@ -125,9 +159,7 @@ const inventoryService = {
 
   createTransfer: async (data) => {
     return inventoryService.transferStock(data);
-  }
-
-  ,
+  },
 
   /**
    * Lấy tổng quan tồn kho phục vụ dashboard Inventory.
@@ -156,6 +188,36 @@ const inventoryService = {
     const raw = await axiosPrivate.get(`/inventory-history/record/export${qs ? `?${qs}` : ""}`);
     // axiosPrivate interceptor trả về response.data, với CSV là string thuần.
     return typeof raw === "string" ? raw : (raw?.data ?? "");
+  },
+
+  /**
+   * Lấy danh sách tất cả danh mục (categories).
+   * GET /api/product/categories
+   * @returns {Promise<Array>} Mảng categories
+   */
+  getAllCategories: async () => {
+    try {
+      const response = await axiosPrivate.get('/product/categories');
+      return response.data || response || [];
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+  },
+
+  /**
+   * Lấy danh sách tất cả nhà cung cấp (suppliers).
+   * GET /api/supplier
+   * @returns {Promise<Array>} Mảng suppliers
+   */
+  getAllSuppliers: async () => {
+    try {
+      const response = await axiosPrivate.get('/supplier');
+      return response.data || response || [];
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      return [];
+    }
   }
 };
 
