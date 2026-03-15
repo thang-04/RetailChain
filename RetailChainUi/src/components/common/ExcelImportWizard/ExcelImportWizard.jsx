@@ -117,9 +117,9 @@ const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
             newRow.categoryId = foundCat ? foundCat.id : null;
           }
           
-          // Remap supplier
+          // Remap supplier - DB field is 'name', not 'supplierName'
           if (row.supplierName && !row.supplierId) {
-            const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
+            const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'name');
             newRow.supplierId = foundSupplier ? (foundSupplier.supplierId || foundSupplier.id) : null;
           }
           
