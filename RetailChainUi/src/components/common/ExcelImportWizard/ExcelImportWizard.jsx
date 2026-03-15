@@ -143,6 +143,9 @@ const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
       setRowStates(states);
       pushUndoState({ parsedData: data, rowStates: states });
       toast.success(`Đã đọc ${data.length} dòng`);
+      
+      // Chuyển sang bước 2 (Map) sau khi upload thành công
+      setCurrentStep(2);
     } catch (err) {
       toast.error(err.message);
     }
