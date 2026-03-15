@@ -53,6 +53,20 @@ public class WarehouseController {
         }
     }
 
+    @GetMapping("/central")
+    public String getCentralWarehouse() {
+        String prefix = "[getCentralWarehouse]";
+        log.info("{}|START", prefix);
+        try {
+            WarehouseResponse response = inventoryService.getCentralWarehouse();
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Central warehouse retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving central warehouse: " + e.getMessage());
+        }
+    }
+
     @PreAuthorize("hasAuthority('" + WAREHOUSE_UPDATE + "')")
     @PutMapping("/{id}")
     public String updateWarehouse(@PathVariable Long id, @RequestBody WarehouseRequest request) {

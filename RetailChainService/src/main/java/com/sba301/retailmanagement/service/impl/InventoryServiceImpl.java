@@ -79,6 +79,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public WarehouseResponse getCentralWarehouse() {
+        return warehouseRepository.findByIsCentralTrue()
+                .map(this::mapToWarehouseResponse)
+                .orElseThrow(() -> new RuntimeException("Central warehouse not found"));
+    }
+
+    @Override
     public List<InventoryStockResponse> getStockByWarehouse(Long warehouseId) {
         List<InventoryStock> stocks = inventoryStockRepository.findByWarehouseId(warehouseId);
         return stocks.stream().map(stock -> {

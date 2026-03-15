@@ -11,6 +11,11 @@ const inventoryService = {
     return axiosPrivate.get('/warehouse');
   },
 
+  // Lấy kho tổng (central warehouse) - không cần quyền đặc biệt
+  getCentralWarehouse: async () => {
+    return axiosPrivate.get('/warehouse/central');
+  },
+
   // Wrapper for product service
   getAllProducts: async () => {
     return productService.getAllProducts();

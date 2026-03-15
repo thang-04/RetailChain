@@ -14,6 +14,12 @@ public interface InventoryService {
 
     List<WarehouseResponse> getAllWarehouses();
 
+    /**
+     * Lấy thông tin kho tổng (central warehouse).
+     * @return WarehouseResponse của kho tổng
+     */
+    WarehouseResponse getCentralWarehouse();
+
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
 
     List<InventoryStockResponse> getStockByProduct(Long productId);
