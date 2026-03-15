@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -140,9 +140,8 @@ const DataTable = ({
               const isEditing = editingRowIndex === originalIndex;
 
               return (
-                <>
+                <React.Fragment key={originalIndex}>
                   <TableRow
-                    key={originalIndex}
                     className={cn(
                       !isValid && "bg-red-50",
                       isValid && !isSelected && "opacity-50"
@@ -221,7 +220,7 @@ const DataTable = ({
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </React.Fragment>
               );
             })}
           </TableBody>
