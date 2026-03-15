@@ -39,19 +39,21 @@ const DataTable = ({
   const filteredData = useMemo(() => {
     if (!data || data.length === 0) return [];
 
-    return data.filter((_, index) => {
-      const state = rowStates[index];
-      switch (activeTab) {
-        case "valid":
-          return state?.isValid;
-        case "invalid":
-          return state && !state.isValid;
-        case "new":
-          return state?.skuExists === false;
-        default:
-          return true;
-      }
-    });
+    return data
+      .map((row, index) => ({ ...row, originalIndex: index }))
+      .filter((row) => {
+        const state = rowStates[row.originalIndex];
+        switch (activeTab) {
+          case "valid":
+            return state?.isValid;
+          case "invalid":
+            return state && !state.isValid;
+          case "new":
+            return state?.skuExists === false;
+          default:
+            return true;
+        }
+      });
   }, [data, rowStates, activeTab]);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -63,8 +65,8 @@ const DataTable = ({
     setCurrentPage(1);
   };
 
-  const handleRowEdit = (index, updatedRow) => {
-    onRowEdit(startIndex + index, updatedRow);
+  const handleRowEdit = (row, updatedRow) => {
+    onRowEdit(row.originalIndex, updatedRow);
     setEditingRowIndex(null);
   };
 
@@ -129,17 +131,18 @@ const DataTable = ({
           </TableHeader>
           <TableBody>
             {paginatedData.map((row, index) => {
-              const state = rowStates[startIndex + index];
+              const originalIndex = row.originalIndex;
+              const state = rowStates[originalIndex];
               const isValid = state?.isValid;
               const isSelected = state?.selected;
               const skuExists = state?.skuExists;
               const isChecking = state?.isChecking;
-              const isEditing = editingRowIndex === startIndex + index;
+              const isEditing = editingRowIndex === originalIndex;
 
               return (
                 <>
                   <TableRow
-                    key={index}
+                    key={originalIndex}
                     className={cn(
                       !isValid && "bg-red-50",
                       isValid && !isSelected && "opacity-50"
@@ -150,7 +153,7 @@ const DataTable = ({
                         type="checkbox"
                         checked={isSelected || false}
                         disabled={!isValid}
-                        onChange={() => onRowToggle(startIndex + index)}
+                        onChange={() => onRowToggle(originalIndex)}
                         className="w-4 h-4"
                       />
                     </TableCell>
@@ -199,7 +202,7 @@ const DataTable = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setEditingRowIndex(isEditing ? null : startIndex + index)}
+                        onClick={() => setEditingRowIndex(isEditing ? null : originalIndex)}
                       >
                         {isEditing ? "Đóng" : "Sửa"}
                       </Button>
@@ -212,7 +215,7 @@ const DataTable = ({
                           row={row}
                           suppliers={suppliers}
                           categories={categories}
-                          onSave={(updatedRow) => handleRowEdit(index, updatedRow)}
+                          onSave={(updatedRow) => handleRowEdit(row, updatedRow)}
                           onCancel={() => setEditingRowIndex(null)}
                         />
                       </TableCell>
