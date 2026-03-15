@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final StoreRepository storeRepository;
+    private final com.sba301.retailmanagement.service.SendMailService sendMailService;
 
     // get user theo scope
     @Override
@@ -118,13 +119,17 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        // Generate random password
+        String tempPassword = generateRandomPassword();
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(passwordEncoder.encode(tempPassword))
                 .fullName(request.getFullName())
                 .phone(request.getPhoneNumber())
                 .status(1) // Active
+                .isFirstLogin(true)
                 .roles(roles)
                 .createdByUserId(currentUser != null ? currentUser.getId() : null)
                 .build();
@@ -132,10 +137,22 @@ public class UserServiceImpl implements UserService {
         assignScopeToUser(user, request, currentUser, roles);
 
         User savedUser = userRepository.save(user);
-        log.info("Created user {} with scope: storeId={}",
+        log.info("Created user {} with scope: storeId={}. Temp password sent to email.",
                 savedUser.getUsername(), savedUser.getStoreId());
 
+        // Send welcome email
+        sendMailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFullName(), tempPassword);
+
         return toDTO(savedUser);
+    }
+
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        java.util.Random rnd = new java.util.Random();
+        StringBuilder sb = new StringBuilder(10);
+        for (int i = 0; i < 10; i++)
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        return sb.toString();
     }
 
     @Override
@@ -179,6 +196,10 @@ public class UserServiceImpl implements UserService {
 
         if (request.getStoreId() != null) {
             user.setStoreId(request.getStoreId());
+        }
+
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
         }
 
         User savedUser = userRepository.save(user);
@@ -324,6 +345,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhone())
                 .status(user.getStatus())
+                .isFirstLogin(user.getIsFirstLogin())
                 .roles(roleNames)
                 .permissions(permissions)
                 // Scope info

@@ -176,7 +176,7 @@ const StockInWizard = () => {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-muted-foreground">Đang tải dữ liệu...</p>
                 </div>
             </div>
@@ -199,7 +199,7 @@ const StockInWizard = () => {
             </div>
 
             {/* Progress Stepper */}
-            <div className="bg-white rounded-lg p-4 shadow-sm border">
+            <div className="bg-white rounded-lg p-4 border shadow-sm">
                 <ProgressStepper currentStep={currentStep} steps={STEPS} />
             </div>
 
@@ -251,7 +251,7 @@ const StockInWizard = () => {
                         <Button variant="outline">Hủy bỏ</Button>
                     </Link>
                     {currentStep < 3 ? (
-                        <Button onClick={handleNext} className="bg-violet-600 hover:bg-violet-700">
+                        <Button onClick={handleNext}>
                             Tiếp tục
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
@@ -259,7 +259,6 @@ const StockInWizard = () => {
                         <Button 
                             onClick={handleSubmit} 
                             disabled={submitting}
-                            className="bg-violet-600 hover:bg-violet-700"
                         >
                             {submitting ? (
                                 <>

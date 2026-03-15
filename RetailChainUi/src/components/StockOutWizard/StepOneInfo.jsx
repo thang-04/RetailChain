@@ -9,32 +9,31 @@ const StepOneInfo = ({ formData, setFormData, centralWarehouses, storeWarehouses
     const selectedTargetWarehouse = storeWarehouses.find(wh => String(wh.id) === formData.targetWarehouseId);
 
     return (
-        <Card className="border-amber-100 shadow-sm">
-            <CardHeader className="bg-amber-50 border-b border-amber-100">
-                <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
+        <Card className="border-border shadow-sm">
+            <CardHeader className="bg-primary/5 border-b border-border">
+                <CardTitle className="text-lg flex items-center gap-2 text-primary">
                     <Building2 className="w-5 h-5" />
-                    Thông tin kho xuất - nhận
+                    Chọn kho xuất và kho nhận
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
                 {/* Source Warehouse - ReadOnly */}
                 <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-amber-500" />
-                        Kho xuất (Kho tổng) <span className="text-red-500">*</span>
+                        <Building2 className="w-4 h-4 text-primary" />
+                        Kho xuất (Kho tổng) <span className="text-destructive">*</span>
                     </Label>
                     {selectedSourceWarehouse ? (
-                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <div className="p-3 bg-primary/5 border border-primary/20 rounded-md">
                             <div className="flex items-center gap-2">
-                                <span className="font-medium text-amber-900">{selectedSourceWarehouse.name}</span>
-                                <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded">(Kho tổng)</span>
+                                <span className="font-medium text-foreground">{selectedSourceWarehouse.name}</span>
                             </div>
                             {selectedSourceWarehouse.address && (
                                 <p className="text-sm text-muted-foreground mt-1">{selectedSourceWarehouse.address}</p>
                             )}
                         </div>
                     ) : (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2 text-red-600">
+                        <div className="p-3 bg-destructive/5 border border-destructive/20 rounded-md flex items-center gap-2 text-destructive">
                             <AlertCircle className="w-4 h-4" />
                             <span>Không tìm thấy kho tổng. Vui lòng liên hệ quản trị viên.</span>
                         </div>
@@ -44,15 +43,15 @@ const StepOneInfo = ({ formData, setFormData, centralWarehouses, storeWarehouses
                 {/* Target Warehouse Selection */}
                 <div className="space-y-2">
                     <Label className="text-sm font-medium flex items-center gap-2">
-                        <Store className="w-4 h-4 text-amber-500" />
-                        Kho nhận (Kho cửa hàng) <span className="text-red-500">*</span>
+                        <Store className="w-4 h-4 text-primary" />
+                        Kho nhận hàng <span className="text-destructive">*</span>
                     </Label>
                     <Select
                         value={formData.targetWarehouseId}
                         onValueChange={(val) => setFormData({ ...formData, targetWarehouseId: val })}
                     >
-                        <SelectTrigger className={errors.targetWarehouseId ? "border-red-500" : ""}>
-                            <SelectValue placeholder="Chọn kho cửa hàng nhận hàng" />
+                        <SelectTrigger className={errors.targetWarehouseId ? "border-destructive" : ""}>
+                            <SelectValue placeholder="Chọn cửa hàng nhận hàng" />
                         </SelectTrigger>
                         <SelectContent>
                             {storeWarehouses.map(wh => (
@@ -68,7 +67,7 @@ const StepOneInfo = ({ formData, setFormData, centralWarehouses, storeWarehouses
                         </SelectContent>
                     </Select>
                     {errors.targetWarehouseId && (
-                        <p className="text-xs text-red-500">{errors.targetWarehouseId}</p>
+                        <p className="text-xs text-destructive">{errors.targetWarehouseId}</p>
                     )}
                 </div>
 
@@ -78,7 +77,7 @@ const StepOneInfo = ({ formData, setFormData, centralWarehouses, storeWarehouses
                         Ghi chú
                     </Label>
                     <Textarea
-                        placeholder="Nhập ghi chú (nếu có)"
+                        placeholder="Nhập ghi chú cho phiếu xuất kho (không bắt buộc)"
                         value={formData.note}
                         onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                         rows={3}

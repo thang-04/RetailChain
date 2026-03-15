@@ -2,6 +2,7 @@ package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
 import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
+import com.sba301.retailmanagement.dto.request.FirstTimeChangePasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -157,6 +158,23 @@ public class AuthController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, e.getMessage());
+        }
+    }
+
+    @PostMapping("/first-change-password")
+    @Operation(summary = "Mandatory password change on first login")
+    public String firstTimeChangePassword(@Valid @RequestBody FirstTimeChangePasswordRequest request,
+            @RequestHeader("Authorization") String bearertoken) {
+        String prefix = "[firstTimeChangePassword]";
+        try {
+            log.info("{}|START", prefix);
+            String token = bearertoken.substring(7);
+            AuthResponse authResponse = authService.firstTimeChangePassword(request, token);
+            log.info("{}|END|userId={}", prefix, authResponse.getUser().getId());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Password updated successfully", authResponse);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Password update failed: " + e.getMessage());
         }
     }
 }

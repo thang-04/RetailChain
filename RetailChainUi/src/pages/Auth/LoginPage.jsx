@@ -24,7 +24,12 @@ const LoginPage = () => {
         }
         setIsSubmitting(true);
         try {
-            await login(email, password);
+            const data = await login(email, password);
+            if (data.requireChangePassword) {
+                toast.info('Đây là lần đầu bạn đăng nhập. Vui lòng đổi mật khẩu.');
+                navigate('/force-change-password', { state: { tempToken: data.tempToken, email: email } });
+                return;
+            }
             toast.success('Đăng nhập thành công!');
             navigate('/');
         } catch (err) {

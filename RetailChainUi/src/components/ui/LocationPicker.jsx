@@ -94,7 +94,7 @@ const LocationPicker = ({ onLocationSelect, initialPosition }) => {
             </MapContainer>
 
             {/* Overlay hint */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] bg-white/90 dark:bg-[#1e282c]/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-gray-200 dark:border-gray-700 pointer-events-none">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[400] bg-card/95 border border-border px-3 py-1.5 rounded-full shadow-sm pointer-events-none">
                 <p className="text-xs font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">touch_app</span>
                     Click map to pin location

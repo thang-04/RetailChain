@@ -3,6 +3,7 @@ package com.sba301.retailmanagement.service.impl;
 import com.sba301.retailmanagement.config.JwtProperties;
 import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
 import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
+import com.sba301.retailmanagement.dto.request.FirstTimeChangePasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -64,23 +65,55 @@ public class AuthServiceImpl implements AuthService {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                String accessToken = tokenProvider.generateAccessToken(authentication);
-
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
                 User user = userRepository.findById(userDetails.getId())
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "User not found with id: " + userDetails.getId()));
 
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+                if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        String tempToken = tokenProvider.generateTemporaryToken(user);
+                        return AuthResponse.builder()
+                                        .requireChangePassword(true)
+                                        .tempToken(tempToken)
+                                        .user(toUserDTO(user))
+                                        .message("Vui lòng đổi mật khẩu để tiếp tục.")
+                                        .build();
+                }
 
-                UserDTO userDTO = toUserDTO(user);
+                String accessToken = tokenProvider.generateAccessToken(authentication);
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
                 return AuthResponse.builder()
                                 .accessToken(accessToken)
                                 .refreshToken(refreshToken.getToken())
                                 .expiresIn(jwtProperties.getAccessTokenExpiration())
-                                .user(userDTO)
+                                .user(toUserDTO(user))
+                                .requireChangePassword(false)
                                 .build();
+        }
+
+        @Override
+        @Transactional
+        public AuthResponse firstTimeChangePassword(FirstTimeChangePasswordRequest request, String tempToken) {
+                String email = tokenProvider.getEmailFromToken(tempToken);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+
+                if (!Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        throw new RuntimeException("Account already initialized");
+                }
+
+                if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu tạm thời");
+                }
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setIsFirstLogin(false);
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+
+                // Now provide full login
+                return login(new LoginRequest(user.getEmail(), request.getNewPassword()));
         }
 
         @Override
@@ -172,11 +205,15 @@ public class AuthServiceImpl implements AuthService {
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
 
                 if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-                        throw new RuntimeException("Current password does not match");
+                        throw new RuntimeException("Mật khẩu hiện tại không chính xác");
+                }
+
+                if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
                 }
 
                 if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-                        throw new RuntimeException("New password and confirm password do not match");
+                        throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp");
                 }
                 refreshTokenService.deleteByUser(user);
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -186,22 +223,34 @@ public class AuthServiceImpl implements AuthService {
         }
         @Override
         public void forgotPassWord(String email) {
-                log.info("[forgotPassWord]|email={}|STUB", email);
-                if (userRepository.existsByEmail(email)) {
-                        sendMailService.sendOtpEmail(email, "RetailChain Admin send code to reset password", otpService.generateAndSaveOtp(email));
-                        return;
+                log.info("[forgotPassWord]|email={}", email);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy email: " + email));
+                
+                if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        throw new RuntimeException("Tài khoản của bạn chưa được kích hoạt. Vui lòng đăng nhập lần đầu bằng mật khẩu tạm thời đã được gửi qua email.");
                 }
-                throw new ResourceNotFoundException("User not found with email: " + email);
+
+                sendMailService.sendOtpEmail(email, "RetailChain Admin send code to reset password", otpService.generateAndSaveOtp(email));
         }
 
         @Override
         public void confirmPassWord(ConfirmPasswordRequest request) {
-                log.info("[confirmPassWord]|email={}|STUB", request.getEmail());
+                log.info("[confirmPassWord]|email={}", request.getEmail());
         if (otpService.verifyOtp(request.getEmail(), request.getOtp(), true)) {
                         User user = userRepository.findByEmail(request.getEmail())
-                                        .orElseThrow(() -> new ResourceNotFoundException(
-                                                        "User not found with email: " + request.getEmail()));
+                                         .orElseThrow(() -> new ResourceNotFoundException(
+                                                         "User not found with email: " + request.getEmail()));
+                        
+                        // If they somehow reset via OTP, we should probably clear isFirstLogin if it was set
+                        // but based on forgotPassword logic, we block it. Still, the check here is good.
+                        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                                throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
+                        }
+
                         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                        user.setIsFirstLogin(false);
+                        user.setUpdatedAt(LocalDateTime.now());
                         userRepository.save(user);
                         return;
                 }
@@ -234,10 +283,13 @@ public class AuthServiceImpl implements AuthService {
 
                 UserDTO dto = UserDTO.builder()
                                 .id(user.getId())
+                                .username(user.getUsername())
                                 .email(user.getEmail())
                                 .fullName(user.getFullName())
                                 .phoneNumber(user.getPhone())
+                                .avatarUrl(null) // Or handle if exists
                                 .status(user.getStatus())
+                                .isFirstLogin(user.getIsFirstLogin())
                                 .roles(roleNames)
                                 .permissions(permissions)
                                 .storeId(user.getStoreId())

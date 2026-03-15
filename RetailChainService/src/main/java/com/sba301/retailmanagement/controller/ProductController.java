@@ -1,7 +1,9 @@
 package com.sba301.retailmanagement.controller;
 
+import com.sba301.retailmanagement.dto.request.CategoryRequest;
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
+import com.sba301.retailmanagement.dto.response.CategoryResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.service.ProductService;
@@ -17,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -166,10 +169,64 @@ public class ProductController {
     public String getCategories() {
         try {
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Categories fetched",
-                    productService.getAllCategories());
+                    productService.getCategoriesWithCount());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error fetching categories: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
+    @GetMapping("/categories/{id}")
+    public String getCategoryById(@PathVariable Long id) {
+        try {
+            CategoryResponse response = productService.getCategoryById(id);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Category fetched successfully", response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error fetching category: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + PRODUCT_CREATE + "')")
+    @PostMapping("/categories")
+    public String createCategory(@Valid @RequestBody CategoryRequest request) {
+        try {
+            CategoryResponse response = productService.createCategory(request);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Category created successfully", response);
+        } catch (IllegalArgumentException e) {
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error creating category: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + PRODUCT_UPDATE + "')")
+    @PutMapping("/categories/{id}")
+    public String updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
+        try {
+            CategoryResponse response = productService.updateCategory(id, request);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Category updated successfully", response);
+        } catch (IllegalArgumentException e) {
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating category: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + PRODUCT_DELETE + "')")
+    @DeleteMapping("/categories/{id}")
+    public String deleteCategory(@PathVariable Long id) {
+        try {
+            productService.deleteCategory(id);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Category deleted successfully");
+        } catch (IllegalStateException e) {
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting category: " + e.getMessage());
         }
     }
 

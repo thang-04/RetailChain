@@ -87,8 +87,8 @@ const EditStoreModal = ({ isOpen, onClose, storeData }) => {
 
     return (
         <div aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8" role="dialog">
-            <div aria-hidden="true" className="absolute inset-0 bg-[#131c1f]/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#1e282c] text-left shadow-lift transition-all flex flex-col h-[85vh]">
+            <div aria-hidden="true" className="absolute inset-0 bg-black/40" onClick={onClose}></div>
+            <div className="relative w-full max-w-6xl transform overflow-hidden rounded-2xl bg-card text-left shadow-lift transition-all flex flex-col h-[85vh]">
                 <div className="flex items-center justify-between border-b border-[#f1f3f4] dark:border-gray-700 px-8 py-4 bg-white dark:bg-[#1e282c] shrink-0">
                     <div>
                         <h3 className="text-xl font-bold leading-6 text-[#121617] dark:text-white tracking-tight">Edit Store Location</h3>

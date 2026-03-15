@@ -1,0 +1,570 @@
+app:
+  name: RetailChainUi
+  framework: React 19 + Vite
+  router: React Router DOM v7
+  total_routes: 28
+  generated: 2026-03-12
+
+routes:
+  # ==================== AUTH ====================
+  - path: /login
+    name: Đăng nhập
+    component: LoginPage
+    file: src/pages/Auth/LoginPage.jsx
+    params: []
+    description: Trang đăng nhập hệ thống
+    functionalities:
+      - Nhập email và mật khẩu để đăng nhập
+      - Hiển thị thông báo lỗi khi đăng nhập thất bại
+      - Chuyển hướng đến dashboard sau khi đăng nhập thành công
+    api_calls:
+      - POST /api/auth/login (thông qua useAuth hook)
+    ui_elements:
+      - Form đăng nhập với email và password
+      - Nút đăng nhập với trạng thái loading
+      - Thông báo lỗi khi đăng nhập thất bại
+
+  - path: /403
+    name: Forbidden
+    component: ForbiddenPage
+    file: src/pages/Auth/ForbiddenPage.jsx
+    params: []
+    description: Trang hiển thị khi không có quyền truy cập
+
+  # ==================== DASHBOARD & REPORTS ====================
+  - path: /
+    name: Dashboard
+    component: DashboardPage
+    file: src/pages/Dashboard/DashboardPage.jsx
+    params: []
+    description: Trang tổng quan hệ thống, hiển thị KPIs và biểu đồ doanh thu
+    functionalities:
+      - Xem tổng quan KPIs (tổng doanh thu, số đơn hàng, sản phẩm, khách hàng)
+      - Xem biểu đồ doanh thu theo thời gian
+      - Xem bảng xếp hạng cửa hàng
+      - Xem danh sách cửa hàng
+      - Chọn khoảng thời gian xem báo cáo (7 ngày, 30 ngày, 90 ngày)
+      - Xuất báo cáo
+      - Tạo báo cáo mới
+    api_calls:
+      - GET /api/dashboard/summary
+    ui_elements:
+      - KPI Cards (tổng doanh thu, đơn hàng, sản phẩm, khách hàng)
+      - Biểu đồ doanh thu (RevenueChart)
+      - Bảng xếp hạng cửa hàng (StoreRanking)
+      - Danh sách cửa hàng (StoreTable)
+      - Nút xuất báo cáo và tạo báo cáo
+
+  - path: /reports
+    name: Báo cáo tổng hợp
+    component: ExecutiveReport
+    file: src/pages/Reports/ExecutiveReport.jsx
+    params: []
+    description: Trang báo cáo điều hành, chỉ dành cho SUPER_ADMIN và STORE_MANAGER
+    functionalities:
+      - Xem báo cáo tổng hợp
+      - Lọc theo thời gian
+    api_calls:
+      - GET /api/reports
+    ui_elements:
+      - Biểu đồ và bảng dữ liệu báo cáo
+      - Bộ lọc thời gian
+
+  # ==================== STORE MODULE ====================
+  - path: /store
+    name: Quản lý cửa hàng
+    component: StorePage
+    file: src/pages/Store/StorePage.jsx
+    params: []
+    description: Trang quản lý danh sách cửa hàng (SUPER_ADMIN only)
+    functionalities:
+      - Xem danh sách cửa hàng dạng cards
+      - Thêm cửa hàng mới
+      - Tìm kiếm cửa hàng
+      - Lọc cửa hàng theo trạng thái
+      - Phân trang danh sách cửa hàng
+    api_calls:
+      - GET /api/stores
+      - POST /api/stores
+    ui_elements:
+      - Header với tiêu đề "Quản lý cửa hàng"
+      - Nút thêm cửa hàng (Add Store)
+      - Bộ lọc tìm kiếm (StoreFilter)
+      - Danh sách cửa hàng dạng card (StoreList)
+      - Phân trang
+
+  - path: /store/:id
+    name: Dashboard cửa hàng
+    component: StoreDashboardPage
+    file: src/pages/StoreDashboard/StoreDashboardPage.jsx
+    params:
+      - name: id
+        type: path
+        description: ID của cửa hàng
+    description: Trang dashboard chi tiết của một cửa hàng
+    functionalities:
+      - Xem thông tin tổng quan cửa hàng
+      - Xem KPI của cửa hàng
+      - Xem biểu đồ doanh thu
+      - Xem danh sách nhân viên
+      - Xem tồn kho thấp
+    api_calls:
+      - GET /api/stores/{id}
+    ui_elements:
+      - Thông tin cửa hàng
+      - KPI grid
+      - Biểu đồ doanh thu
+      - Danh sách nhân viên
+      - Bảng tồn kho thấp
+
+  - path: /store/:id/inventory
+    name: Tồn kho cửa hàng
+    component: StoreInventoryDetail
+    file: src/pages/StoreDashboard/StoreInventoryDetail.jsx
+    params:
+      - name: id
+        type: path
+        description: ID của cửa hàng
+    description: Trang xem chi tiết tồn kho của cửa hàng
+
+  - path: /store/:id/staff
+    name: Nhân viên cửa hàng
+    component: StoreStaffPage
+    file: src/pages/StoreDashboard/StoreStaffPage.jsx
+    params:
+      - name: id
+        type: path
+        description: ID của cửa hàng
+    description: Trang quản lý nhân viên của cửa hàng
+
+  # ==================== WAREHOUSE MODULE ====================
+  - path: /warehouse
+    name: Quản lý kho
+    component: WarehouseListPage
+    file: src/pages/Warehouse/WarehouseListPage.jsx
+    params: []
+    description: Trang quản lý kho tổng và kho cửa hàng (SUPER_ADMIN only)
+    functionalities:
+      - Xem danh sách kho (table view và grid view)
+      - Tạo kho mới
+      - Chỉnh sửa thông tin kho
+      - Xóa kho
+      - Xem tồn kho của kho
+      - Lọc kho theo loại (kho tổng, kho cửa hàng)
+      - Lọc kho theo trạng thái
+      - Lọc kho theo cửa hàng
+      - Tìm kiếm kho
+      - Phân trang
+    api_calls:
+      - GET /api/warehouses
+      - POST /api/warehouses
+      - PUT /api/warehouses/{id}
+      - DELETE /api/warehouses/{id}
+      - GET /api/stock/{warehouseId}
+    ui_elements:
+      - Thống kê tổng số kho, kho tổng, kho cửa hàng, đang hoạt động
+      - Search input
+      - Bộ lọc (trạng thái, loại kho, cửa hàng)
+      - Toggle view (table/grid)
+      - Table với thông tin kho
+      - Modal tạo/sửa kho
+      - Modal xem tồn kho
+      - Dialog xác nhận xóa
+
+  # ==================== PRODUCT MODULE ====================
+  - path: /products
+    name: Danh sách sản phẩm
+    component: ProductPage
+    file: src/pages/Product/ProductPage.jsx
+    params: []
+    description: Trang danh sách sản phẩm, tất cả vai trò đều xem được
+    functionalities:
+      - Xem danh sách sản phẩm
+      - Tìm kiếm sản phẩm theo tên hoặc mã
+      - Lọc sản phẩm theo danh mục
+      - Lọc sản phẩm theo trạng thái (active/inactive)
+      - Xem chi tiết sản phẩm
+      - Chỉnh sửa sản phẩm (SUPER_ADMIN, STORE_MANAGER)
+      - Tạo sản phẩm mới (SUPER_ADMIN, STORE_MANAGER)
+    api_calls:
+      - GET /api/products
+      - GET /api/categories
+    ui_elements:
+      - Banner cảnh báo backend offline
+      - Header với nút thêm sản phẩm
+      - Bộ lọc (tìm kiếm, danh mục, trạng thái)
+      - Bảng sản phẩm (ProductTable)
+
+  - path: /products/create
+    name: Tạo sản phẩm
+    component: ProductEditPage
+    file: src/pages/Product/ProductEditPage.jsx
+    params: []
+    description: Trang tạo sản phẩm mới (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Nhập thông tin sản phẩm
+      - Lưu sản phẩm mới
+    api_calls:
+      - POST /api/products
+    ui_elements:
+      - Form tạo sản phẩm
+
+  - path: /products/:slug
+    name: Chi tiết sản phẩm
+    component: ProductDetailPage
+    file: src/pages/Product/ProductDetailPage.jsx
+    params:
+      - name: slug
+        type: path
+        description: Slug của sản phẩm
+    description: Trang xem chi tiết một sản phẩm
+    functionalities:
+      - Xem thông tin chi tiết sản phẩm
+      - Xem các biến thể sản phẩm
+      - Xem tồn kho theo cửa hàng/kho
+    api_calls:
+      - GET /api/products/{slug}
+    ui_elements:
+      - Thông tin sản phẩm
+      - Danh sách biến thể
+      - Bảng tồn kho
+
+  - path: /products/:slug/edit
+    name: Chỉnh sửa sản phẩm
+    component: ProductEditPage
+    file: src/pages/Product/ProductEditPage.jsx
+    params:
+      - name: slug
+        type: path
+        description: Slug của sản phẩm
+    description: Trang chỉnh sửa sản phẩm (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Chỉnh sửa thông tin sản phẩm
+      - Lưu thay đổi
+    api_calls:
+      - GET /api/products/{slug}
+      - PUT /api/products/{id}
+    ui_elements:
+      - Form chỉnh sửa sản phẩm
+
+  # ==================== INVENTORY MODULE ====================
+  - path: /inventory
+    name: Lịch sử tồn kho
+    component: InventoryPage
+    file: src/pages/Inventory/InventoryPage.jsx
+    params: []
+    description: Trang xem lịch sử tồn kho, tất cả vai trò đều xem được
+    functionalities:
+      - Xem lịch sử tồn kho
+      - Lọc theo ngày
+      - Tìm kiếm theo tên sản phẩm
+      - Lọc theo loại thao tác (nhập/xuất)
+      - Phân trang
+      - Xuất file CSV
+    api_calls:
+      - GET /api/inventory/history
+      - GET /api/inventory/overview
+      - GET /api/inventory/export
+    ui_elements:
+      - Header với nút xuất CSV
+      - Bộ chọn ngày (date range picker)
+      - Thống kê tồn kho (InventoryStats)
+      - Bảng lịch sử tồn kho (InventoryTable)
+      - Phân trang
+
+  - path: /inventory/ledger
+    name: Sổ kho
+    component: StockLedger
+    file: src/pages/Inventory/StockLedger.jsx
+    params: []
+    description: Trang sổ kho chi tiết
+    functionalities:
+      - Xem sổ kho chi tiết
+    api_calls:
+      - GET /api/inventory/ledger
+    ui_elements:
+      - Bảng dữ liệu sổ kho
+
+  # ==================== STOCK IN ====================
+  - path: /stock-in
+    name: Danh sách phiếu nhập kho
+    component: StockInList
+    file: src/pages/StockIn/StockInList.jsx
+    params: []
+    description: Trang danh sách phiếu nhập kho
+    functionalities:
+      - Xem danh sách phiếu nhập kho
+      - Tìm kiếm theo mã phiếu, nhà cung cấp, kho đích
+      - Lọc theo trạng thái
+      - Lọc theo ngày
+      - Xem chi tiết phiếu nhập
+      - Xóa phiếu nhập
+      - Tạo phiếu nhập mới
+      - Nhập từ Excel
+      - Phân trang
+    api_calls:
+      - GET /api/stock-in
+      - DELETE /api/stock-in/{id}
+    ui_elements:
+      - Header với nút tạo phiếu và nhập Excel
+      - Bộ lọc (tìm kiếm, trạng thái, ngày)
+      - Bảng danh sách phiếu nhập
+      - Modal chi tiết phiếu nhập
+      - Phân trang
+
+  - path: /stock-in/create
+    name: Tạo phiếu nhập kho
+    component: CreateStockIn
+    file: src/pages/StockIn/CreateStockIn.jsx
+    params: []
+    description: Trang tạo phiếu nhập kho mới (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Chọn kho đích
+      - Chọn nhà cung cấp
+      - Thêm sản phẩm vào phiếu
+      - Nhập số lượng và đơn giá
+      - Lưu phiếu nhập
+    api_calls:
+      - POST /api/stock-in
+    ui_elements:
+      - Form tạo phiếu nhập với wizard (3 bước)
+
+  # ==================== STOCK OUT ====================
+  - path: /stock-out
+    name: Danh sách phiếu xuất kho
+    component: StockOutList
+    file: src/pages/StockOut/StockOutList.jsx
+    params: []
+    description: Trang danh sách phiếu xuất kho
+    functionalities:
+      - Xem danh sách phiếu xuất kho
+      - Tìm kiếm theo mã phiếu, kho xuất, ghi chú
+      - Lọc theo ngày
+      - Xem chi tiết phiếu xuất
+      - Xóa phiếu xuất
+      - Tạo phiếu xuất mới
+      - Nhập từ Excel
+      - Phân trang
+      - Xem thống kê (tổng phiếu, chờ duyệt, hoàn thành, tổng giá trị)
+    api_calls:
+      - GET /api/stock-out
+      - DELETE /api/stock-out/{id}
+    ui_elements:
+      - Header với nút tạo phiếu
+      - Thống kê (StatCards)
+      - Bộ lọc (tìm kiếm, ngày)
+      - Bảng danh sách phiếu xuất
+      - Modal chi tiết phiếu xuất
+      - Phân trang
+
+  - path: /stock-out/create
+    name: Tạo phiếu xuất kho
+    component: CreateStockOut
+    file: src/pages/StockOut/CreateStockOut.jsx
+    params: []
+    description: Trang tạo phiếu xuất kho mới (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Chọn kho nguồn
+      - Chọn kho đích
+      - Thêm sản phẩm vào phiếu
+      - Nhập số lượng
+      - Chọn lý do xuất
+      - Lưu phiếu xuất
+    api_calls:
+      - POST /api/stock-out
+    ui_elements:
+      - Form tạo phiếu xuất với wizard (3 bước)
+
+  # ==================== STAFF MODULE ====================
+  - path: /staff
+    name: Danh sách nhân viên
+    component: StaffList
+    file: src/pages/Staff/StaffList/StaffList.jsx
+    params: []
+    description: Trang danh sách nhân viên (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Xem danh sách nhân viên
+      - Tìm kiếm nhân viên
+      - Thêm nhân viên mới
+      - Xem thông tin nhân viên
+    api_calls:
+      - GET /api/staff
+    ui_elements:
+      - Header với nút thêm nhân viên
+      - Search input
+      - Bảng danh sách nhân viên (tên, email, role, department, store, status)
+
+  - path: /staff/shifts
+    name: Quản lý ca làm việc
+    component: StaffShiftsPage
+    file: src/pages/Staff/StaffShifts/StaffShiftsPage.jsx
+    params: []
+    description: Trang quản lý ca làm việc của nhân viên (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Xem danh sách ca làm
+      - Tạo ca làm mới
+      - Phân công nhân viên vào ca
+    api_calls:
+      - GET /api/shifts
+      - POST /api/shifts
+    ui_elements:
+      - Bảng danh sách ca làm
+      - Modal tạo ca làm
+      - Modal phân công nhân viên
+
+  - path: /staff/calendar
+    name: Lịch làm việc
+    component: StaffCalendar
+    file: src/pages/Staff/ShiftCalendar/StaffCalendar.jsx
+    params: []
+    description: Trang xem lịch làm việc của nhân viên
+    functionalities:
+      - Xem lịch làm việc theo ngày/tuần/tháng
+    api_calls:
+      - GET /api/staff/calendar
+    ui_elements:
+      - Calendar view
+
+  - path: /staff/attendance
+    name: Chấm công nhân viên
+    component: StaffAttendance
+    file: src/pages/Staff/Attendance/StaffAttendance.jsx
+    params: []
+    description: Trang chấm công nhân viên (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Xem bảng chấm công
+      - Lọc theo ngày và nhân viên
+    api_calls:
+      - GET /api/attendance
+    ui_elements:
+      - Bảng chấm công
+
+  - path: /staff/profile/:id
+    name: Hồ sơ nhân viên
+    component: StaffProfile
+    file: src/pages/Staff/Profile/StaffProfile.jsx
+    params:
+      - name: id
+        type: path
+        description: ID của nhân viên
+    description: Trang xem hồ sơ chi tiết nhân viên
+    functionalities:
+      - Xem thông tin nhân viên
+      - Xem lịch sử làm việc
+    api_calls:
+      - GET /api/staff/{id}
+    ui_elements:
+      - Thông tin nhân viên
+      - Lịch sử làm việc
+
+  - path: /staff/resource
+    name: Phân bổ nguồn lực
+    component: ResourceAssignment
+    file: src/pages/Staff/ResourceAssignment/ResourceAssignment.jsx
+    params: []
+    description: Trang phân bổ nguồn lực nhân viên (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Phân bổ nhân viên vào cửa hàng
+      - Quản lý phân công
+    api_calls:
+      - GET /api/resource/assignment
+      - POST /api/resource/assignment
+    ui_elements:
+      - Giao diện phân bổ nguồn lực
+
+  # ==================== USER MANAGEMENT ====================
+  - path: /users
+    name: Quản lý người dùng
+    component: UserManagementPage
+    file: src/pages/UserManagement/UserManagementPage.jsx
+    params: []
+    description: Trang quản lý người dùng hệ thống (SUPER_ADMIN, STORE_MANAGER)
+    functionalities:
+      - Xem danh sách người dùng
+      - Tìm kiếm người dùng
+      - Tạo người dùng mới
+      - Chỉnh sửa thông tin người dùng
+      - Khóa/Mở khóa tài khoản người dùng
+    api_calls:
+      - GET /api/users
+      - POST /api/users
+      - PUT /api/users/{id}
+      - POST /api/users/{id}/toggle-block
+    ui_elements:
+      - Header với nút tạo user
+      - Search input
+      - Bảng danh sách users (info, role, scope, status)
+      - Nút chỉnh sửa và khóa/mở khóa
+      - Dialog tạo user
+      - Dialog chỉnh sửa user
+
+  # ==================== PROFILE ====================
+  - path: /profile
+    name: Hồ sơ cá nhân
+    component: ProfilePage
+    file: src/pages/Profile/ProfilePage.jsx
+    params: []
+    description: Trang xem và chỉnh sửa hồ sơ cá nhân của user đang đăng nhập
+    functionalities:
+      - Xem thông tin hồ sơ cá nhân
+      - Xem vai trò và quyền hạn
+      - Xem cửa hàng trực thuộc
+    api_calls:
+      - GET /api/auth/me
+    ui_elements:
+      - Avatar và tên user
+      - Badge trạng thái
+      - Thông tin chi tiết (họ tên, username, email, số điện thoại)
+      - Thông tin cửa hàng trực thuộc
+
+  # ==================== ROLES & PERMISSIONS ====================
+  - path: /roles
+    name: Quản lý vai trò
+    component: RolePermissionPage
+    file: src/pages/RolePermission/RolePermissionPage.jsx
+    params: []
+    description: Trang quản lý vai trò và quyền hạn (SUPER_ADMIN only)
+    functionalities:
+      - Xem danh sách vai trò
+      - Tạo vai trò mới
+      - Chỉnh sửa vai trò
+      - Gán quyền cho vai trò
+    api_calls:
+      - GET /api/roles
+      - POST /api/roles
+      - PUT /api/roles/{id}
+    ui_elements:
+      - Danh sách vai trò
+      - Form tạo/sửa vai trò
+      - Gán quyền
+
+summary:
+  total_routes: 28
+  api_endpoints:
+    - GET/POST /api/auth/login
+    - GET /api/auth/me
+    - GET /api/dashboard/summary
+    - GET /api/reports
+    - GET/POST /api/stores
+    - GET /api/stores/{id}
+    - GET/POST /api/warehouses
+    - PUT/DELETE /api/warehouses/{id}
+    - GET /api/stock/{warehouseId}
+    - GET /api/products
+    - GET /api/categories
+    - POST/PUT /api/products
+    - GET /api/inventory/history
+    - GET /api/inventory/overview
+    - GET /api/inventory/export
+    - GET /api/inventory/ledger
+    - GET/POST/DELETE /api/stock-in
+    - GET/POST/DELETE /api/stock-out
+    - GET /api/staff
+    - GET/POST /api/shifts
+    - GET /api/staff/calendar
+    - GET /api/attendance
+    - GET /api/staff/{id}
+    - GET/POST /api/resource/assignment
+    - GET/POST/PUT /api/users
+    - POST /api/users/{id}/toggle-block
+    - GET /api/roles

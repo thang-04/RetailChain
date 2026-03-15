@@ -2,6 +2,7 @@ package com.sba301.retailmanagement.service;
 
 import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
 import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
+import com.sba301.retailmanagement.dto.request.FirstTimeChangePasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -23,4 +24,6 @@ public interface AuthService {
     void confirmPassWord(ConfirmPasswordRequest request);
 
     boolean verifyOtp(String email, String otp);
+
+    AuthResponse firstTimeChangePassword(FirstTimeChangePasswordRequest request, String tempToken);
 }

@@ -14,4 +14,5 @@ public class ShiftRequest {
     private String name;
     private String startTime; // Format: "HH:mm:ss"
     private String endTime; // Format: "HH:mm:ss"
+    private boolean isDefault;
 }

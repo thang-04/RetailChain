@@ -24,6 +24,14 @@ const confirmPassword = async (data) => {
     return await axiosPublic.post('/auth/confirm-password', data);
 };
 
+const firstTimeChangePassword = async (data, token) => {
+    return await axiosPublic.post('/auth/first-change-password', data, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+};
+
 const verifyOtp = async (email, otp) => {
     return await axiosPublic.post(`/auth/verify-otp?email=${email}&otp=${otp}`);
 };
@@ -35,7 +43,8 @@ const authService = {
     changePassword,
     forgotPassword,
     confirmPassword,
-    verifyOtp
+    verifyOtp,
+    firstTimeChangePassword
 };
 
 export default authService;
