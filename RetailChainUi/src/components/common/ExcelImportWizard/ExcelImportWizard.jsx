@@ -102,6 +102,48 @@ const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
     }
   }, [parsedData, rowStates, open]);
 
+  // Re-map categoryId and supplierId after categories/suppliers are loaded
+  useEffect(() => {
+    if (categories.length > 0 && parsedData.length > 0) {
+      const needsRemap = parsedData.some(row => (row.categoryName || row.supplierName) && (!row.categoryId || !row.supplierId));
+      
+      if (needsRemap) {
+        const remappedData = parsedData.map(row => {
+          let newRow = { ...row };
+          
+          // Remap category
+          if (row.categoryName && !row.categoryId) {
+            const foundCat = fuzzyMatch(row.categoryName, categories, 'name');
+            newRow.categoryId = foundCat ? foundCat.id : null;
+          }
+          
+          // Remap supplier
+          if (row.supplierName && !row.supplierId) {
+            const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
+            newRow.supplierId = foundSupplier ? (foundSupplier.supplierId || foundSupplier.id) : null;
+          }
+          
+          return newRow;
+        });
+
+        // Re-validate all rows
+        const newStates = {};
+        remappedData.forEach((row, index) => {
+          const validation = validateRow(row, index);
+          newStates[index] = {
+            ...validation,
+            selected: validation.isValid,
+            skuExists: rowStates[index]?.skuExists ?? null,
+            isChecking: false,
+          };
+        });
+
+        setParsedData(remappedData);
+        setRowStates(newStates);
+      }
+    }
+  }, [categories, suppliers]);
+
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
