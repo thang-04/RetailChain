@@ -12,6 +12,8 @@ import com.sba301.retailmanagement.entity.ProductVariant;
 import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.exception.ResourceNotFoundException;
 import com.sba301.retailmanagement.mapper.StoreMapper;
+import com.sba301.retailmanagement.entity.Shift;
+import com.sba301.retailmanagement.repository.ShiftRepository;
 import com.sba301.retailmanagement.repository.StoreRepository;
 import com.sba301.retailmanagement.repository.WarehouseRepository;
 import com.sba301.retailmanagement.repository.UserRepository;
@@ -27,6 +29,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +45,7 @@ public class StoreServiceImpl implements StoreService {
     private final StoreMapper storeMapper;
     private final WarehouseRepository warehouseRepository;
     private final InventoryStockRepository inventoryStockRepository;
+    private final ShiftRepository shiftRepository;
 
     @Override
     public List<StoreResponse> getAllStores() {
@@ -178,10 +182,22 @@ public class StoreServiceImpl implements StoreService {
 
             List<StoreStaffDTO> staff = users.stream().map(user -> {
                 String roleName = user.getRoles().isEmpty() ? "Staff" : user.getRoles().iterator().next().getName();
-                String status = user.getStatus() == 1 ? "Active" : "Inactive";
-                String statusColor = user.getStatus() == 1 ? "text-emerald-700 bg-emerald-50"
-                        : "text-red-700 bg-red-50";
-                String dotColor = user.getStatus() == 1 ? "bg-emerald-500" : "bg-red-500";
+                
+                String status = "Inactive";
+                String statusColor = "text-red-700 bg-red-50";
+                String dotColor = "bg-red-500";
+                
+                if (user.getStatus() != null) {
+                    if (user.getStatus() == 1) {
+                        status = "Active";
+                        statusColor = "text-emerald-700 bg-emerald-50";
+                        dotColor = "bg-emerald-500";
+                    } else if (user.getStatus() == 2) {
+                        status = "On Leave";
+                        statusColor = "text-amber-700 bg-amber-50";
+                        dotColor = "bg-amber-500";
+                    }
+                }
 
                 String initials = "";
                 if (user.getFullName() != null && !user.getFullName().isEmpty()) {
@@ -250,6 +266,10 @@ public class StoreServiceImpl implements StoreService {
             store.setUpdatedAt(LocalDateTime.now());
 
             Store savedStore = storeRepository.save(store);
+            
+            // Seed default shifts for new store
+            seedDefaultShifts(savedStore.getId());
+            
             StoreResponse response = storeMapper.toResponse(savedStore);
             response.setWarehouseId(savedWarehouse.getId());
 
@@ -407,5 +427,43 @@ public class StoreServiceImpl implements StoreService {
     private boolean isSuperAdmin(User user) {
         return user != null && user.getRoles() != null && user.getRoles().stream()
                 .anyMatch(r -> r.getCode().equalsIgnoreCase(RoleConstant.SUPER_ADMIN.name()));
+    }
+
+    private void seedDefaultShifts(Long storeId) {
+        log.info("[seedDefaultShifts]|storeId={}|START", storeId);
+        List<Shift> defaultShifts = new ArrayList<>();
+        
+        // Morning Shift: 06:00 - 14:00
+        Shift morning = new Shift();
+        morning.setStoreId(storeId);
+        morning.setName("Ca Sáng");
+        morning.setStartTime(LocalTime.of(6, 0));
+        morning.setEndTime(LocalTime.of(14, 0));
+        morning.setCreatedAt(LocalDateTime.now());
+        morning.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(morning);
+
+        // Afternoon Shift: 14:00 - 22:00
+        Shift afternoon = new Shift();
+        afternoon.setStoreId(storeId);
+        afternoon.setName("Ca Chiều");
+        afternoon.setStartTime(LocalTime.of(14, 0));
+        afternoon.setEndTime(LocalTime.of(22, 0));
+        afternoon.setCreatedAt(LocalDateTime.now());
+        afternoon.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(afternoon);
+
+        // Night Shift: 22:00 - 06:00
+        Shift night = new Shift();
+        night.setStoreId(storeId);
+        night.setName("Ca Đêm");
+        night.setStartTime(LocalTime.of(22, 0));
+        night.setEndTime(LocalTime.of(6, 0));
+        night.setCreatedAt(LocalDateTime.now());
+        night.setUpdatedAt(LocalDateTime.now());
+        defaultShifts.add(night);
+
+        shiftRepository.saveAll(defaultShifts);
+        log.info("[seedDefaultShifts]|storeId={}|END|Seeded {} shifts", storeId, defaultShifts.size());
     }
 }

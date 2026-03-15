@@ -133,6 +133,10 @@ const storeService = {
 
   deleteStore: async (id) => {
     return axiosPrivate.delete('/stores/' + id);
+  },
+
+  updateStaffStatus: async (staffId, data) => {
+    return axiosPrivate.put(`/user/${staffId}`, data);
   }
 };
 

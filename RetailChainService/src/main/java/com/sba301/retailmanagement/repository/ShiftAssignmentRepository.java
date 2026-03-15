@@ -24,6 +24,8 @@ public interface ShiftAssignmentRepository extends JpaRepository<ShiftAssignment
 
     // Added by me
     List<ShiftAssignment> findByWorkDateBetween(LocalDate from, LocalDate to);
+    
+    List<ShiftAssignment> findByUser_StoreIdAndWorkDateBetween(Long storeId, LocalDate from, LocalDate to);
 
     List<ShiftAssignment> findByShift_StoreIdAndWorkDateBetween(Long storeId, LocalDate from, LocalDate to);
 

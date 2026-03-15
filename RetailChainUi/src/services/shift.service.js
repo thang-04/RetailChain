@@ -32,13 +32,37 @@ const shiftService = {
         return response;
     },
 
+    /**
+     * Cập nhật ca làm việc
+     */
+    updateShift: async (id, data) => {
+        const response = await axiosPrivate.put(`/shifts/${id}`, data);
+        return response;
+    },
+
+    /**
+     * Lấy danh sách ca làm mẫu (Global Templates)
+     */
+    getTemplates: async () => {
+        const response = await axiosPrivate.get('/shifts/templates');
+        return response;
+    },
+
+    /**
+     * Import ca làm từ mẫu cho cửa hàng
+     */
+    importTemplates: async (storeId, templateIds) => {
+        const response = await axiosPrivate.post(`/shifts/store/${storeId}/import-templates`, templateIds);
+        return response;
+    },
+
     // ==================== SHIFT ASSIGNMENT ====================
 
     /**
-     * Phân công ca cho nhân viên
-     * @param {{ shiftId: number, userId: number, workDate: string, createdBy: number }} data
+     * Phân công ca cho nhân viên (Hỗ trợ nhiều ca cùng lúc)
+     * @param {{ shiftIds: number[], userId: number, workDate: string, createdBy: number }} data
      */
-    assignShift: async (data) => {
+    assignShifts: async (data) => {
         const response = await axiosPrivate.post('/shifts/assign', data);
         return response;
     },

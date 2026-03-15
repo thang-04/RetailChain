@@ -67,19 +67,61 @@ public class ShiftController {
         }
     }
 
+    @GetMapping("/templates")
+    public String getGlobalTemplates() {
+        String prefix = "[getGlobalTemplates]";
+        log.info("{}|START", prefix);
+        try {
+            List<ShiftResponse> response = shiftService.getGlobalTemplates();
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Get global templates success", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving templates: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/store/{storeId}/import-templates")
+    public String importTemplates(@PathVariable Long storeId, @RequestBody List<Long> templateIds) {
+        String prefix = "[importTemplates]|storeId=" + storeId + "|templateIds=" + templateIds;
+        log.info("{}|START", prefix);
+        try {
+            List<ShiftResponse> response = shiftService.importTemplates(storeId, templateIds);
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Import templates success", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error importing templates: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public String updateShift(@PathVariable Long id, @RequestBody ShiftRequest request) {
+        String prefix = "[updateShift]|id=" + id;
+        log.info("{}|START", prefix);
+        try {
+            ShiftResponse response = shiftService.updateShift(id, request);
+            log.info("{}|END|id={}", prefix, response.getId());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Update shift success", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error updating shift: " + e.getMessage());
+        }
+    }
+
     // ==================== SHIFT ASSIGNMENT ====================
 
     @PostMapping("/assign")
-    public String assignShift(@RequestBody ShiftAssignmentRequest request) {
-        String prefix = "[assignShift]|shiftId=" + (request != null ? request.getShiftId() : "null")
+    public String assignShifts(@RequestBody ShiftAssignmentRequest request) {
+        String prefix = "[assignShifts]|shiftIds=" + (request != null ? request.getShiftIds() : "null")
                 + "|userId=" + (request != null ? request.getUserId() : "null");
         log.info("{}|START", prefix);
         try {
-            ShiftAssignmentResponse response = shiftService.assignShift(request);
-            log.info("{}|END|id={}", prefix, response.getId());
+            List<ShiftAssignmentResponse> response = shiftService.assignShifts(request);
+            log.info("{}|END|size={}", prefix, response.size());
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Assign shift success", response);
         } catch (IllegalArgumentException e) {
-            log.warn("{}|DUPLICATE|{}", prefix, e.getMessage());
+            log.warn("{}|BAD_REQUEST|{}", prefix, e.getMessage());
             return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);

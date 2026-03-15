@@ -154,6 +154,14 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             } 
                         />
+                        <Route 
+                            path="/store/:id/shifts" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <StaffShiftsPage />
+                                </ProtectedRoute>
+                            } 
+                        />
                         <Route path="/staff/calendar" element={<StaffCalendar />} />
                         <Route 
                             path="/staff/attendance" 

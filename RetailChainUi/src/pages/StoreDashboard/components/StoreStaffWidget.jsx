@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -11,18 +10,21 @@ import {
 } from "@/components/ui/table";
 import { Link, useParams } from "react-router-dom";
 
+const STAFF_PREVIEW_LIMIT = 5;
+
 const StoreStaffWidget = ({ staff }) => {
     const { id } = useParams();
 
     const staffList = staff && staff.length > 0 ? staff : [];
+    const previewStaff = staffList.slice(0, STAFF_PREVIEW_LIMIT);
 
     return (
         <Card className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm overflow-hidden flex-1">
             <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border-light dark:border-border-dark space-y-0">
                 <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Store Staff</CardTitle>
+                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Nhân viên cửa hàng</CardTitle>
                     <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2 py-0.5 rounded-full border-none shadow-none">
-                        {staffList.filter(s => s.status === 'Active').length} Active
+                        {staffList.filter(s => s.status === 'Active').length} đang hoạt động
                     </Badge>
                 </div>
                 <Link to={`/store/${id}/staff`} className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer">
@@ -33,14 +35,14 @@ const StoreStaffWidget = ({ staff }) => {
                 <Table>
                     <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
                         <TableRow className="hover:bg-transparent border-b border-border-light dark:border-border-dark">
-                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Employee</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Role</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider text-right">Status</TableHead>
+                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Nhân viên</TableHead>
+                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Vai trò</TableHead>
+                            <TableHead className="px-4 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider text-right">Trạng thái</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-border-light dark:divide-border-dark">
-                        {staffList.length > 0 ? (
-                            staffList.slice(0, 5).map((person, index) => (
+                        {previewStaff.length > 0 ? (
+                            previewStaff.map((person, index) => (
                                 <TableRow key={index} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-none">
                                     <TableCell className="px-4 py-3">
                                         <div className="flex items-center gap-3">
@@ -66,13 +68,14 @@ const StoreStaffWidget = ({ staff }) => {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={3} className="text-center py-4 text-slate-500">
-                                    No staff data available
+                                    Chưa có dữ liệu nhân viên
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </CardContent>
+
         </Card>
     );
 };

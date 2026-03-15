@@ -23,4 +23,6 @@ public class UpdateUserRequest {
     private Set<Long> roleIds;
 
     private Long storeId;
+
+    private Integer status;
 }

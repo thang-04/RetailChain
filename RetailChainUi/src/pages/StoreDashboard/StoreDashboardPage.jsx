@@ -89,12 +89,12 @@ const StoreDashboardPage = () => {
 
       {/* Split Layout: Tables */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Recent Sales Orders (1/2) */}
-        <div className="lg:w-1/2 flex flex-col gap-4">
+        {/* Inventory Table (60%) */}
+        <div className="lg:w-3/5 flex flex-col gap-4">
           <StoreInventoryTable inventory={storeData.inventory} />
         </div>
-        {/* Staff Overview (1/2) */}
-        <div className="lg:w-1/2 flex flex-col gap-4">
+        {/* Staff Overview (40%) */}
+        <div className="lg:w-2/5 flex flex-col gap-4">
           <StoreStaffWidget staff={storeData.staff} />
         </div>
       </div>
