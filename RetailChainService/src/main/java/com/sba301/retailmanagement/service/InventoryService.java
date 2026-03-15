@@ -1,9 +1,11 @@
 package com.sba301.retailmanagement.service;
 
-import com.sba301.retailmanagement.dto.request.WarehouseRequest;
+import com.sba301.retailmanagement.dto.request.InventoryAdjustRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
+import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
+import com.sba301.retailmanagement.dto.response.InventoryDetailResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import java.util.List;
@@ -42,4 +44,19 @@ public interface InventoryService {
      * @param items List of items with sku, productName, quantity, unitPrice, note
      */
     void importStockFromExcel(List<Map<String, Object>> items);
+
+    /**
+     * Lấy danh sách tồn kho theo store (mapping từ store -> warehouse).
+     */
+    List<InventoryStockResponse> getStockByStore(Long storeId);
+
+    /**
+     * Lấy chi tiết một bản ghi tồn kho theo inventoryId (warehouseId-variantId).
+     */
+    InventoryDetailResponse getInventoryDetail(String inventoryId);
+
+    /**
+     * Điều chỉnh tồn kho thủ công, đồng thời ghi nhận lịch sử điều chỉnh.
+     */
+    void adjustInventory(String inventoryId, InventoryAdjustRequest request);
 }

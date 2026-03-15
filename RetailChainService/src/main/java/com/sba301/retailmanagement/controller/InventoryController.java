@@ -1,7 +1,9 @@
 package com.sba301.retailmanagement.controller;
 
+import com.sba301.retailmanagement.dto.request.InventoryAdjustRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
+import com.sba301.retailmanagement.dto.response.InventoryDetailResponse;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.service.InventoryService;
@@ -9,13 +11,13 @@ import com.sba301.retailmanagement.utils.ApiCode;
 import com.sba301.retailmanagement.utils.ResponseJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.sba301.retailmanagement.utils.CommonUtils.gson;
-import org.springframework.security.access.prepost.PreAuthorize;
 import static com.sba301.retailmanagement.security.SecurityConstants.*;
+import static com.sba301.retailmanagement.utils.CommonUtils.gson;
 
 @Slf4j
 @RestController
@@ -37,6 +39,26 @@ public class InventoryController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving stock: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy tồn kho hiện tại theo store (mapping sang warehouse tương ứng).
+     * API: GET /api/inventory?storeId={storeId}
+     */
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
+    @GetMapping
+    public String getInventoryByStore(@RequestParam("storeId") Long storeId) {
+        String prefix = "[getInventoryByStore]|storeId=" + storeId;
+        log.info("{}|START", prefix);
+        try {
+            List<InventoryStockResponse> response = inventoryService.getStockByStore(storeId);
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Inventory by store retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving inventory by store: " + e.getMessage());
         }
     }
 
@@ -160,6 +182,47 @@ public class InventoryController {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
                     "Error retrieving inventory overview: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Lấy chi tiết một bản ghi tồn kho theo inventoryId (warehouseId-variantId).
+     * API: GET /api/inventory/{inventoryId}
+     */
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
+    @GetMapping("/{inventoryId}")
+    public String getInventoryDetail(@PathVariable String inventoryId) {
+        String prefix = "[getInventoryDetail]|inventoryId=" + inventoryId;
+        log.info("{}|START", prefix);
+        try {
+            InventoryDetailResponse response = inventoryService.getInventoryDetail(inventoryId);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Inventory detail retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving inventory detail: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Điều chỉnh tồn kho thủ công.
+     * API: PUT /api/inventory/{inventoryId}
+     */
+    @PreAuthorize("hasAuthority('" + INVENTORY_UPDATE + "')")
+    @PutMapping("/{inventoryId}")
+    public String adjustInventory(@PathVariable String inventoryId,
+                                  @RequestBody InventoryAdjustRequest request) {
+        String prefix = "[adjustInventory]|inventoryId=" + inventoryId;
+        log.info("{}|START|body={}", prefix, gson.toJson(request));
+        try {
+            inventoryService.adjustInventory(inventoryId, request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Inventory adjusted successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error adjusting inventory: " + e.getMessage());
         }
     }
 }
