@@ -1,81 +1,106 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useAuth from '../../contexts/AuthContext/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        if (password.length < 8) {
+            toast.error('Mật khẩu phải có ít nhất 8 ký tự.');
+            return;
+        }
         setIsSubmitting(true);
         try {
             await login(email, password);
+            toast.success('Đăng nhập thành công!');
             navigate('/');
         } catch (err) {
-            setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.');
+            toast.error(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' }}>
-            <div style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '400px' }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>RetailChain Login</h1>
-
-                {error && (
-                    <div style={{ backgroundColor: '#ffebee', color: '#c62828', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                        {error}
+        <div className="flex h-screen w-full items-center justify-center bg-muted/50 p-4">
+            <Card className="w-full max-w-md shadow-lg">
+                <CardHeader className="space-y-1 text-center">
+                    <CardTitle className="text-3xl font-bold tracking-tight text-primary">RetailChain</CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                        Chào mừng bạn quay lại. Đăng nhập để tiếp tục.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="grid gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="name@example.com"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="bg-background"
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password">Mật khẩu</Label>
+                                <Link
+                                    to="/forgot-password"
+                                    className="text-sm font-medium text-primary hover:underline hover:text-primary/90"
+                                >
+                                    Quên mật khẩu?
+                                </Link>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="bg-background pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                                >
+                                    {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                </button>
+                            </div>
+                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full mt-2 py-6 text-base font-semibold transition-all hover:scale-[1.01]"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
+                        </Button>
+                    </form>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4 text-center">
+                    <div className="text-sm text-muted-foreground">
+                        @Retail Chain 2026
                     </div>
-                )}
-
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Email</label>
-                        <input
-                            type="email"
-                            required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                            placeholder="admin@retailchain.com"
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Password</label>
-                        <input
-                            type="password"
-                            required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}
-                            placeholder="••••••"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        style={{
-                            marginTop: '1rem',
-                            padding: '0.75rem',
-                            backgroundColor: isSubmitting ? '#9ca3af' : '#2563eb',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontWeight: 'bold',
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer'
-                        }}
-                    >
-                        {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
-                    </button>
-                </form>
-            </div>
+                </CardFooter>
+            </Card>
         </div>
     );
 };

@@ -42,19 +42,22 @@ import RolePermissionPage from "../pages/RolePermission/RolePermissionPage";
 // User Management
 import UserManagementPage from "../pages/UserManagement/UserManagementPage";
 
-// Profile
-import ProfilePage from "../pages/Profile/ProfilePage";
-
 // Auth
 import LoginPage from "../pages/Auth/LoginPage";
+import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
 import ForbiddenPage from "../pages/Auth/ForbiddenPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+
+// Profile
+import ProfilePage from "../pages/Profile/ProfilePage";
+import ChangePassword from "../pages/Profile/ChangePassword";
 
 const AppRoutes = () => {
     return (
         <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/403" element={<ForbiddenPage />} />
 
             {/* Protected Routes */}
@@ -185,6 +188,7 @@ const AppRoutes = () => {
 
                     {/* Profile - All authenticated users */}
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/change-password" element={<ChangePassword />} />
 
                     {/* Role & Permission - SUPER_ADMIN only */}
                     <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>

@@ -1,7 +1,7 @@
-import { axiosPrivate } from './api/axiosClient';
+import { axiosPrivate, axiosPublic } from './api/axiosClient';
 
 const login = async (email, password) => {
-    return await axiosPrivate.post('/auth/login', { email, password });
+    return await axiosPublic.post('/auth/login', { email, password });
 };
 
 const logout = async () => {
@@ -12,10 +12,30 @@ const getCurrentUser = async () => {
     return await axiosPrivate.get('/user/me');
 };
 
+const changePassword = async (data) => {
+    return await axiosPrivate.post('/auth/change-password', data);
+};
+
+const forgotPassword = async (email) => {
+    return await axiosPublic.post(`/auth/forgot-password?email=${email}`);
+};
+
+const confirmPassword = async (data) => {
+    return await axiosPublic.post('/auth/confirm-password', data);
+};
+
+const verifyOtp = async (email, otp) => {
+    return await axiosPublic.post(`/auth/verify-otp?email=${email}&otp=${otp}`);
+};
+
 const authService = {
     login,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    changePassword,
+    forgotPassword,
+    confirmPassword,
+    verifyOtp
 };
 
 export default authService;

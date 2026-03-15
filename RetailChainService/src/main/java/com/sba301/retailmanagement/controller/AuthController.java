@@ -1,5 +1,7 @@
 package com.sba301.retailmanagement.controller;
 
+import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
+import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -16,7 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -76,7 +80,10 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout", description = "Invalidate the refresh token of the current user")
     public String logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String prefix = "[logout]|userId=" + (userDetails != null ? userDetails.getId() : "null");
+        if (userDetails == null) {
+            return ResponseJson.toJsonString(ApiCode.NOT_AUTHORIZED, "User not authenticated");
+        }
+        String prefix = "[logout]|userId=" + userDetails.getId();
         try {
             log.info("{}|START", prefix);
             authService.logout(userDetails.getId());
@@ -85,6 +92,71 @@ public class AuthController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Logout failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/change-password")
+    @Operation(summary = "Change password", description = "Update user password with old password verification")
+    public String changePassWord(@Valid @RequestBody ChangePassWordRequest request,
+                                 @RequestHeader("Authorization") String bearertoken) {
+        String prefix = "[changePassword]";
+        try {
+            log.info("{}|START", prefix);
+            String token = bearertoken.substring(7);
+            AuthResponse authResponse = authService.changePassword(request, token);
+            log.info("{}|END|userId={}", prefix, authResponse.getUser().getId());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Password changed successfully", authResponse);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Password change failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Forgot password", description = "Request a password reset link/code to be sent to email")
+    public String forgot(@RequestParam String email) {
+        String prefix = "[forgotPassword]|email=" + email;
+        try {
+            log.info("{}|START", prefix);
+            authService.forgotPassWord(email);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Password reset request processed");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Forgot password request failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify OTP for password reset")
+    public String verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        String prefix = "[verifyOtp]|email=" + email;
+        try {
+            log.info("{}|START", prefix);
+            boolean isValid = authService.verifyOtp(email, otp);
+            if (isValid) {
+                return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "OTP verified successfully");
+            } else {
+                return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, "Invalid or expired OTP");
+            }
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, e.getMessage());
+        }
+    }
+
+    @PostMapping("/confirm-password")
+    @Operation(summary = "Confirm password reset with OTP")
+    public String confirm(@Valid @RequestBody ConfirmPasswordRequest request) {
+        String prefix = "[confirmPassword]|email=" + request.getEmail();
+        try {
+            log.info("{}|START", prefix);
+            authService.confirmPassWord(request);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Password reset successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, e.getMessage());
         }
     }
 }

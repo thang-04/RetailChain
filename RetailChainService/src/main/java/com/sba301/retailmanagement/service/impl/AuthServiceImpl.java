@@ -1,6 +1,8 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.config.JwtProperties;
+import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
+import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -17,7 +19,9 @@ import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.security.CustomUserDetails;
 import com.sba301.retailmanagement.security.JwtTokenProvider;
 import com.sba301.retailmanagement.service.AuthService;
+import com.sba301.retailmanagement.service.OtpService;
 import com.sba301.retailmanagement.service.RefreshTokenService;
+import com.sba301.retailmanagement.service.SendMailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +43,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
-
+        private final OtpService otpService;
+        private final SendMailService sendMailService;
         private final AuthenticationManager authenticationManager;
         private final UserRepository userRepository;
         private final RoleRepository roleRepository;
@@ -157,6 +162,56 @@ public class AuthServiceImpl implements AuthService {
                                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
                 refreshTokenService.deleteByUser(user);
+        }
+
+        @Override
+        @Transactional
+        public AuthResponse changePassword(ChangePassWordRequest request, String token) {
+                String email = tokenProvider.getEmailFromToken(token);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+                if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                        throw new RuntimeException("Current password does not match");
+                }
+
+                if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+                        throw new RuntimeException("New password and confirm password do not match");
+                }
+                refreshTokenService.deleteByUser(user);
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+            return login(new LoginRequest(user.getEmail(), request.getNewPassword()));
+        }
+        @Override
+        public void forgotPassWord(String email) {
+                log.info("[forgotPassWord]|email={}|STUB", email);
+                if (userRepository.existsByEmail(email)) {
+                        sendMailService.sendOtpEmail(email, "RetailChain Admin send code to reset password", otpService.generateAndSaveOtp(email));
+                        return;
+                }
+                throw new ResourceNotFoundException("User not found with email: " + email);
+        }
+
+        @Override
+        public void confirmPassWord(ConfirmPasswordRequest request) {
+                log.info("[confirmPassWord]|email={}|STUB", request.getEmail());
+        if (otpService.verifyOtp(request.getEmail(), request.getOtp(), true)) {
+                        User user = userRepository.findByEmail(request.getEmail())
+                                        .orElseThrow(() -> new ResourceNotFoundException(
+                                                        "User not found with email: " + request.getEmail()));
+                        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                        userRepository.save(user);
+                        return;
+                }
+                throw new RuntimeException("Otp is invalid or expired for email: " + request.getEmail());
+        }
+
+        @Override
+        public boolean verifyOtp(String email, String otp) {
+                log.info("[verifyOtp]|email={}|otp={}", email, otp);
+                return otpService.verifyOtp(email, otp, false);
         }
 
         private UserDTO toUserDTO(User user) {
