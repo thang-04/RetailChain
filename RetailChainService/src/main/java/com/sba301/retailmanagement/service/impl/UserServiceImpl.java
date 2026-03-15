@@ -181,6 +181,10 @@ public class UserServiceImpl implements UserService {
             user.setStoreId(request.getStoreId());
         }
 
+        if (request.getStatus() != null) {
+            user.setStatus(request.getStatus());
+        }
+
         User savedUser = userRepository.save(user);
         log.info("Updated user: {} (id={})", savedUser.getUsername(), savedUser.getId());
         return toDTO(savedUser);

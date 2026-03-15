@@ -12,15 +12,23 @@ import {
 import useAuth from "../../../contexts/AuthContext/useAuth";
 import { useNavigate } from "react-router-dom";
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     return (
-        <header className="h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 z-10 flex-shrink-0">
+        <header className="h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 lg:px-6 z-10 flex-shrink-0">
             {/* Left: Branding & Context */}
-            <div className="flex items-center gap-4">
-                <span className="font-bold text-xl text-primary tracking-tight hidden md:block">
+            <div className="flex items-center gap-3">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="lg:hidden text-text-muted hover:text-primary"
+                    onClick={toggleSidebar}
+                >
+                    <span className="material-symbols-outlined">menu</span>
+                </Button>
+                <span className="font-bold text-xl text-primary tracking-tight hidden sm:block">
                     RetailChain
                 </span>
             </div>

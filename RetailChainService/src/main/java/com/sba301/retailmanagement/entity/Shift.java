@@ -21,8 +21,11 @@ public class Shift {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "store_id", nullable = false)
+    @Column(name = "store_id", nullable = true)
     private Long storeId;
+
+    @Column(name = "is_default", nullable = false)
+    private boolean isDefault = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", insertable = false, updatable = false)
