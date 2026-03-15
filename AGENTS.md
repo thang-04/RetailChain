@@ -385,6 +385,43 @@ bd update <id> --claim --json
 bd update bd-42 --priority 1 --json
 ```
 
+<!-- end-bv-agent-instructions -->
+
+<!-- BEGIN BEADS INTEGRATION -->
+## Issue Tracking with bd (beads)
+
+**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+
+### Why bd?
+
+- Dependency-aware: Track blockers and relationships between issues
+- Git-friendly: Dolt-powered version control with native sync
+- Agent-optimized: JSON output, ready work detection, discovered-from links
+- Prevents duplicate tracking systems and confusion
+
+### Quick Start
+
+**Check for ready work:**
+
+```bash
+bd ready --json
+```
+
+**Create new issues:**
+
+```bash
+bd create "Issue title" --description="Detailed context" -t bug|feature|task -p 0-4 --json
+bd create "Issue title" --description="What this issue is about" -p 1 --deps discovered-from:bd-123 --json
+```
+
+**Claim and update:**
+
+```bash
+bd update <id> --claim --json
+bd update bd-42 --priority 1 --json
+```
+
+>>>>>>> staging
 **Complete work:**
 
 ```bash
@@ -495,4 +532,5 @@ When searching or reading code, prefer using these codebase-memory-mcp tools ins
           │      Store 1     │ │      Store 2     │ │      Store 3     │
           │  is_central = 0 │ │  is_central = 0  │ │  is_central = 0  │
           │  warehouse_id=1  │ │  warehouse_id=2  │ │  warehouse_id=3  │
-          └─────────────────┘ └─────────────────┘ └─────────────────┘
+           └─────────────────┘ └─────────────────┘ └─────────────────┘
+
