@@ -103,7 +103,13 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Navigation */}
       <nav className="flex-1 px-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
         {visibleMenuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          // Exact match cho root (/), startsWith cho các path khác
+          // Nhưng cần tránh /products match /products/categories
+          const isActive =
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname === item.path ||
+                location.pathname.startsWith(item.path + "/");
 
           return (
             <Button

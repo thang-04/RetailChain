@@ -19,6 +19,7 @@ const StoreStaffPage = lazy(() => import("../pages/StoreDashboard/StoreStaffPage
 const ProductPage = lazy(() => import("../pages/Product/ProductPage"));
 const ProductDetailPage = lazy(() => import("../pages/Product/ProductDetailPage"));
 const ProductEditPage = lazy(() => import("../pages/Product/ProductEditPage"));
+const ProductCategoryPage = lazy(() => import("../pages/Product/ProductCategoryPage"));
 
 const InventoryPage = lazy(() => import("../pages/Inventory/InventoryPage"));
 const StockLedger = lazy(() => import("../pages/Inventory/StockLedger"));
@@ -98,6 +99,14 @@ const AppRoutes = () => {
                             element={
                                 <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
                                     <ProductEditPage />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/products/categories" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ProductCategoryPage />
                                 </ProtectedRoute>
                             } 
                         />
