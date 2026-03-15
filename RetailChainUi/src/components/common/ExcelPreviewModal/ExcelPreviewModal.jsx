@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Plus, X, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import inventoryService from "@/services/inventory.service";
 
 const SIZES = ["S", "M", "L", "XL", "26", "28", "30", "32", "34", "38", "39", "40", "41", "42", "43", "UNI"];
@@ -38,6 +39,7 @@ const EXCEL_COLUMNS = [
   { key: "productName", label: "Tên sản phẩm", required: true },
   { key: "quantity", label: "Số lượng", required: true },
   { key: "unitPrice", label: "Đơn giá", required: true },
+  { key: "supplierName", label: "Nhà cung cấp", required: false },
   { key: "note", label: "Ghi chú", required: false },
 ];
 
@@ -97,41 +99,9 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [isLoadingDropdown, setIsLoadingDropdown] = useState(false);
 
-  // Load categories and suppliers when modal opens
-  useEffect(() => {
-    if (open) {
-      loadDropdownData();
-    }
-  }, [open]);
-
-  // Re-map categoryId after categories are loaded
-  useEffect(() => {
-    if (categories.length > 0 && parsedData.length > 0) {
-      const needsRemap = parsedData.some(row => row.categoryName && !row.categoryId);
-      if (needsRemap) {
-        const remappedData = parsedData.map(row => {
-          if (row.categoryName && !row.categoryId) {
-            const foundCat = fuzzyMatch(row.categoryName, categories, 'name');
-            return { ...row, categoryId: foundCat ? foundCat.id : null };
-          }
-          return row;
-        });
-        setParsedData(remappedData);
-        
-        // Re-validate rows
-        const newStates = {};
-        remappedData.forEach((row, index) => {
-          const validation = validateRow(row, index);
-          newStates[index] = {
-            ...rowStates[index],
-            ...validation,
-            selected: validation.isValid && (rowStates[index]?.selected || false),
-          };
-        });
-        setRowStates(newStates);
-      }
-    }
-  }, [categories]);
+  // Refs to track remap status to avoid infinite loops
+  const categoryRemapped = useRef(false);
+  const supplierRemapped = useRef(false);
 
   const loadDropdownData = async () => {
     setIsLoadingDropdown(true);
@@ -141,14 +111,12 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         inventoryService.getAllSuppliers(),
       ]);
       
-      // Handle both array response and wrapped response
       const cats = Array.isArray(catRes) ? catRes : (catRes.data || []);
       const sups = Array.isArray(supRes) ? supRes : (supRes.data || []);
       
       setCategories(cats);
       setSuppliers(sups);
       
-      // Return categories for immediate use
       return cats;
     } catch (err) {
       console.error("Error loading dropdown data:", err);
@@ -191,11 +159,89 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
       errors.push("Đơn giá phải lớn hơn 0");
     }
 
+    if (row.supplierName && !row.supplierId) {
+      errors.push("Không tìm thấy NCC: " + row.supplierName);
+    }
+
     return {
       isValid: errors.length === 0,
       errors: errors,
     };
   }, []);
+
+  // Load categories and suppliers when modal opens
+  useEffect(() => {
+    if (open) {
+      categoryRemapped.current = false;
+      supplierRemapped.current = false;
+      loadDropdownData();
+    }
+  }, [open]);
+
+  // Re-map categoryId after categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && parsedData.length > 0 && !categoryRemapped.current) {
+      const needsRemap = parsedData.some(row => row.categoryName && !row.categoryId);
+      if (needsRemap) {
+        categoryRemapped.current = true;
+        setParsedData(prevData => {
+          const remappedData = prevData.map(row => {
+            if (row.categoryName && !row.categoryId) {
+              const foundCat = fuzzyMatch(row.categoryName, categories, 'name');
+              return { ...row, categoryId: foundCat ? foundCat.id : null };
+            }
+            return row;
+          });
+          
+          const newStates = {};
+          remappedData.forEach((row, index) => {
+            const validation = validateRow(row, index);
+            newStates[index] = {
+              ...validation,
+              selected: validation.isValid,
+            };
+          });
+          setRowStates(newStates);
+          
+          return remappedData;
+        });
+      }
+    }
+  }, [categories, validateRow]);
+
+  // Re-map supplierId after suppliers are loaded
+  useEffect(() => {
+    if (suppliers.length > 0 && parsedData.length > 0 && !supplierRemapped.current) {
+      const needsRemap = parsedData.some(row => row.supplierName && !row.supplierId);
+      if (needsRemap) {
+        supplierRemapped.current = true;
+        setParsedData(prevData => {
+          const remappedData = prevData.map(row => {
+            if (row.supplierName && !row.supplierId) {
+              const foundSupplier = fuzzyMatch(row.supplierName, suppliers, 'supplierName');
+              if (!foundSupplier) {
+                return { ...row, supplierId: null };
+              }
+              return { ...row, supplierId: foundSupplier.supplierId || foundSupplier.id };
+            }
+            return row;
+          });
+          
+          const newStates = {};
+          remappedData.forEach((row, index) => {
+            const validation = validateRow(row, index);
+            newStates[index] = {
+              ...validation,
+              selected: validation.isValid,
+            };
+          });
+          setRowStates(newStates);
+          
+          return remappedData;
+        });
+      }
+    }
+  }, [suppliers, validateRow]);
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files?.[0];
@@ -247,6 +293,11 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         const colorFromExcelRaw = row.Màu || row.Color || row["Màu sắc"] || row.MauSac || row.mau || null;
         const colorFromExcel = colorFromExcelRaw ? fuzzyMatchSimple(colorFromExcelRaw, COLORS) : null;
 
+        // Map supplier name from Excel
+        const supplierNameFromExcel = row["Nhà cung cấp"] || row.Supplier || row.SupplierName || row.NCC || row.ncc || null;
+        const supplierNameRaw = supplierNameFromExcel;
+        let supplierId = null;
+
         return {
           stt: index + 1,
           sku: row.SKU || row.sku || row.Mã || row.Mã_SP || "",
@@ -260,34 +311,10 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
           quantity: row["Số lượng"] || row.quantity || row.Quantity || row.qty || 0,
           unitPrice: row["Đơn giá"] || row.unitPrice || row.Price || row.price || row["Giá"] || 0,
           note: row["Ghi chú"] || row.note || row.Note || "",
+          supplierName: supplierNameRaw,
+          supplierId: supplierId,
         };
       });
-
-      const states = {};
-      const validationPromises = normalizedData.map(async (row, index) => {
-        const validation = validateRow(row, index);
-        states[index] = {
-          ...validation,
-          selected: validation.isValid,
-          skuExists: null,
-          isChecking: !validation.isValid ? false : true,
-        };
-
-        if (validation.isValid && row.sku) {
-          try {
-            const skuResult = await inventoryService.checkSkuExists(row.sku);
-            states[index].skuExists = skuResult.exists;
-            states[index].isChecking = false;
-          } catch (_err) {
-            states[index].skuExists = null;
-            states[index].isChecking = false;
-          }
-        }
-
-        return states;
-      });
-
-      await Promise.all(validationPromises.map(p => p.then ? p : Promise.resolve()));
 
       const finalStates = {};
       for (let i = 0; i < normalizedData.length; i++) {
@@ -343,9 +370,9 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     setRowStates(newStates);
   };
 
-  const handleCategoryChange = (index, categoryId) => {
+  const handleFieldChange = useCallback((index, field, value) => {
     const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], categoryId };
+    updatedData[index] = { ...updatedData[index], [field]: value };
     setParsedData(updatedData);
     
     const validation = validateRow(updatedData[index], index);
@@ -357,48 +384,27 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         selected: validation.isValid && prev[index]?.selected,
       },
     }));
-  };
+  }, [parsedData, validateRow]);
 
-  const handleSizeChange = (index, size) => {
-    const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], size };
-    setParsedData(updatedData);
-    
-    const validation = validateRow(updatedData[index], index);
-    setRowStates((prev) => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        ...validation,
-        selected: validation.isValid && prev[index]?.selected,
-      },
-    }));
-  };
-
-  const handleColorChange = (index, color) => {
-    const updatedData = [...parsedData];
-    updatedData[index] = { ...updatedData[index], color };
-    setParsedData(updatedData);
-    
-    const validation = validateRow(updatedData[index], index);
-    setRowStates((prev) => ({
-      ...prev,
-      [index]: {
-        ...prev[index],
-        ...validation,
-        selected: validation.isValid && prev[index]?.selected,
-      },
-    }));
-  };
+  const handleCategoryChange = (index, value) => handleFieldChange(index, 'categoryId', Number(value));
+  const handleSizeChange = (index, value) => handleFieldChange(index, 'size', value);
+  const handleColorChange = (index, value) => handleFieldChange(index, 'color', value);
 
   const handleImport = () => {
-    if (!selectedSupplier) {
-      setError("Vui lòng chọn nhà cung cấp");
-      return;
+    const invalidSupplierRows = parsedData.filter(
+      (_, index) => rowStates[index]?.selected && rowStates[index]?.errors?.some(e => e.includes("Không tìm thấy NCC"))
+    );
+
+    if (invalidSupplierRows.length > 0) {
+      toast.warning(`${invalidSupplierRows.length} dòng có NCC không hợp lệ và sẽ bị bỏ qua`);
     }
 
     const selectedRows = parsedData
-      .filter((_, index) => rowStates[index]?.selected)
+      .filter((_, index) => {
+        const isSelected = rowStates[index]?.selected;
+        const hasSupplierError = rowStates[index]?.errors?.some(e => e.includes("Không tìm thấy NCC"));
+        return isSelected && !hasSupplierError;
+      })
       .map((row) => ({
         sku: row.sku,
         productName: row.productName,
@@ -408,10 +414,11 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
         quantity: parseInt(row.quantity, 10),
         unitPrice: parseFloat(row.unitPrice),
         note: row.note,
-        supplierId: selectedSupplier,
+        supplierId: row.supplierId || (selectedSupplier ? Number(selectedSupplier) : null),
       }));
 
     if (selectedRows.length === 0) {
+      setError("Không có dòng nào hợp lệ để import");
       return;
     }
 
@@ -425,20 +432,70 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
     setRowStates({});
     setError(null);
     setSelectedSupplier(null);
+    categoryRemapped.current = false;
+    supplierRemapped.current = false;
     onOpenChange(false);
   };
 
-  const stats = {
+  const handleSupplierChangeForAll = (supplierId) => {
+    if (!supplierId) return;
+    
+    const supplier = suppliers.find(s => String(s.supplierId || s.id) === String(supplierId));
+    const supplierName = supplier ? (supplier.supplierName || supplier.name) : '';
+    
+    const updatedData = parsedData.map(row => ({
+      ...row,
+      supplierId: Number(supplierId),
+      supplierName: supplierName || row.supplierName,
+    }));
+    
+    setParsedData(updatedData);
+    
+    const newStates = {};
+    updatedData.forEach((row, index) => {
+      const validation = validateRow(row, index);
+      newStates[index] = {
+        ...validation,
+        selected: validation.isValid,
+      };
+    });
+    setRowStates(newStates);
+  };
+
+  const handleSupplierChangeForRow = (index, supplierId) => {
+    const supplier = suppliers.find(s => String(s.supplierId || s.id) === String(supplierId));
+    const supplierName = supplier ? (supplier.supplierName || supplier.name) : '';
+    
+    const updatedData = [...parsedData];
+    updatedData[index] = {
+      ...updatedData[index],
+      supplierId: supplierId ? Number(supplierId) : null,
+      supplierName: supplierName || updatedData[index].supplierName,
+    };
+    
+    setParsedData(updatedData);
+    
+    const newStates = { ...rowStates };
+    const validation = validateRow(updatedData[index], index);
+    newStates[index] = {
+      ...newStates[index],
+      ...validation,
+      selected: validation.isValid,
+    };
+    setRowStates(newStates);
+  };
+
+  const stats = useMemo(() => ({
     total: parsedData.length,
     valid: Object.values(rowStates).filter((s) => s?.isValid).length,
     invalid: Object.values(rowStates).filter((s) => s && !s.isValid).length,
     newProduct: Object.values(rowStates).filter((s) => s?.skuExists === false).length,
     selected: Object.values(rowStates).filter((s) => s?.selected).length,
-  };
+  }), [parsedData, rowStates]);
 
-  const hasSupplierError = !selectedSupplier;
-  const canImport = file && stats.selected > 0 && !isLoading && !hasSupplierError;
-  const importButtonText = hasSupplierError 
+  const hasSelectedSupplier = selectedSupplier || parsedData.some(row => row.supplierId);
+  const canImport = file && stats.selected > 0 && !isLoading && hasSelectedSupplier;
+  const importButtonText = !hasSelectedSupplier 
     ? "Chưa chọn nhà cung cấp" 
     : stats.invalid > 0 
       ? `Nhập (${stats.selected} dòng, ${stats.invalid} lỗi)` 
@@ -446,7 +503,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-green-600" />
@@ -505,7 +562,12 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                 </div>
                 <Select
                   value={selectedSupplier || ""}
-                  onValueChange={(value) => setSelectedSupplier(value)}
+                  onValueChange={(value) => {
+                    setSelectedSupplier(value);
+                    if (value) {
+                      handleSupplierChangeForAll(value);
+                    }
+                  }}
                   disabled={isLoadingDropdown}
                 >
                   <SelectTrigger className="w-[250px] bg-white">
@@ -519,8 +581,8 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                     ))}
                   </SelectContent>
                 </Select>
-                {!selectedSupplier && (
-                  <span className="text-sm text-red-500">* Bắt buộc chọn</span>
+                {selectedSupplier && (
+                  <span className="text-sm text-green-600">✓ Đã áp dụng cho tất cả dòng</span>
                 )}
               </div>
 
@@ -558,6 +620,7 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                       <TableHead>STT</TableHead>
                       <TableHead>SKU</TableHead>
                       <TableHead>Tên sản phẩm</TableHead>
+                      <TableHead>Nhà cung cấp</TableHead>
                       <TableHead>Danh mục</TableHead>
                       <TableHead>Size</TableHead>
                       <TableHead>Màu</TableHead>
@@ -594,6 +657,26 @@ export function ExcelPreviewModal({ open, onOpenChange, onImport }) {
                           <TableCell>{row.stt}</TableCell>
                           <TableCell className="font-mono text-xs">{row.sku}</TableCell>
                           <TableCell>{row.productName}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={row.supplierId ? String(row.supplierId) : ""}
+                              onValueChange={(value) => handleSupplierChangeForRow(index, value)}
+                            >
+                              <SelectTrigger className="w-[180px] h-8 text-xs">
+                                <SelectValue placeholder="Chọn NCC..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {suppliers.map((supplier) => (
+                                  <SelectItem key={supplier.supplierId || supplier.id} value={String(supplier.supplierId || supplier.id)}>
+                                    {supplier.supplierName || supplier.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {row.supplierName && !row.supplierId && (
+                              <p className="text-xs text-red-500 mt-1">Không tìm thấy: {row.supplierName}</p>
+                            )}
+                          </TableCell>
                           <TableCell>
                             <Select
                               value={String(row.categoryId) || ""}

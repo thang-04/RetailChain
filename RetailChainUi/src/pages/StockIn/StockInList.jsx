@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
-import { ExcelPreviewModal } from '@/components/common/ExcelPreviewModal';
+import { ExcelImportWizard } from '@/components/common/ExcelImportWizard';
 import { Upload, Plus, Eye, Edit, Trash2, MoreHorizontal,
     Search, FileText, Filter, RotateCcw, Calendar,
     CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight,
@@ -890,8 +890,8 @@ const StockInList = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Excel Preview Modal */}
-            <ExcelPreviewModal
+            {/* Excel Import Wizard */}
+            <ExcelImportWizard
                 open={showPreviewModal}
                 onOpenChange={setShowPreviewModal}
                 onImport={handleExcelImport}
