@@ -229,7 +229,10 @@ const StockOutList = () => {
 
             let matchesStatus = true;
             if (statusFilter && statusFilter !== 'all') {
-                matchesStatus = record.status === statusFilter;
+                // Handle both old (Pending/Completed) and new (PENDING/COMPLETED) status values
+                const recordStatus = record.status?.toUpperCase();
+                const filterStatus = statusFilter.toUpperCase();
+                matchesStatus = recordStatus === filterStatus || record.status === statusFilter;
             }
 
             return matchesSearch && matchesDate && matchesStatus;
@@ -332,7 +335,9 @@ const StockOutList = () => {
     const getStatusBadge = (status) => {
         const statusConfig = {
             'Completed': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
-            'Pending': { label: 'Chờ duyệt', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'Pending': { label: 'Chờ xác nhận', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'PENDING': { label: 'Chờ xác nhận', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'COMPLETED': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
             'Cancelled': { label: 'Đã hủy', class: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100' },
         };
         const config = statusConfig[status] || statusConfig['Pending'];
@@ -397,7 +402,7 @@ const StockOutList = () => {
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
-                            Yêu cầu chờ duyệt
+                            Hàng đến
                             {pendingRequests.length > 0 && (
                                 <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                                     {pendingRequests.length}
@@ -437,7 +442,7 @@ const StockOutList = () => {
                                 trend={stats.hasPreviousData ? stats.totalTrend : undefined}
                             />
                             <StatCard
-                                title="Chờ duyệt"
+                                title="Chờ xác nhận"
                                 value={stats.pending}
                                 subtitle="Đang xử lý"
                                 icon={Clock}
@@ -498,8 +503,8 @@ const StockOutList = () => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">Tất cả</SelectItem>
-                                        <SelectItem value="Pending">Chờ duyệt</SelectItem>
-                                        <SelectItem value="Completed">Hoàn thành</SelectItem>
+                                        <SelectItem value="PENDING">Chờ xác nhận</SelectItem>
+                                        <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
                                         <SelectItem value="Cancelled">Đã hủy</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -559,7 +564,7 @@ const StockOutList = () => {
                             {statusFilter && statusFilter !== 'all' && (
                                 <FilterPill 
                                     label="Trạng thái" 
-                                    value={statusFilter === 'Pending' ? 'Chờ duyệt' : statusFilter === 'Completed' ? 'Hoàn thành' : 'Đã hủy'} 
+                                    value={statusFilter === 'PENDING' ? 'Chờ xác nhận' : statusFilter === 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'} 
                                     onRemove={() => setStatusFilter('all')} 
                                 />
                             )}

@@ -1,6 +1,7 @@
 package com.sba301.retailmanagement.repository;
 
 import com.sba301.retailmanagement.entity.InventoryDocument;
+import com.sba301.retailmanagement.enums.InventoryDocumentType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,4 +40,7 @@ public interface InventoryDocumentRepository extends JpaRepository<InventoryDocu
             ORDER BY d
             """, nativeQuery = true)
     List<Object[]> sumTotalAmountGroupByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    List<InventoryDocument> findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(
+            Long targetWarehouseId, InventoryDocumentType documentType);
 }

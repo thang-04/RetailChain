@@ -157,13 +157,12 @@ public class StockRequestServiceImpl implements StockRequestService {
 
         List<StockRequestItem> items = stockRequestItemRepository.findByStockRequestId(id);
 
-        TransferRequest transferRequest = new TransferRequest();
-        transferRequest.setSourceWarehouseId(stockRequest.getTargetWarehouseId());
-        
         Store store = storeRepository.findById(stockRequest.getStoreId())
                 .orElseThrow(() -> new RuntimeException("Store not found: " + stockRequest.getStoreId()));
-        Long targetWarehouseId = store.getWarehouseId();
-        transferRequest.setTargetWarehouseId(targetWarehouseId);
+        
+        TransferRequest transferRequest = new TransferRequest();
+        transferRequest.setSourceWarehouseId(stockRequest.getSourceWarehouseId());
+        transferRequest.setTargetWarehouseId(store.getWarehouseId());
         
         transferRequest.setNote("Tu yeu cau: " + stockRequest.getRequestCode());
         transferRequest.setItems(items.stream()

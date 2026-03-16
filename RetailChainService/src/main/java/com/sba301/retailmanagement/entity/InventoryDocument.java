@@ -70,4 +70,7 @@ public class InventoryDocument {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "status", length = 20)
+    private String status;
 }

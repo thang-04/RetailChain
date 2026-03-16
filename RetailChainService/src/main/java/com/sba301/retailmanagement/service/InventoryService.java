@@ -48,4 +48,8 @@ public interface InventoryService {
      * @param items List of items with sku, productName, quantity, unitPrice, note
      */
     void importStockFromExcel(List<Map<String, Object>> items);
+
+    void confirmReceipt(Long documentId);
+
+    List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getExportDocumentsByStore(Long storeId);
 }

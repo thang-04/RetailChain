@@ -4,6 +4,8 @@ import com.sba301.retailmanagement.dto.request.InventoryItemRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
+import com.sba301.retailmanagement.dto.response.InventoryDocumentResponse;
+import com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
@@ -43,6 +45,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final UserRepository userRepository;
+    private final StoreRepository storeRepository;
 
     @Override
     @Transactional
@@ -314,6 +317,7 @@ public class InventoryServiceImpl implements InventoryService {
         document.setNote(request.getNote());
         document.setCreatedBy(createdByUserId);
         document.setCreatedAt(LocalDateTime.now());
+        document.setStatus("PENDING");
 
         // Fetch all variants and calculate totalAmount
         List<Long> variantIds = request.getItems().stream()
@@ -592,7 +596,7 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status(doc.getDocumentType() == InventoryDocumentType.IMPORT ? "Completed" : "Pending") // IMPORT = Completed, others = Pending
+                    .status(doc.getStatus() != null ? doc.getStatus() : "PENDING")
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
@@ -825,5 +829,80 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryDocumentRepository.save(savedDoc);
 
         log.info("Excel import completed: {} items, total amount: {}", items.size(), totalAmount);
+    }
+
+    @Override
+    public void confirmReceipt(Long documentId) {
+        InventoryDocument document = inventoryDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found: " + documentId));
+
+        if (!"PENDING".equals(document.getStatus())) {
+            throw new RuntimeException("Document has already been confirmed or cannot be confirmed");
+        }
+
+        document.setStatus("COMPLETED");
+        inventoryDocumentRepository.save(document);
+        log.info("Document {} confirmed receipt", documentId);
+    }
+
+    @Override
+    public List<InventoryDocumentResponse> getExportDocumentsByStore(Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found: " + storeId));
+
+        Long warehouseId = store.getWarehouseId();
+        if (warehouseId == null) {
+            throw new RuntimeException("Store does not have a warehouse assigned");
+        }
+
+        List<InventoryDocument> documents = inventoryDocumentRepository
+                .findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(warehouseId, InventoryDocumentType.TRANSFER);
+
+        return documents.stream().map(doc -> {
+            List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
+            int totalItems = items.stream().mapToInt(InventoryDocumentItem::getQuantity).sum();
+
+            BigDecimal totalValue = items.stream()
+                    .map(item -> {
+                        ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+                        if (variant != null && variant.getPrice() != null) {
+                            return variant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                        }
+                        return BigDecimal.ZERO;
+                    })
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            String supplierName = doc.getSupplier() != null ? doc.getSupplier().getName() : null;
+
+            List<InventoryDocumentItemResponse> itemResponses = items.stream()
+                    .map(item -> {
+                        ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
+                        return InventoryDocumentItemResponse.builder()
+                                .variantId(item.getVariantId())
+                                .productName(variant != null && variant.getProduct() != null ? variant.getProduct().getName() : null)
+                                .sku(variant != null ? variant.getSku() : null)
+                                .quantity(item.getQuantity())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            return InventoryDocumentResponse.builder()
+                    .id(doc.getId())
+                    .documentCode(doc.getDocumentCode())
+                    .documentType(doc.getDocumentType() != null ? doc.getDocumentType().name() : null)
+                    .sourceWarehouseId(doc.getSourceWarehouseId())
+                    .sourceWarehouseName(doc.getSourceWarehouse() != null ? doc.getSourceWarehouse().getName() : null)
+                    .targetWarehouseId(doc.getTargetWarehouseId())
+                    .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
+                    .note(doc.getNote())
+                    .status(doc.getStatus() != null ? doc.getStatus() : "PENDING")
+                    .createdBy(String.valueOf(doc.getCreatedBy()))
+                    .createdAt(doc.getCreatedAt())
+                    .totalItems(totalItems)
+                    .totalValue(totalValue.longValue())
+                    .supplier(supplierName)
+                    .items(itemResponses)
+                    .build();
+        }).collect(Collectors.toList());
     }
 }
