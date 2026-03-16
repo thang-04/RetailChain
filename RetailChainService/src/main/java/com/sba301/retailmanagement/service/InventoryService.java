@@ -14,6 +14,12 @@ public interface InventoryService {
 
     List<WarehouseResponse> getAllWarehouses();
 
+    /**
+     * Lấy thông tin kho tổng (central warehouse).
+     * @return WarehouseResponse của kho tổng
+     */
+    WarehouseResponse getCentralWarehouse();
+
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
 
     List<InventoryStockResponse> getStockByProduct(Long productId);
@@ -42,4 +48,8 @@ public interface InventoryService {
      * @param items List of items with sku, productName, quantity, unitPrice, note
      */
     void importStockFromExcel(List<Map<String, Object>> items);
+
+    void confirmReceipt(Long documentId);
+
+    List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getExportDocumentsByStore(Long storeId);
 }

@@ -3,10 +3,13 @@ import { useParams } from "react-router-dom";
 import StoreKPIGrid from "./components/StoreKPIGrid";
 import StoreInventoryTable from "./components/StoreInventoryTable";
 import StoreStaffWidget from "./components/StoreStaffWidget";
+import StoreIncomingShipments from "./components/StoreIncomingShipments";
 import EditStoreModal from "./components/EditStoreModal";
+import CreateStockRequestModal from "./components/CreateStockRequestModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Edit, Send, Package, Users, Truck } from "lucide-react";
 import storeService from "../../services/store.service";
 import useAuth from "../../contexts/AuthContext/useAuth";
 
@@ -15,6 +18,8 @@ const StoreDashboardPage = () => {
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { hasPermission, hasRole } = useAuth();
   const canEditStore = hasPermission('STORE_UPDATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
@@ -78,6 +83,14 @@ const StoreDashboardPage = () => {
             </Button>
           )}
 
+          <Button
+            className="h-9 gap-2 bg-primary hover:bg-primary/90 text-white shadow-sm"
+            onClick={() => setIsCreateRequestOpen(true)}
+          >
+            <Send className="w-4 h-4" />
+            <span>Yêu cầu xuất hàng</span>
+          </Button>
+
           <Button size="icon" className="h-9 w-9 bg-primary hover:bg-primary-dark text-white rounded-lg shadow-sm shadow-primary/30">
             <span className="material-symbols-outlined text-[20px]">download</span>
           </Button>
@@ -87,17 +100,45 @@ const StoreDashboardPage = () => {
       {/* KPI Grid */}
       <StoreKPIGrid data={{ ...storeData.kpi, totalStaff: storeData.staff?.length || 0 }} />
 
-      {/* Split Layout: Tables */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Inventory Table (60%) */}
-        <div className="lg:w-3/5 flex flex-col gap-4">
-          <StoreInventoryTable inventory={storeData.inventory} />
-        </div>
-        {/* Staff Overview (40%) */}
-        <div className="lg:w-2/5 flex flex-col gap-4">
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overview" className="gap-2">
+            <Package className="w-4 h-4" />
+            Tồn kho
+          </TabsTrigger>
+          <TabsTrigger value="incoming" className="gap-2">
+            <Truck className="w-4 h-4" />
+            Hàng đến
+          </TabsTrigger>
+          <TabsTrigger value="staff" className="gap-2">
+            <Users className="w-4 h-4" />
+            Nhân viên
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-4">
+          {/* Split Layout: Tables */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Inventory Table (60%) */}
+            <div className="lg:w-3/5 flex flex-col gap-4">
+              <StoreInventoryTable inventory={storeData.inventory} />
+            </div>
+            {/* Staff Overview (40%) */}
+            <div className="lg:w-2/5 flex flex-col gap-4">
+              <StoreStaffWidget staff={storeData.staff} />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="incoming" className="mt-4">
+          <StoreIncomingShipments storeId={storeData?.dbId} />
+        </TabsContent>
+
+        <TabsContent value="staff" className="mt-4">
           <StoreStaffWidget staff={storeData.staff} />
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <div className="pb-10"></div>
 
@@ -106,6 +147,17 @@ const StoreDashboardPage = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         storeData={storeData}
+      />
+
+      {/* Create Stock Request Modal */}
+      <CreateStockRequestModal
+        isOpen={isCreateRequestOpen}
+        onClose={() => setIsCreateRequestOpen(false)}
+        storeId={storeData?.dbId}
+        storeWarehouseId={storeData?.warehouseId}
+        onSuccess={() => {
+          setIsCreateRequestOpen(false);
+        }}
       />
     </div>
   );

@@ -23,12 +23,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Label } from "@/components/ui/label";
 import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
+import stockRequestService from '@/services/stockRequest.service';
 import {
     Upload, Plus, Eye, Edit, Trash2, MoreHorizontal,
     Search, FileText, RotateCcw, Calendar,
     Truck, Package, Clock, CheckCircle2,
     ClipboardList, DollarSign, Filter, X,
-    TrendingUp, AlertCircle, PackageCheck
+    TrendingUp, AlertCircle, PackageCheck, Bell, XCircle
 } from 'lucide-react';
 
 const detectTimeframe = (startDate, endDate) => {
@@ -171,6 +172,12 @@ const StockOutList = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('stock-out');
+    const [pendingRequests, setPendingRequests] = useState([]);
+    const [requestsLoading, setRequestsLoading] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [showRequestDetail, setShowRequestDetail] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -184,9 +191,28 @@ const StockOutList = () => {
         }
     };
 
+    const fetchPendingRequests = async () => {
+        try {
+            setRequestsLoading(true);
+            const data = await stockRequestService.getPendingRequests();
+            const response = data?.data || data;
+            setPendingRequests(response || []);
+        } catch (error) {
+            console.error("Failed to fetch pending requests:", error);
+        } finally {
+            setRequestsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === 'pending-requests') {
+            fetchPendingRequests();
+        }
+    }, [activeTab]);
 
     const filteredRecords = useMemo(() => {
         return records.filter(record => {
@@ -205,7 +231,10 @@ const StockOutList = () => {
 
             let matchesStatus = true;
             if (statusFilter && statusFilter !== 'all') {
-                matchesStatus = record.status === statusFilter;
+                // Handle both old (Pending/Completed) and new (PENDING/COMPLETED) status values
+                const recordStatus = record.status?.toUpperCase();
+                const filterStatus = statusFilter.toUpperCase();
+                matchesStatus = recordStatus === filterStatus || record.status === statusFilter;
             }
 
             return matchesSearch && matchesDate && matchesStatus;
@@ -308,7 +337,9 @@ const StockOutList = () => {
     const getStatusBadge = (status) => {
         const statusConfig = {
             'Completed': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
-            'Pending': { label: 'Chờ duyệt', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'Pending': { label: 'Chờ xác nhận', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'PENDING': { label: 'Chờ xác nhận', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'COMPLETED': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
             'Cancelled': { label: 'Đã hủy', class: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100' },
         };
         const config = statusConfig[status] || statusConfig['Pending'];
@@ -350,7 +381,58 @@ const StockOutList = () => {
                         </div>
                     </div>
 
-                    {/* Stats Cards */}
+                    {/* Tabs */}
+                    <div className="flex items-center gap-2 border-b border-border">
+                        <button
+                            onClick={() => setActiveTab('stock-out')}
+                            className={`px-4 py-2 font-medium text-sm transition-colors relative ${
+                                activeTab === 'stock-out'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            Phiếu xuất kho
+                            {activeTab === 'stock-out' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('pending-requests')}
+                            className={`px-4 py-2 font-medium text-sm transition-colors relative flex items-center gap-2 ${
+                                activeTab === 'pending-requests'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            Hàng đến
+                            {pendingRequests.length > 0 && (
+                                <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                                    {pendingRequests.length}
+                                </span>
+                            )}
+                            {activeTab === 'pending-requests' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('notifications')}
+                            className={`px-4 py-2 font-medium text-sm transition-colors relative flex items-center gap-2 ${
+                                activeTab === 'notifications'
+                                    ? 'text-primary'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            <Bell className="w-4 h-4" />
+                            Thông báo
+                            {activeTab === 'notifications' && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Content based on active tab */}
+                    {activeTab === 'stock-out' && (
+                        <>
                     {!loading && records.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                             <StatCard
@@ -362,7 +444,7 @@ const StockOutList = () => {
                                 trend={stats.hasPreviousData ? stats.totalTrend : undefined}
                             />
                             <StatCard
-                                title="Chờ duyệt"
+                                title="Chờ xác nhận"
                                 value={stats.pending}
                                 subtitle="Đang xử lý"
                                 icon={Clock}
@@ -423,8 +505,8 @@ const StockOutList = () => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">Tất cả</SelectItem>
-                                        <SelectItem value="Pending">Chờ duyệt</SelectItem>
-                                        <SelectItem value="Completed">Hoàn thành</SelectItem>
+                                        <SelectItem value="PENDING">Chờ xác nhận</SelectItem>
+                                        <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
                                         <SelectItem value="Cancelled">Đã hủy</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -484,7 +566,7 @@ const StockOutList = () => {
                             {statusFilter && statusFilter !== 'all' && (
                                 <FilterPill 
                                     label="Trạng thái" 
-                                    value={statusFilter === 'Pending' ? 'Chờ duyệt' : statusFilter === 'Completed' ? 'Hoàn thành' : 'Đã hủy'} 
+                                    value={statusFilter === 'PENDING' ? 'Chờ xác nhận' : statusFilter === 'COMPLETED' ? 'Hoàn thành' : 'Đã hủy'} 
                                     onRemove={() => setStatusFilter('all')} 
                                 />
                             )}
@@ -684,6 +766,147 @@ const StockOutList = () => {
                             </div>
                         </div>
                     )}
+                    </>)}
+
+                    {/* Pending Requests Tab */}
+                    {activeTab === 'pending-requests' && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold">Yêu cầu chờ duyệt</h2>
+                                <span className="text-sm text-muted-foreground">
+                                    {pendingRequests.length} yêu cầu
+                                </span>
+                            </div>
+
+                            {requestsLoading ? (
+                                <div className="flex flex-col items-center justify-center py-32">
+                                    <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                                    <p className="text-muted-foreground font-medium">Đang tải dữ liệu...</p>
+                                </div>
+                            ) : pendingRequests.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-24 bg-gradient-to-b from-muted/30 to-muted/10 rounded-3xl border-2 border-dashed border-border/60">
+                                    <div className="w-28 h-28 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center mb-6 ring-4 ring-primary/5">
+                                        <ClipboardList className="w-14 h-14 text-primary/30" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-foreground mb-2">
+                                        Không có yêu cầu nào
+                                    </h3>
+                                    <p className="text-muted-foreground text-center max-w-md">
+                                        Tất cả yêu cầu từ cửa hàng đã được xử lý.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm">
+                                    <Table>
+                                        <TableHeader className="bg-gradient-to-r from-muted/60 to-muted/40">
+                                            <TableRow className="hover:bg-transparent border-border/50">
+                                                <TableHead className="font-bold text-muted-foreground/80">STT</TableHead>
+                                                <TableHead className="font-bold text-muted-foreground/80">Mã yêu cầu</TableHead>
+                                                <TableHead className="font-bold text-muted-foreground/80">Cửa hàng</TableHead>
+                                                <TableHead className="font-bold text-muted-foreground/80">Ngày gửi</TableHead>
+                                                <TableHead className="font-bold text-muted-foreground/80">Sản phẩm</TableHead>
+                                                <TableHead className="text-center font-bold text-muted-foreground/80">Thao tác</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {pendingRequests.map((request, index) => (
+                                                <TableRow key={request.id} className="hover:bg-muted/40 transition-colors border-border/30">
+                                                    <TableCell className="text-center text-muted-foreground font-medium">
+                                                        {index + 1}
+                                                    </TableCell>
+                                                    <TableCell className="font-bold text-primary">{request.requestCode}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 bg-primary/10 rounded-md flex items-center justify-center">
+                                                                <Truck className="w-3.5 h-3.5 text-primary" />
+                                                            </div>
+                                                            <span className="font-medium">{request.storeName}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-muted-foreground">
+                                                        {new Date(request.createdAt).toLocaleDateString('vi-VN')}
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <div 
+                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
+                                                            onClick={() => {
+                                                                setSelectedRequest(request);
+                                                                setShowRequestDetail(true);
+                                                            }}
+                                                        >
+                                                            <Package className="w-3.5 h-3.5 text-muted-foreground/70" />
+                                                            <span className="font-semibold">
+                                                                {request.items?.[0]?.variantName || 'Sản phẩm #' + request.items?.[0]?.variantId}
+                                                                {request.totalItems > 1 && ` +${request.totalItems - 1} khác`}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        await stockRequestService.approveRequest(request.id);
+                                                                        alert('Đã duyệt yêu cầu!');
+                                                                        fetchPendingRequests();
+                                                                    } catch (error) {
+                                                                        alert(error.response?.data?.message || 'Lỗi khi duyệt');
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <CheckCircle2 className="w-4 h-4" /> Duyệt
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="gap-1"
+                                                                onClick={async () => {
+                                                                    const reason = prompt('Nhập lý do từ chối:');
+                                                                    if (reason) {
+                                                                        try {
+                                                                            await stockRequestService.rejectRequest(request.id, reason);
+                                                                            alert('Đã từ chối yêu cầu!');
+                                                                            fetchPendingRequests();
+                                                                        } catch (error) {
+                                                                            alert(error.response?.data?.message || 'Lỗi khi từ chối');
+                                                                        }
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <X className="w-4 h-4" /> Từ chối
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Notifications Tab */}
+                    {activeTab === 'notifications' && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold">Thông báo</h2>
+                            </div>
+                            <div className="flex flex-col items-center justify-center py-24 bg-gradient-to-b from-muted/30 to-muted/10 rounded-3xl border-2 border-dashed border-border/60">
+                                <div className="w-28 h-28 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center mb-6 ring-4 ring-primary/5">
+                                    <Bell className="w-14 h-14 text-primary/30" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-foreground mb-2">
+                                    Chưa có thông báo
+                                </h3>
+                                <p className="text-muted-foreground text-center max-w-md">
+                                    Thông báo về các yêu cầu mới và cập nhật sẽ hiển thị tại đây.
+                                </p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -785,6 +1008,88 @@ const StockOutList = () => {
                             <Upload className="w-4 h-4" /> In phiếu
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Request Detail Dialog */}
+            <Dialog open={showRequestDetail} onOpenChange={setShowRequestDetail}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Chi tiết yêu cầu xuất hàng</DialogTitle>
+                        <DialogDescription>
+                            {selectedRequest?.requestCode} - {selectedRequest?.storeName}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedRequest && (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-muted-foreground">Ngày gửi</p>
+                                    <p className="font-medium">{new Date(selectedRequest.createdAt).toLocaleDateString('vi-VN')}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Kho nhận</p>
+                                    <p className="font-medium">{selectedRequest.targetWarehouseName}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Ghi chú</p>
+                                    <p className="font-medium">{selectedRequest.note || '-'}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground mb-2">Danh sách sản phẩm ({selectedRequest.totalItems})</p>
+                                <div className="border rounded-lg divide-y max-h-64 overflow-y-auto">
+                                    {selectedRequest.items?.map((item, idx) => (
+                                        <div key={idx} className="p-3 flex items-center justify-between">
+                                            <div>
+                                                <p className="font-medium text-sm">{item.variantName || 'Sản phẩm #' + item.variantId}</p>
+                                                <p className="text-xs text-muted-foreground">SKU: {item.sku}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-semibold">x{item.quantity}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button 
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 gap-1"
+                                    onClick={async () => {
+                                        try {
+                                            await stockRequestService.approveRequest(selectedRequest.id);
+                                            alert('Đã duyệt yêu cầu!');
+                                            fetchPendingRequests();
+                                            setShowRequestDetail(false);
+                                        } catch (error) {
+                                            alert(error.response?.data?.desc || 'Lỗi khi duyệt');
+                                        }
+                                    }}
+                                >
+                                    <CheckCircle2 className="w-4 h-4" /> Duyệt
+                                </Button>
+                                <Button 
+                                    variant="destructive"
+                                    className="flex-1 gap-1"
+                                    onClick={async () => {
+                                        const reason = prompt('Nhập lý do từ chối:');
+                                        if (reason) {
+                                            try {
+                                                await stockRequestService.rejectRequest(selectedRequest.id, reason);
+                                                alert('Đã từ chối yêu cầu!');
+                                                fetchPendingRequests();
+                                                setShowRequestDetail(false);
+                                            } catch (error) {
+                                                alert(error.response?.data?.desc || 'Lỗi khi từ chối');
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <XCircle className="w-4 h-4" /> Từ chối
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>

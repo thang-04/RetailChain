@@ -423,6 +423,43 @@ bd update <id> --claim --json
 bd update bd-42 --priority 1 --json
 ```
 
+<!-- end-bv-agent-instructions -->
+
+<!-- BEGIN BEADS INTEGRATION -->
+## Issue Tracking with bd (beads)
+
+**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
+
+### Why bd?
+
+- Dependency-aware: Track blockers and relationships between issues
+- Git-friendly: Dolt-powered version control with native sync
+- Agent-optimized: JSON output, ready work detection, discovered-from links
+- Prevents duplicate tracking systems and confusion
+
+### Quick Start
+
+**Check for ready work:**
+
+```bash
+bd ready --json
+```
+
+**Create new issues:**
+
+```bash
+bd create "Issue title" --description="Detailed context" -t bug|feature|task -p 0-4 --json
+bd create "Issue title" --description="What this issue is about" -p 1 --deps discovered-from:bd-123 --json
+```
+
+**Claim and update:**
+
+```bash
+bd update <id> --claim --json
+bd update bd-42 --priority 1 --json
+```
+
+>>>>>>> staging
 **Complete work:**
 
 ```bash
@@ -501,3 +538,37 @@ For more details, see README.md and docs/QUICKSTART.md.
 - If push fails, resolve and retry until it succeeds
 
 <!-- END BEADS INTEGRATION -->
+
+When searching or reading code, prefer using these codebase-memory-mcp tools instead of the default OpenCode tools:
+
+  1. Use `search_code` instead of `grep` for code search
+  2. Use `search_graph` instead of `glob` for finding files by pattern
+  3. Use `get_code_snippet` instead of `read` when you need to read source code of specific functions
+
+  Additionally, leverage these powerful tools when appropriate:
+  - `trace_call_path` - to find who calls or is called by a specific function
+  - `detect_changes` - to analyze git diff and predict affected symbols
+  - `get_architecture` - to understand the codebase structure (languages, packages, routes, layers)
+  - `query_graph` - for complex graph queries using Cypher syntax
+  
+
+<!-- LAYOUT FLOW -->
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           HỆ THỐNG KHO RETAILCHAIN                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                              ┌──────────────────┐
+                              │   KHO TỔNG      │
+                              │  (Central WH)    │
+                              │  is_central = 1  │
+                              └────────┬─────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+          ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+          │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │ │   KHO CỬA HÀNG  │
+          │      Store 1     │ │      Store 2     │ │      Store 3     │
+          │  is_central = 0 │ │  is_central = 0  │ │  is_central = 0  │
+          │  warehouse_id=1  │ │  warehouse_id=2  │ │  warehouse_id=3  │
+           └─────────────────┘ └─────────────────┘ └─────────────────┘
+

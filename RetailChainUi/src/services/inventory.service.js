@@ -11,6 +11,11 @@ const inventoryService = {
     return axiosPrivate.get('/warehouse');
   },
 
+  // Lấy kho tổng (central warehouse) - không cần quyền đặc biệt
+  getCentralWarehouse: async () => {
+    return axiosPrivate.get('/warehouse/central');
+  },
+
   // Wrapper for product service
   getAllProducts: async () => {
     return productService.getAllProducts();
@@ -216,6 +221,30 @@ const inventoryService = {
       return response.data || response || [];
     } catch (error) {
       console.error("Error fetching suppliers:", error);
+      return [];
+    }
+  },
+
+  /**
+   * Xác nhận đã nhận hàng từ phiếu xuất kho.
+   * PUT /api/inventory/{id}/confirm
+   * @param {number} documentId - ID phiếu xuất
+   */
+  confirmReceipt: async (documentId) => {
+    return axiosPrivate.put(`/inventory/${documentId}/confirm`);
+  },
+
+  /**
+   * Lấy danh sách phiếu xuất kho đến cửa hàng.
+   * GET /api/inventory/store/{storeId}/export
+   * @param {number} storeId - ID cửa hàng
+   */
+  getExportDocumentsByStore: async (storeId) => {
+    try {
+      const response = await axiosPrivate.get(`/inventory/store/${storeId}/export`);
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching export documents by store:", error);
       return [];
     }
   }

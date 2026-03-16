@@ -162,4 +162,35 @@ public class InventoryController {
                     "Error retrieving inventory overview: " + e.getMessage());
         }
     }
+
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
+    @PutMapping("/{id}/confirm")
+    public String confirmReceipt(@PathVariable Long id) {
+        String prefix = "[confirmReceipt]|id=" + id;
+        log.info("{}|START", prefix);
+        try {
+            inventoryService.confirmReceipt(id);
+            log.info("{}|END", prefix);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Receipt confirmed successfully");
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error confirming receipt: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasAuthority('" + INVENTORY_VIEW + "')")
+    @GetMapping("/store/{storeId}/export")
+    public String getExportDocumentsByStore(@PathVariable Long storeId) {
+        String prefix = "[getExportDocumentsByStore]|storeId=" + storeId;
+        log.info("{}|START", prefix);
+        try {
+            List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> response = 
+                    inventoryService.getExportDocumentsByStore(storeId);
+            log.info("{}|END|size={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Export documents retrieved successfully", response);
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving documents: " + e.getMessage());
+        }
+    }
 }
