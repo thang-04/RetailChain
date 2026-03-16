@@ -29,10 +29,26 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [chainStock, setChainStock] = useState([]);
+    
+    // Chain Stock Pagination State
+    const [chainStockPage, setChainStockPage] = useState(1);
+    const STOCK_ITEMS_PER_PAGE = 5;
 
     // Variant states
     const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
     const [savingVariant, setSavingVariant] = useState(false);
+
+    const getStatusBadge = (quantity) => {
+        if (quantity > 100) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">EXCELLENT</span>;
+        } else if (quantity > 10) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-100">IN STOCK</span>;
+        } else if (quantity > 0) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-100">LOW STOCK</span>;
+        } else {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-100">OUT OF STOCK</span>;
+        }
+    };
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -317,18 +333,19 @@ const ProductDetailPage = () => {
                                         <p className="text-sm text-slate-500">Stock availability across all locations.</p>
                                     </div>
                                 </div>
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                                     <table className="w-full text-left border-collapse text-sm">
                                         <thead>
                                             <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
                                                 <th className="px-6 py-4">Location</th>
                                                 <th className="px-6 py-4 text-center">SKU</th>
                                                 <th className="px-6 py-4 text-right">Available</th>
+                                                <th className="px-6 py-4 text-center">Status</th>
                                                 <th className="px-6 py-4 text-center">Last Updated</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                            {chainStock.length > 0 ? chainStock.map((stock, idx) => (
+                                            {chainStock.length > 0 ? chainStock.slice((chainStockPage - 1) * STOCK_ITEMS_PER_PAGE, chainStockPage * STOCK_ITEMS_PER_PAGE).map((stock, idx) => (
                                                 <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                                                     <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
                                                         <div className="flex items-center gap-3">
@@ -344,17 +361,54 @@ const ProductDetailPage = () => {
                                                     <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">
                                                         {stock.quantity.toLocaleString()}
                                                     </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        {getStatusBadge(stock.quantity)}
+                                                    </td>
                                                     <td className="px-6 py-4 text-center text-slate-500 text-xs">
                                                         {new Date(stock.lastUpdated).toLocaleString()}
                                                     </td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">No inventory records found for this product.</td>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">No inventory records found for this product.</td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
+
+                                    {/* Pagination Footer */}
+                                    {chainStock.length > 0 && (
+                                        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                Showing <span className="font-bold text-slate-900 dark:text-white">{(chainStockPage - 1) * STOCK_ITEMS_PER_PAGE + 1}-{Math.min(chainStockPage * STOCK_ITEMS_PER_PAGE, chainStock.length)}</span> of <span className="font-bold text-slate-900 dark:text-white">{chainStock.length}</span> locations
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="w-8 h-8"
+                                                    onClick={() => setChainStockPage(p => Math.max(1, p - 1))}
+                                                    disabled={chainStockPage === 1}
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </Button>
+                                                
+                                                <div className="flex items-center gap-1 mx-1">
+                                                    <span className="text-xs font-medium">Page {chainStockPage} of {Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE) || 1}</span>
+                                                </div>
+
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="w-8 h-8"
+                                                    onClick={() => setChainStockPage(p => Math.min(Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE), p + 1))}
+                                                    disabled={chainStockPage >= Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE)}
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
