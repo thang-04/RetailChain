@@ -26,7 +26,7 @@ import { ExcelImportWizard } from '@/components/common/ExcelImportWizard';
 import { Upload, Plus,
     Search, FileText, Filter, RotateCcw, Calendar,
     CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight,
-    ClipboardList, DollarSign, AlertCircle, Download, Package, Building2
+    ClipboardList, DollarSign, AlertCircle, Download, Package, Building2, Trash2
 } from 'lucide-react';
 
 const detectTimeframe = (startDate, endDate) => {
