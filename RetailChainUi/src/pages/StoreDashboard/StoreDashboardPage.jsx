@@ -15,13 +15,22 @@ import useAuth from "../../contexts/AuthContext/useAuth";
 
 const StoreDashboardPage = () => {
   const { id } = useParams();
-  const { hasPermission, hasRole } = useAuth();
-  const isStoreManager = hasRole('STORE_MANAGER');
+  const { hasPermission, hasRole, loading: authLoading } = useAuth();
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(isStoreManager ? "incoming" : "overview");
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Set default tab based on role after auth loads
+  useEffect(() => {
+    if (!authLoading) {
+      const isStoreManager = hasRole('STORE_MANAGER');
+      if (isStoreManager) {
+        setActiveTab("incoming");
+      }
+    }
+  }, [authLoading, hasRole]);
 
   const canEditStore = hasPermission('STORE_UPDATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
