@@ -209,7 +209,9 @@ const StockInList = () => {
                 (record.supplier?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 (record.targetWarehouseName?.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
-            const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
+            const matchesStatus = statusFilter === 'all' || 
+                record.status?.toUpperCase() === statusFilter.toUpperCase() ||
+                record.status === statusFilter;
 
             let matchesDate = true;
             if (dateFilter.start) {
@@ -257,9 +259,9 @@ const StockInList = () => {
         }
         
         const total = currentRecords.length;
-        const completed = currentRecords.filter(r => r.status === 'Completed').length;
-        const pending = currentRecords.filter(r => r.status === 'Pending').length;
-        const cancelled = currentRecords.filter(r => r.status === 'Cancelled').length;
+        const completed = currentRecords.filter(r => r.status?.toUpperCase() === 'COMPLETED' || r.status === 'Completed').length;
+        const pending = currentRecords.filter(r => r.status?.toUpperCase() === 'PENDING' || r.status === 'Pending').length;
+        const cancelled = currentRecords.filter(r => r.status?.toUpperCase() === 'CANCELLED' || r.status === 'Cancelled').length;
         const totalValue = currentRecords.reduce((sum, r) => sum + (r.totalValue || 0), 0);
         const totalItems = currentRecords.reduce((sum, r) => sum + (r.totalItems || 0), 0);
         
@@ -373,10 +375,12 @@ const StockInList = () => {
     const getStatusBadge = (status) => {
         const statusConfig = {
             'Completed': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
+            'COMPLETED': { label: 'Hoàn thành', class: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
             'Pending': { label: 'Chờ duyệt', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
+            'PENDING': { label: 'Chờ duyệt', class: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-100' },
             'Cancelled': { label: 'Đã hủy', class: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100' },
         };
-        const config = statusConfig[status] || statusConfig['Pending'];
+        const config = statusConfig[status] || statusConfig['COMPLETED'];
         return <Badge className={`${config.class} border font-medium px-2.5 py-0.5`}>{config.label}</Badge>;
     };
 
