@@ -121,6 +121,14 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
+                        <Route 
+                            path="/products/categories" 
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN', 'STORE_MANAGER']}>
+                                    <ProductCategoryPage />
+                                </ProtectedRoute>
+                            } 
+                        />
                         <Route path="/products/:slug" element={<ProductDetailPage />} />
                         <Route
                             path="/products/:slug/edit"
