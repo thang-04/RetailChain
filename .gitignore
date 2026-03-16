@@ -50,3 +50,34 @@ RetailChainUi/template/
 *.db
 .worktrees/
 
+# Windows system trash
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
+tmp/
+temp/
+
+# Caches
+.cache/
+.eslintcache
+.parcel-cache/
+.vite/
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Java crash dumps
+hs_err_pid*
+replay_pid*
+
