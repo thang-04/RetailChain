@@ -15,14 +15,14 @@ import useAuth from "../../contexts/AuthContext/useAuth";
 
 const StoreDashboardPage = () => {
   const { id } = useParams();
+  const { hasPermission, hasRole } = useAuth();
+  const isStoreManager = hasRole('STORE_MANAGER');
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
-  const isStoreManager = hasRole('STORE_MANAGER');
   const [activeTab, setActiveTab] = useState(isStoreManager ? "incoming" : "overview");
 
-  const { hasPermission, hasRole } = useAuth();
   const canEditStore = hasPermission('STORE_UPDATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
   useEffect(() => {
