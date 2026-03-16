@@ -17,6 +17,8 @@ public interface ProductService {
 
     ProductResponse updateProduct(String slug, ProductRequest request);
 
+    void deleteProduct(Long id);
+
     ProductResponse getProductBySlug(String slug);
 
     String getNextProductCode(Long categoryId);

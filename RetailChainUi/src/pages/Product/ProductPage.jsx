@@ -110,6 +110,20 @@ const ProductPage = () => {
     navigate(`/products/${product.slug}`);
   };
 
+  const handleDelete = async (product) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xoá sản phẩm ${product.name}?`)) {
+      try {
+        await productService.deleteProduct(product.id);
+        const prodRes = await productService.getAllProducts();
+        setAllProducts(prodRes.data || []);
+        // filter trigger automatically from allProducts dependency
+      } catch (error) {
+        console.error("Xoá sản phẩm thất bại", error);
+        alert("Xoá sản phẩm thất bại: " + (error.response?.data?.desc || error.message));
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8 p-4 md:p-8 bg-[#f8fafc] dark:bg-[#0f171a] min-h-screen">
       {/* Banner cảnh báo backend offline */}
@@ -146,6 +160,7 @@ const ProductPage = () => {
             categories={categories}
             onEditClick={handleEdit}
             onViewClick={handleView}
+            onDeleteClick={handleDelete}
           />
         )}
       </div>
