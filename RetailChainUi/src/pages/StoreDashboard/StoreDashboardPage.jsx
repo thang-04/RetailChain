@@ -19,7 +19,8 @@ const StoreDashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+  const isStoreManager = hasRole('STORE_MANAGER');
+  const [activeTab, setActiveTab] = useState(isStoreManager ? "incoming" : "overview");
 
   const { hasPermission, hasRole } = useAuth();
   const canEditStore = hasPermission('STORE_UPDATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
