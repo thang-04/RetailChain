@@ -1,6 +1,9 @@
 package com.sba301.retailmanagement.service.impl;
 
 import com.sba301.retailmanagement.config.JwtProperties;
+import com.sba301.retailmanagement.dto.request.ChangePassWordRequest;
+import com.sba301.retailmanagement.dto.request.ConfirmPasswordRequest;
+import com.sba301.retailmanagement.dto.request.FirstTimeChangePasswordRequest;
 import com.sba301.retailmanagement.dto.request.LoginRequest;
 import com.sba301.retailmanagement.dto.request.RefreshTokenRequest;
 import com.sba301.retailmanagement.dto.request.RegisterRequest;
@@ -17,7 +20,9 @@ import com.sba301.retailmanagement.repository.UserRepository;
 import com.sba301.retailmanagement.security.CustomUserDetails;
 import com.sba301.retailmanagement.security.JwtTokenProvider;
 import com.sba301.retailmanagement.service.AuthService;
+import com.sba301.retailmanagement.service.OtpService;
 import com.sba301.retailmanagement.service.RefreshTokenService;
+import com.sba301.retailmanagement.service.SendMailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,7 +44,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
-
+        private final OtpService otpService;
+        private final SendMailService sendMailService;
         private final AuthenticationManager authenticationManager;
         private final UserRepository userRepository;
         private final RoleRepository roleRepository;
@@ -59,23 +65,55 @@ public class AuthServiceImpl implements AuthService {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                String accessToken = tokenProvider.generateAccessToken(authentication);
-
                 CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
                 User user = userRepository.findById(userDetails.getId())
                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                 "User not found with id: " + userDetails.getId()));
 
-                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+                if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        String tempToken = tokenProvider.generateTemporaryToken(user);
+                        return AuthResponse.builder()
+                                        .requireChangePassword(true)
+                                        .tempToken(tempToken)
+                                        .user(toUserDTO(user))
+                                        .message("Vui lòng đổi mật khẩu để tiếp tục.")
+                                        .build();
+                }
 
-                UserDTO userDTO = toUserDTO(user);
+                String accessToken = tokenProvider.generateAccessToken(authentication);
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
                 return AuthResponse.builder()
                                 .accessToken(accessToken)
                                 .refreshToken(refreshToken.getToken())
                                 .expiresIn(jwtProperties.getAccessTokenExpiration())
-                                .user(userDTO)
+                                .user(toUserDTO(user))
+                                .requireChangePassword(false)
                                 .build();
+        }
+
+        @Override
+        @Transactional
+        public AuthResponse firstTimeChangePassword(FirstTimeChangePasswordRequest request, String tempToken) {
+                String email = tokenProvider.getEmailFromToken(tempToken);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+
+                if (!Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        throw new RuntimeException("Account already initialized");
+                }
+
+                if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu tạm thời");
+                }
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setIsFirstLogin(false);
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+
+                // Now provide full login
+                return login(new LoginRequest(user.getEmail(), request.getNewPassword()));
         }
 
         @Override
@@ -159,6 +197,72 @@ public class AuthServiceImpl implements AuthService {
                 refreshTokenService.deleteByUser(user);
         }
 
+        @Override
+        @Transactional
+        public AuthResponse changePassword(ChangePassWordRequest request, String token) {
+                String email = tokenProvider.getEmailFromToken(token);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+                if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+                        throw new RuntimeException("Mật khẩu hiện tại không chính xác");
+                }
+
+                if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
+                }
+
+                if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+                        throw new RuntimeException("Mật khẩu mới và xác nhận mật khẩu không khớp");
+                }
+                refreshTokenService.deleteByUser(user);
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setUpdatedAt(LocalDateTime.now());
+                userRepository.save(user);
+            return login(new LoginRequest(user.getEmail(), request.getNewPassword()));
+        }
+        @Override
+        public void forgotPassWord(String email) {
+                log.info("[forgotPassWord]|email={}", email);
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy email: " + email));
+                
+                if (Boolean.TRUE.equals(user.getIsFirstLogin())) {
+                        throw new RuntimeException("Tài khoản của bạn chưa được kích hoạt. Vui lòng đăng nhập lần đầu bằng mật khẩu tạm thời đã được gửi qua email.");
+                }
+
+                sendMailService.sendOtpEmail(email, "RetailChain Admin send code to reset password", otpService.generateAndSaveOtp(email));
+        }
+
+        @Override
+        public void confirmPassWord(ConfirmPasswordRequest request) {
+                log.info("[confirmPassWord]|email={}", request.getEmail());
+        if (otpService.verifyOtp(request.getEmail(), request.getOtp(), true)) {
+                        User user = userRepository.findByEmail(request.getEmail())
+                                         .orElseThrow(() -> new ResourceNotFoundException(
+                                                         "User not found with email: " + request.getEmail()));
+                        
+                        // If they somehow reset via OTP, we should probably clear isFirstLogin if it was set
+                        // but based on forgotPassword logic, we block it. Still, the check here is good.
+                        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                                throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
+                        }
+
+                        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                        user.setIsFirstLogin(false);
+                        user.setUpdatedAt(LocalDateTime.now());
+                        userRepository.save(user);
+                        return;
+                }
+                throw new RuntimeException("Otp is invalid or expired for email: " + request.getEmail());
+        }
+
+        @Override
+        public boolean verifyOtp(String email, String otp) {
+                log.info("[verifyOtp]|email={}|otp={}", email, otp);
+                return otpService.verifyOtp(email, otp, false);
+        }
+
         private UserDTO toUserDTO(User user) {
                 List<String> roleNames = user.getRoles() != null
                                 ? user.getRoles().stream().map(Role::getCode).collect(Collectors.toList())
@@ -179,10 +283,13 @@ public class AuthServiceImpl implements AuthService {
 
                 UserDTO dto = UserDTO.builder()
                                 .id(user.getId())
+                                .username(user.getUsername())
                                 .email(user.getEmail())
                                 .fullName(user.getFullName())
                                 .phoneNumber(user.getPhone())
+                                .avatarUrl(null) // Or handle if exists
                                 .status(user.getStatus())
+                                .isFirstLogin(user.getIsFirstLogin())
                                 .roles(roleNames)
                                 .permissions(permissions)
                                 .storeId(user.getStoreId())

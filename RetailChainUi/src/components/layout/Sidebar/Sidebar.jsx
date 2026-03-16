@@ -63,7 +63,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/roles",
       label: "Roles & Permissions",
       icon: "admin_panel_settings",
-      show: hasPermission('ROLE_VIEW'),
+      show: isSuperAdmin(),
     },
     {
       path: "/users",
@@ -109,7 +109,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             item.path === "/"
               ? location.pathname === "/"
               : location.pathname === item.path ||
-                location.pathname.startsWith(item.path + "/");
+              location.pathname.startsWith(item.path + "/");
 
           return (
             <Button

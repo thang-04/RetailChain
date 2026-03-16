@@ -18,7 +18,6 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
-        password: '',
         fullName: '',
         phoneNumber: '',
         roleId: '',
@@ -39,7 +38,6 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
             setFormData({
                 username: '',
                 email: '',
-                password: '',
                 fullName: '',
                 phoneNumber: '',
                 roleId: '',
@@ -57,8 +55,15 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
             let filteredRoles = [];
             if (isSuperAdmin()) {
                 filteredRoles = rolesData.filter(r => r.code === 'STORE_MANAGER' || r.code === 'STAFF');
+            } else if (isStoreManager()) {
+                filteredRoles = rolesData.filter(r => r.code === 'STAFF');
             }
             setRoles(filteredRoles);
+
+            // Auto-select if only one role
+            if (filteredRoles.length === 1) {
+                setFormData(prev => ({ ...prev, roleId: filteredRoles[0].id.toString() }));
+            }
 
             const storesRes = await storeService.getAllStores();
             setStores(storesRes);
@@ -85,18 +90,17 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
             const payload = {
                 username: formData.username,
                 email: formData.email,
-                password: formData.password,
                 fullName: formData.fullName,
                 phoneNumber: formData.phoneNumber,
             };
 
-            if (isSuperAdmin()) {
-                const selectedRole = roles.find(r => r.id.toString() === formData.roleId);
-                if (!selectedRole) {
-                    throw new Error('Please select a valid role');
-                }
-                payload.roleIds = [parseInt(formData.roleId)];
+            const selectedRole = roles.find(r => r.id.toString() === formData.roleId);
+            if (!selectedRole) {
+                throw new Error('Please select a valid role');
+            }
+            payload.roleIds = [parseInt(formData.roleId)];
 
+            if (isSuperAdmin()) {
                 if (selectedRole.code === 'STORE_MANAGER' || selectedRole.code === 'STAFF') {
                     if (!formData.storeId) {
                         throw new Error('Store is required');
@@ -104,6 +108,8 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
                     payload.storeId = parseInt(formData.storeId);
                 }
             }
+            // For StoreManager, backend will automatically assign their storeId if not provided
+            // or we could explicitly send it if we had it in the form.
 
             await userService.createUser(payload);
             onSuccess();
@@ -135,11 +141,6 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
                     <div className="space-y-2">
                         <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                         <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
-                        <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} required minLength={6} />
                     </div>
 
                     <div className="space-y-2">
