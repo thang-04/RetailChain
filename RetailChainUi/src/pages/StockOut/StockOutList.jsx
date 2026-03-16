@@ -19,13 +19,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Link } from 'react-router-dom';
 import inventoryService from '@/services/inventory.service';
 import stockRequestService from '@/services/stockRequest.service';
 import {
-    Upload, Plus, Eye, Edit, Trash2, MoreHorizontal,
+    Upload, Plus,
     Search, FileText, RotateCcw, Calendar,
     Truck, Package, Clock, CheckCircle2,
     ClipboardList, DollarSign, Filter, X,
@@ -641,14 +640,14 @@ const StockOutList = () => {
                                         <TableHead className="text-right font-bold text-muted-foreground/80">Sản phẩm</TableHead>
                                         <TableHead className="text-right font-bold text-muted-foreground/80">Giá trị</TableHead>
                                         <TableHead className="text-center font-bold text-muted-foreground/80">Trạng thái</TableHead>
-                                        <TableHead className="w-14"></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {paginatedRecords.map((record, index) => (
-                                        <TableRow 
-                                            key={record.id} 
-                                            className="hover:bg-muted/40 transition-colors border-border/30"
+                                        <TableRow
+                                            key={record.id}
+                                            className="cursor-pointer hover:bg-muted/40 transition-colors border-border/30"
+                                            onClick={() => handleViewDetail(record)}
                                         >
                                             <TableCell className="text-center text-muted-foreground font-medium">
                                                 {(currentPage - 1) * itemsPerPage + index + 1}
@@ -682,30 +681,6 @@ const StockOutList = () => {
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 {getStatusBadge(record.status)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-44 rounded-xl">
-                                                        <DropdownMenuItem onClick={() => handleViewDetail(record)} className="gap-2">
-                                                            <Eye className="w-4 h-4" /> Xem chi tiết
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem className="gap-2">
-                                                            <Edit className="w-4 h-4" /> Chỉnh sửa
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            className="text-destructive focus:text-destructive gap-2"
-                                                            onClick={() => handleDelete(record.id)}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" /> Xóa phiếu
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
                                             </TableCell>
                                         </TableRow>
                                     ))}
