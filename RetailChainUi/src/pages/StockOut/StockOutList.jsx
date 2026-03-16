@@ -29,7 +29,7 @@ import {
     Search, FileText, RotateCcw, Calendar,
     Truck, Package, Clock, CheckCircle2,
     ClipboardList, DollarSign, Filter, X,
-    TrendingUp, AlertCircle, PackageCheck, Bell
+    TrendingUp, AlertCircle, PackageCheck, Bell, XCircle
 } from 'lucide-react';
 
 const detectTimeframe = (startDate, endDate) => {
@@ -176,6 +176,8 @@ const StockOutList = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [requestsLoading, setRequestsLoading] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [showRequestDetail, setShowRequestDetail] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -825,9 +827,18 @@ const StockOutList = () => {
                                                         {new Date(request.createdAt).toLocaleDateString('vi-VN')}
                                                     </TableCell>
                                                     <TableCell className="text-center">
-                                                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md">
+                                                        <div 
+                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-muted rounded-md cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
+                                                            onClick={() => {
+                                                                setSelectedRequest(request);
+                                                                setShowRequestDetail(true);
+                                                            }}
+                                                        >
                                                             <Package className="w-3.5 h-3.5 text-muted-foreground/70" />
-                                                            <span className="font-semibold">{request.totalItems}</span>
+                                                            <span className="font-semibold">
+                                                                {request.items?.[0]?.variantName || 'Sản phẩm #' + request.items?.[0]?.variantId}
+                                                                {request.totalItems > 1 && ` +${request.totalItems - 1} khác`}
+                                                            </span>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="text-center">
@@ -997,6 +1008,88 @@ const StockOutList = () => {
                             <Upload className="w-4 h-4" /> In phiếu
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Request Detail Dialog */}
+            <Dialog open={showRequestDetail} onOpenChange={setShowRequestDetail}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Chi tiết yêu cầu xuất hàng</DialogTitle>
+                        <DialogDescription>
+                            {selectedRequest?.requestCode} - {selectedRequest?.storeName}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedRequest && (
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-muted-foreground">Ngày gửi</p>
+                                    <p className="font-medium">{new Date(selectedRequest.createdAt).toLocaleDateString('vi-VN')}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Kho nhận</p>
+                                    <p className="font-medium">{selectedRequest.targetWarehouseName}</p>
+                                </div>
+                                <div>
+                                    <p className="text-muted-foreground">Ghi chú</p>
+                                    <p className="font-medium">{selectedRequest.note || '-'}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground mb-2">Danh sách sản phẩm ({selectedRequest.totalItems})</p>
+                                <div className="border rounded-lg divide-y max-h-64 overflow-y-auto">
+                                    {selectedRequest.items?.map((item, idx) => (
+                                        <div key={idx} className="p-3 flex items-center justify-between">
+                                            <div>
+                                                <p className="font-medium text-sm">{item.variantName || 'Sản phẩm #' + item.variantId}</p>
+                                                <p className="text-xs text-muted-foreground">SKU: {item.sku}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-semibold">x{item.quantity}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button 
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 gap-1"
+                                    onClick={async () => {
+                                        try {
+                                            await stockRequestService.approveRequest(selectedRequest.id);
+                                            alert('Đã duyệt yêu cầu!');
+                                            fetchPendingRequests();
+                                            setShowRequestDetail(false);
+                                        } catch (error) {
+                                            alert(error.response?.data?.desc || 'Lỗi khi duyệt');
+                                        }
+                                    }}
+                                >
+                                    <CheckCircle2 className="w-4 h-4" /> Duyệt
+                                </Button>
+                                <Button 
+                                    variant="destructive"
+                                    className="flex-1 gap-1"
+                                    onClick={async () => {
+                                        const reason = prompt('Nhập lý do từ chối:');
+                                        if (reason) {
+                                            try {
+                                                await stockRequestService.rejectRequest(selectedRequest.id, reason);
+                                                alert('Đã từ chối yêu cầu!');
+                                                fetchPendingRequests();
+                                                setShowRequestDetail(false);
+                                            } catch (error) {
+                                                alert(error.response?.data?.desc || 'Lỗi khi từ chối');
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <XCircle className="w-4 h-4" /> Từ chối
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
