@@ -14,4 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findTopByCodeStartingWithOrderByCodeDesc(String prefix);
     boolean existsByCode(String code);
+
+    long countByCategoryId(Long categoryId);
 }

@@ -22,6 +22,7 @@ import { Search, Plus, Edit2, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 import CreateUserDialog from './CreateUserDialog';
 import EditUserDialog from './EditUserDialog';
+import ConfirmModal from '@/components/ui/confirmModal';
 
 const UserManagementPage = () => {
 
@@ -36,6 +37,14 @@ const UserManagementPage = () => {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
+
+    // State for confirmation modal
+    const [confirmConfig, setConfirmConfig] = useState({
+        isOpen: false,
+        userId: null,
+        userFullName: '',
+        isBlocking: true
+    });
 
     // Fetch users on mount
     useEffect(() => {
@@ -55,13 +64,24 @@ const UserManagementPage = () => {
         }
     };
 
-    const handleToggleBlock = async (userId, currentStatus) => {
+    const handleToggleBlock = (user) => {
+        setConfirmConfig({
+            isOpen: true,
+            userId: user.id,
+            userFullName: user.fullName || user.username,
+            isBlocking: user.status === 1
+        });
+    };
+
+    const executeToggleBlock = async () => {
+        const { userId } = confirmConfig;
         try {
             await userService.toggleBlock(userId);
-            fetchUsers(); // Refresh the list
+            setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            fetchUsers();
         } catch (err) {
             console.error('Error toggling block status:', err);
-            alert('Failed to update user status');
+            setError('Failed to update user status');
         }
     };
 
@@ -183,7 +203,7 @@ const UserManagementPage = () => {
                                                 variant={user.status === 1 ? "outline" : "default"}
                                                 size="icon"
                                                 title={user.status === 1 ? "Block User" : "Unblock User"}
-                                                onClick={() => handleToggleBlock(user.id, user.status)}
+                                                onClick={() => handleToggleBlock(user)}
                                                 className={user.status === 1 ? "text-red-500 hover:text-red-600 hover:bg-red-50" : "bg-green-600 hover:bg-green-700"}
                                             >
                                                 {user.status === 1 ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
@@ -211,6 +231,20 @@ const UserManagementPage = () => {
                 }}
                 onSuccess={fetchUsers}
                 userToEdit={userToEdit}
+            />
+
+            <ConfirmModal
+                isOpen={confirmConfig.isOpen}
+                onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={executeToggleBlock}
+                title={confirmConfig.isBlocking ? "Khóa người dùng" : "Mở khóa người dùng"}
+                message={
+                    confirmConfig.isBlocking
+                        ? `Bạn có chắc chắn muốn khóa người dùng "${confirmConfig.userFullName}" không? Người dùng này sẽ không thể đăng nhập vào hệ thống.`
+                        : `Bạn có chắc chắn muốn mở khóa cho người dùng "${confirmConfig.userFullName}" không?`
+                }
+                confirmText={confirmConfig.isBlocking ? "Khóa" : "Mở khóa"}
+                variant={confirmConfig.isBlocking ? "danger" : "success"}
             />
         </div>
     );

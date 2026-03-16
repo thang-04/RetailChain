@@ -56,8 +56,10 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
             // Filter roles based on current user's authority
             let filteredRoles = [];
             if (isSuperAdmin()) {
-                filteredRoles = rolesData.filter(r => r.code === 'STORE_MANAGER');
+                // SuperAdmin can manage both Store Managers and Staff
+                filteredRoles = rolesData.filter(r => r.code === 'STORE_MANAGER' || r.code === 'STAFF');
             } else if (isStoreManager()) {
+                // Store Manager can only manage Staff
                 filteredRoles = rolesData.filter(r => r.code === 'STAFF');
             }
             setRoles(filteredRoles);

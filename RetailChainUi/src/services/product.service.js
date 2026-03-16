@@ -48,6 +48,27 @@ const productService = {
     return response;
   },
 
+  // --- Category CRUD ---
+  getCategoryById: async (id) => {
+    const response = await axiosPrivate.get(`${PRODUCT_API_PATH}/categories/${id}`);
+    return response;
+  },
+
+  createCategory: async (data) => {
+    const response = await axiosPrivate.post(`${PRODUCT_API_PATH}/categories`, data);
+    return response;
+  },
+
+  updateCategory: async (id, data) => {
+    const response = await axiosPrivate.put(`${PRODUCT_API_PATH}/categories/${id}`, data);
+    return response;
+  },
+
+  deleteCategory: async (id) => {
+    const response = await axiosPrivate.delete(`${PRODUCT_API_PATH}/categories/${id}`);
+    return response;
+  },
+
   getProductChainStock: async () => {
     return [
       { locationId: "WH01", locationName: "Kho Tổng", type: "Warehouse", stock: 100, status: "High" },

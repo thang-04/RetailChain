@@ -1,7 +1,9 @@
 package com.sba301.retailmanagement.service;
 
+import com.sba301.retailmanagement.dto.request.CategoryRequest;
 import com.sba301.retailmanagement.dto.request.ProductRequest;
 import com.sba301.retailmanagement.dto.request.ProductVariantRequest;
+import com.sba301.retailmanagement.dto.response.CategoryResponse;
 import com.sba301.retailmanagement.dto.response.ProductResponse;
 import com.sba301.retailmanagement.dto.response.ProductVariantResponse;
 import com.sba301.retailmanagement.dto.response.ProductExistsResponse;
@@ -20,6 +22,17 @@ public interface ProductService {
     String getNextProductCode(Long categoryId);
 
     List<ProductCategory> getAllCategories();
+
+    // --- Category CRUD ---
+    List<CategoryResponse> getCategoriesWithCount();
+
+    CategoryResponse getCategoryById(Long id);
+
+    CategoryResponse createCategory(CategoryRequest request);
+
+    CategoryResponse updateCategory(Long id, CategoryRequest request);
+
+    void deleteCategory(Long id);
 
     ProductVariantResponse createProductVariant(Long productId, ProductVariantRequest request);
 

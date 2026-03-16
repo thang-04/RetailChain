@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import roleService from '../../services/role.service';
+import useAuth from '../../contexts/AuthContext/useAuth';
 
 // Helper: Nhóm permissions theo category (phần trước dấu _ cuối cùng)
 const groupPermissions = (permissions) => {
@@ -79,6 +80,8 @@ const getRoleDescription = (code) => {
 };
 
 const RolePermissionPage = () => {
+    const { isSuperAdmin } = useAuth();
+    const isCurrentUserAdmin = isSuperAdmin();
     const [roles, setRoles] = useState([]);
     const [allPermissions, setAllPermissions] = useState([]);
     const [selectedRole, setSelectedRole] = useState(null);
@@ -200,7 +203,14 @@ const RolePermissionPage = () => {
     );
 
     // Nhóm permissions theo category
-    const groupedPermissions = groupPermissions(allPermissions);
+    // Filter out sensitive permissions (ROLE, PERMISSION) for non-SUPER_ADMIN roles
+    const displayPermissions = allPermissions.filter(perm => {
+        if (selectedRole?.code === 'SUPER_ADMIN') return true;
+        const code = (perm.code || perm.name || '').toUpperCase();
+        return !code.includes('ROLE') && !code.includes('PERMISSION');
+    });
+
+    const groupedPermissions = groupPermissions(displayPermissions);
 
     if (loading) {
         return (
@@ -307,31 +317,57 @@ const RolePermissionPage = () => {
                                     </div>
                                     <h2 className="text-xl font-bold text-text-main dark:text-white">
                                         {formatCategory(selectedRole.name || selectedRole.code || '')} Permissions
+                                        {selectedRole?.code === 'SUPER_ADMIN' && (
+                                            <span className="ml-3 px-2 py-0.5 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded uppercase tracking-wider">
+                                                Immutable Role
+                                            </span>
+                                        )}
                                     </h2>
                                     <p className="text-sm text-text-muted dark:text-gray-400 mt-0.5">
                                         Configure what users with the {formatCategory(selectedRole.name || '')} role can see and do.
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        onClick={handleDiscard}
-                                        disabled={!hasChanges() || saving}
-                                    >
-                                        Discard
-                                    </Button>
-                                    <Button
-                                        onClick={handleSave}
-                                        disabled={!hasChanges() || saving}
-                                        className="bg-primary hover:bg-primary/90"
-                                    >
-                                        {saving ? 'Saving...' : 'Save Changes'}
-                                    </Button>
+                                    {isCurrentUserAdmin && (
+                                        <>
+                                            <Button
+                                                variant="outline"
+                                                onClick={handleDiscard}
+                                                disabled={!hasChanges() || saving || selectedRole?.code === 'SUPER_ADMIN'}
+                                            >
+                                                Discard
+                                            </Button>
+                                            <Button
+                                                onClick={handleSave}
+                                                disabled={!hasChanges() || saving || selectedRole?.code === 'SUPER_ADMIN'}
+                                                className="bg-primary hover:bg-primary/90"
+                                            >
+                                                {saving ? 'Saving...' : 'Save Changes'}
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Messages */}
-                            {error && (
+                        {/* Info Messages */}
+                        <div className="px-6 py-2 border-b border-gray-100 dark:border-gray-800">
+                            {selectedRole?.code === 'SUPER_ADMIN' ? (
+                                <div className="p-2 text-xs text-blue-600 bg-blue-50 rounded-md dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                                    <span className="font-bold uppercase mr-2">Note:</span> Role Super Admin là mặc định và không thể thay đổi để đảm bảo an toàn hệ thống.
+                                </div>
+                            ) : !isCurrentUserAdmin ? (
+                                <div className="p-2 text-xs text-amber-600 bg-amber-50 rounded-md dark:bg-amber-900/20 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
+                                    <span className="font-bold uppercase mr-2">Read-only:</span> Chỉ Super Admin mới có quyền chỉnh sửa phân quyền.
+                                </div>
+                            ) : (
+                                <div className="p-2 text-xs text-blue-600 bg-blue-50 rounded-md dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                                    <span className="font-bold uppercase mr-2">Tip:</span> Các quyền quản lý Role nhạy cảm đã bị ẩn để tránh sai sót.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Messages */}
+                        {error && (
                                 <div className="mt-3 p-2 text-sm text-red-600 bg-red-50 rounded-md dark:bg-red-900/20 dark:text-red-400">
                                     {error}
                                 </div>
@@ -375,7 +411,8 @@ const RolePermissionPage = () => {
                                                         type="checkbox"
                                                         checked={isChecked}
                                                         onChange={() => togglePermission(perm.id)}
-                                                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
+                                                        disabled={!isCurrentUserAdmin || selectedRole?.code === 'SUPER_ADMIN'}
+                                                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary disabled:opacity-50 cursor-not-allowed"
                                                     />
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-sm font-medium text-text-main dark:text-white">
