@@ -362,63 +362,6 @@ const ProductEditPage = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Chain Inventory Section - Display only if editing */}
-                    {isEdit && (
-                        <div className="space-y-4">
-                            <div className="flex items-end justify-between px-1">
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Chain Inventory</h3>
-                                    <p className="text-sm text-slate-500">Real-time stock across all warehouse and store locations.</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="sm" className="h-9">
-                                        <BarChart3 className="w-3.5 h-3.5 mr-2" />
-                                        View History
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
-                                <table className="w-full text-left border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
-                                            <th className="px-6 py-4">Location</th>
-                                            <th className="px-6 py-4 text-center">SKU</th>
-                                            <th className="px-6 py-4 text-right">Available</th>
-                                            <th className="px-6 py-4 text-center">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                        {chainStock.length > 0 ? chainStock.map((stock, idx) => (
-                                            <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                                                <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                            <Store className="w-4 h-4" />
-                                                        </div>
-                                                        {stock.warehouseName}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium font-mono">{stock.sku}</span>
-                                                </td>
-                                                <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">
-                                                    {stock.quantity.toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    {getStatusBadge(stock.quantity)}
-                                                </td>
-                                            </tr>
-                                        )) : (
-                                            <tr>
-                                                <td colSpan={4} className="px-6 py-8 text-center text-slate-400">No inventory records found.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 
