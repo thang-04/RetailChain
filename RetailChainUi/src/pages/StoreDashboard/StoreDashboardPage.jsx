@@ -113,13 +113,13 @@ const StoreDashboardPage = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview" className="gap-2">
-            <Package className="w-4 h-4" />
-            Tồn kho
-          </TabsTrigger>
           <TabsTrigger value="incoming" className="gap-2">
             <Truck className="w-4 h-4" />
             Hàng đến
+          </TabsTrigger>
+          <TabsTrigger value="overview" className="gap-2">
+            <Package className="w-4 h-4" />
+            Tồn kho
           </TabsTrigger>
           <TabsTrigger value="staff" className="gap-2">
             <Users className="w-4 h-4" />
