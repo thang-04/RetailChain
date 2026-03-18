@@ -63,11 +63,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/attendance",
       label: "Chấm công",
       icon: "access_time",
-      show: false, // Ẩn hoàn toàn khỏi System Admin
+      show: isStaff() || isStoreManager() || isSuperAdmin(),
     },
     {
       path: "/staff/attendance",
-      label: "Attendance Dashboard",
+      label: "Dashboard Chấm công",
       icon: "fact_check",
       show: isSuperAdmin() || isStoreManager(),
     },
