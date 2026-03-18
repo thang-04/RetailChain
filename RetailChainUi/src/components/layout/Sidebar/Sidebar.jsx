@@ -50,13 +50,25 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/reports",
       label: "Reports",
       icon: "bar_chart",
-      show: hasPermission('REPORT_SYSTEM_VIEW') || hasPermission('REPORT_STORE_VIEW') || isStoreManager(),
+      show: false, // Ẩn hoàn toàn khỏi System Admin
     },
     {
       path: "/staff/shifts",
       label: "Staff Shifts",
       icon: "calendar_month",
       filledIcon: true,
+      show: isSuperAdmin() || isStoreManager(),
+    },
+    {
+      path: "/attendance",
+      label: "Chấm công",
+      icon: "access_time",
+      show: false, // Ẩn hoàn toàn khỏi System Admin
+    },
+    {
+      path: "/staff/attendance",
+      label: "Attendance Dashboard",
+      icon: "fact_check",
       show: isSuperAdmin() || isStoreManager(),
     },
     {
