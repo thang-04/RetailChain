@@ -12,6 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AttendanceHistoryResponse {
+    private Long userId;
+    private String userName;
     private String date;
     private String checkInTime;
     private String checkOutTime;

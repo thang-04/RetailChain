@@ -218,6 +218,8 @@ const StaffAttendance = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>Nhân viên</TableHead>
+                                    <TableHead>Ca làm</TableHead>
                                     <TableHead>Ngày</TableHead>
                                     <TableHead>Check-in</TableHead>
                                     <TableHead>Check-out</TableHead>
@@ -228,7 +230,9 @@ const StaffAttendance = () => {
                             <TableBody>
                                 {attendanceList.map((record, index) => (
                                     <TableRow key={index}>
-                                        <TableCell className="font-medium">{formatDate(record.date)}</TableCell>
+                                        <TableCell className="font-medium">{record.userName || 'N/A'}</TableCell>
+                                        <TableCell>{record.shiftName || 'N/A'}</TableCell>
+                                        <TableCell>{formatDate(record.date)}</TableCell>
                                         <TableCell>{record.checkInTime || '--:--'}</TableCell>
                                         <TableCell>{record.checkOutTime || '--:--'}</TableCell>
                                         <TableCell>{record.workHours ? `${record.workHours}h` : '--'}</TableCell>

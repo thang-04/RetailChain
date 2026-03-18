@@ -561,32 +561,52 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     private List<AttendanceHistoryResponse> buildHistoryResponse(List<AttendanceLog> logs) {
-        Map<LocalDate, AttendanceHistoryResponse> historyMap = new LinkedHashMap<>();
+        Map<String, AttendanceHistoryResponse> historyMap = new LinkedHashMap<>();
 
         for (AttendanceLog log : logs) {
-            LocalDate date = log.getOccurredAt().toLocalDate();
-            AttendanceHistoryResponse existing = historyMap.get(date);
+            String userName = null;
+            String shiftName = null;
+
+            if (log.getUser() != null) {
+                userName = log.getUser().getFullName();
+            }
+
+            if (log.getAssignment() != null && log.getAssignment().getShift() != null) {
+                shiftName = log.getAssignment().getShift().getName();
+            }
 
             if (log.getCheckType() == CheckType.IN) {
+                String key = log.getUserId() + "_" + log.getOccurredAt().toLocalDate().toString();
+                AttendanceHistoryResponse existing = historyMap.get(key);
+
                 if (existing == null) {
                     existing = AttendanceHistoryResponse.builder()
-                            .date(date.toString())
+                            .userId(log.getUserId())
+                            .userName(userName)
+                            .shiftName(shiftName)
+                            .date(log.getOccurredAt().toLocalDate().toString())
                             .checkInTime(log.getOccurredAt().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                             .status(log.getStatus())
                             .build();
-                    historyMap.put(date, existing);
+                    historyMap.put(key, existing);
                 } else {
                     existing.setCheckInTime(log.getOccurredAt().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
             } else if (log.getCheckType() == CheckType.OUT) {
+                String key = log.getUserId() + "_" + log.getOccurredAt().toLocalDate().toString();
+                AttendanceHistoryResponse existing = historyMap.get(key);
+
                 if (existing == null) {
                     existing = AttendanceHistoryResponse.builder()
-                            .date(date.toString())
+                            .userId(log.getUserId())
+                            .userName(userName)
+                            .shiftName(shiftName)
+                            .date(log.getOccurredAt().toLocalDate().toString())
                             .checkOutTime(log.getOccurredAt().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                             .workHours(log.getWorkHours())
                             .status(log.getStatus())
                             .build();
-                    historyMap.put(date, existing);
+                    historyMap.put(key, existing);
                 } else {
                     existing.setCheckOutTime(log.getOccurredAt().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
                     existing.setWorkHours(log.getWorkHours());
