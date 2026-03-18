@@ -19,4 +19,8 @@ public class AuthResponse {
 
     private Long expiresIn;
     private UserDTO user;
+    private String message;
+
+    private Boolean requireChangePassword;
+    private String tempToken;
 }

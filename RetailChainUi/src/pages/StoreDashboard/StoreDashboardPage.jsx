@@ -15,13 +15,23 @@ import useAuth from "../../contexts/AuthContext/useAuth";
 
 const StoreDashboardPage = () => {
   const { id } = useParams();
+  const { hasPermission, hasRole, loading: authLoading } = useAuth();
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateRequestOpen, setIsCreateRequestOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const { hasPermission, hasRole } = useAuth();
+  // Set default tab based on role after auth loads
+  useEffect(() => {
+    if (!authLoading) {
+      const isStoreManager = hasRole('STORE_MANAGER');
+      if (isStoreManager) {
+        setActiveTab("incoming");
+      }
+    }
+  }, [authLoading, hasRole]);
+
   const canEditStore = hasPermission('STORE_UPDATE') || hasRole('SUPER_ADMIN') || hasRole('STORE_MANAGER');
 
   useEffect(() => {
@@ -103,13 +113,13 @@ const StoreDashboardPage = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="overview" className="gap-2">
-            <Package className="w-4 h-4" />
-            Tồn kho
-          </TabsTrigger>
           <TabsTrigger value="incoming" className="gap-2">
             <Truck className="w-4 h-4" />
             Hàng đến
+          </TabsTrigger>
+          <TabsTrigger value="overview" className="gap-2">
+            <Package className="w-4 h-4" />
+            Tồn kho
           </TabsTrigger>
           <TabsTrigger value="staff" className="gap-2">
             <Users className="w-4 h-4" />

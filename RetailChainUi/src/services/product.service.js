@@ -38,6 +38,11 @@ const productService = {
     return response;
   },
 
+  deleteProduct: async (id) => {
+    const response = await axiosPrivate.delete(`${PRODUCT_API_PATH}/${id}`);
+    return response;
+  },
+
   getNextCode: async (categoryId) => {
     const response = await axiosPrivate.get(`${PRODUCT_API_PATH}/next-code?categoryId=${categoryId}`);
     return response;

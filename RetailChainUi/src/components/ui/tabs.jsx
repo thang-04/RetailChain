@@ -1,14 +1,15 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-const Tabs = React.forwardRef(({ className, defaultValue, children, ...props }, ref) => {
-  const [activeTab, setActiveTab] = React.useState(defaultValue)
+const Tabs = React.forwardRef(({ className, defaultValue, value, onValueChange, children, ...props }, ref) => {
+  const [internalActiveTab, setInternalActiveTab] = React.useState(defaultValue)
+  const activeTab = value !== undefined ? value : internalActiveTab;
+  const setActiveTab = onValueChange || setInternalActiveTab;
 
   return (
     <div
       ref={ref}
       className={cn("", className)}
-      data-active-tab={activeTab}
       {...props}
     >
         {React.Children.map(children, child => {
@@ -22,7 +23,7 @@ const Tabs = React.forwardRef(({ className, defaultValue, children, ...props }, 
 })
 Tabs.displayName = "Tabs"
 
-const TabsList = React.forwardRef(({ className, activeTab, setActiveTab, ...props }, ref) => (
+const TabsList = React.forwardRef(({ className, activeTab, setActiveTab, children, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
@@ -31,7 +32,7 @@ const TabsList = React.forwardRef(({ className, activeTab, setActiveTab, ...prop
     )}
     {...props}
   >
-      {React.Children.map(props.children, child => {
+      {React.Children.map(children, child => {
           if (React.isValidElement(child)) {
               return React.cloneElement(child, { activeTab, setActiveTab });
           }

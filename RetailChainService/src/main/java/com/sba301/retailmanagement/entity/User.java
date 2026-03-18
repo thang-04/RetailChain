@@ -62,6 +62,10 @@ public class User {
     @Builder.Default
     private Integer status = 1;
 
+    @Column(name = "is_first_login", nullable = false)
+    @Builder.Default
+    private Boolean isFirstLogin = true;
+
     @Column(name = "store_id")
     private Long storeId;
 

@@ -1,7 +1,5 @@
 {
   "enabledPlugins": {
-    "rune@rune-kit": true,
-    "@rune/ui@rune-kit": true,
     "superpowers@claude-plugins-official": true
   }
 }

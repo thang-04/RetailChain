@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/reports",
       label: "Reports",
       icon: "bar_chart",
-      show: hasPermission('REPORT_SYSTEM_VIEW') || hasPermission('REPORT_STORE_VIEW') || isStoreManager(),
+      show: false, // Ẩn hoàn toàn khỏi System Admin
     },
     {
       path: "/staff/shifts",
@@ -60,10 +60,22 @@ const Sidebar = ({ isOpen, onClose }) => {
       show: isSuperAdmin() || isStoreManager(),
     },
     {
+      path: "/attendance",
+      label: "Chấm công",
+      icon: "access_time",
+      show: isStaff() || isStoreManager() || isSuperAdmin(),
+    },
+    {
+      path: "/staff/attendance",
+      label: "Dashboard Chấm công",
+      icon: "fact_check",
+      show: isSuperAdmin() || isStoreManager(),
+    },
+    {
       path: "/roles",
       label: "Roles & Permissions",
       icon: "admin_panel_settings",
-      show: hasPermission('ROLE_VIEW'),
+      show: isSuperAdmin(),
     },
     {
       path: "/users",
@@ -109,7 +121,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             item.path === "/"
               ? location.pathname === "/"
               : location.pathname === item.path ||
-                location.pathname.startsWith(item.path + "/");
+              location.pathname.startsWith(item.path + "/");
 
           return (
             <Button
