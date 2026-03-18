@@ -45,6 +45,10 @@ const StaffAttendance = lazy(() => import("../pages/Staff/Attendance/StaffAttend
 const StaffProfile = lazy(() => import("../pages/Staff/Profile/StaffProfile"));
 const ResourceAssignment = lazy(() => import("../pages/Staff/ResourceAssignment/ResourceAssignment"));
 
+// Attendance
+const AttendancePage = lazy(() => import("../pages/Attendance/AttendancePage"));
+const AttendanceHistoryPage = lazy(() => import("../pages/Attendance/AttendanceHistoryPage"));
+
 // System Admin
 const RolePermissionPage = lazy(() => import("../pages/RolePermission/RolePermissionPage"));
 const UserManagementPage = lazy(() => import("../pages/UserManagement/UserManagementPage"));
@@ -164,6 +168,10 @@ const AppRoutes = () => {
                                 </ProtectedRoute>
                             }
                         />
+
+                        {/* Attendance Module - All authenticated users */}
+                        <Route path="/attendance" element={<AttendancePage />} />
+                        <Route path="/attendance/history" element={<AttendanceHistoryPage />} />
 
                         {/* Staff Module - STORE_MANAGER+ for management */}
                         <Route

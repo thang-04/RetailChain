@@ -16,6 +16,9 @@ public class StoreResponse {
     private String code;
     private String name;
     private String address;
+    private Double latitude;
+    private Double longitude;
+    private Integer radiusMeters;
     private Integer status;
     private Long warehouseId;
     private LocalDateTime createdAt;
