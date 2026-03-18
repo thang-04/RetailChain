@@ -11,28 +11,39 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import attendanceService from "@/services/attendance.service";
+import storeService from "@/services/store.service";
 import useAuth from "@/contexts/AuthContext/useAuth";
 
 const StaffAttendance = () => {
-    const { user } = useAuth();
+    const { user, isSuperAdmin, isStoreManager } = useAuth();
     const [loading, setLoading] = useState(true);
     const [dashboard, setDashboard] = useState(null);
     const [attendanceList, setAttendanceList] = useState([]);
     const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [selectedStoreId, setSelectedStoreId] = useState(null);
+    const [stores, setStores] = useState([]);
 
     const storeId = user?.storeId;
 
     const fetchDashboard = useCallback(async () => {
-        if (!storeId) return;
+        if (!storeId && !isSuperAdmin()) return;
         
         try {
             setLoading(true);
-            const [dashRes, listRes] = await Promise.all([
-                attendanceService.getDashboard(storeId, selectedDate),
-                attendanceService.getStoreAttendance(storeId, selectedDate, statusFilter === 'all' ? '' : statusFilter)
-            ]);
-
+            let dashRes, listRes;
+            
+            if (isSuperAdmin() && !selectedStoreId) {
+                dashRes = await attendanceService.getAllDashboard();
+                listRes = { code: 200, data: [] };
+            } else {
+                const targetStoreId = isSuperAdmin() ? selectedStoreId : storeId;
+                [dashRes, listRes] = await Promise.all([
+                    attendanceService.getDashboard(targetStoreId, selectedDate),
+                    attendanceService.getStoreAttendance(targetStoreId, selectedDate, statusFilter === 'all' ? '' : statusFilter)
+                ]);
+            }
+            
             if (dashRes.code === 200) {
                 setDashboard(dashRes.data);
             }
@@ -45,11 +56,19 @@ const StaffAttendance = () => {
         } finally {
             setLoading(false);
         }
-    }, [storeId, selectedDate, statusFilter]);
+    }, [storeId, selectedDate, statusFilter, isSuperAdmin, selectedStoreId]);
 
     useEffect(() => {
         fetchDashboard();
     }, [fetchDashboard]);
+
+    useEffect(() => {
+        if (isSuperAdmin() || isStoreManager()) {
+            storeService.getAllStores()
+                .then(data => setStores(data))
+                .catch(err => console.error('Failed to load stores:', err));
+        }
+    }, [isSuperAdmin, isStoreManager]);
 
     const getStatusBadge = (status) => {
         const statusMap = {
@@ -68,7 +87,7 @@ const StaffAttendance = () => {
         return date.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit' });
     };
 
-    if (!storeId) {
+    if (!storeId && !isSuperAdmin()) {
         return (
             <div className="p-6 text-center">
                 <p className="text-[#677c83]">Bạn không được phân công cửa hàng</p>
@@ -86,7 +105,32 @@ const StaffAttendance = () => {
                     </h2>
                     <p className="text-[#677c83] dark:text-gray-400">Theo dõi check-in và giờ làm hàng ngày</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                    {/* Store selector for Super Admin */}
+                    {isSuperAdmin() && (
+                        <Select 
+                            value={selectedStoreId || 'all'} 
+                            onValueChange={(val) => setSelectedStoreId(val === 'all' ? null : val)}
+                        >
+                            <SelectTrigger className="w-[200px]">
+                                <SelectValue placeholder="Chọn cửa hàng" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tất cả cửa hàng</SelectItem>
+                                {stores.map(store => (
+                                    <SelectItem key={store.id} value={store.dbId}>
+                                        {store.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                    {/* Store name for Store Manager */}
+                    {isStoreManager() && user?.storeId && (
+                        <div className="text-sm text-muted-foreground">
+                            Cửa hàng: {stores.find(s => s.dbId === user.storeId)?.name || 'Đang tải...'}
+                        </div>
+                    )}
                     <Input
                         type="date"
                         value={selectedDate}
