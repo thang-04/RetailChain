@@ -1,7 +1,11 @@
 package com.sba301.retailmanagement.controller;
 
 import com.sba301.retailmanagement.dto.request.ShiftAssignmentRequest;
+import com.sba301.retailmanagement.dto.request.AutoAssignShiftsRequest;
+import com.sba301.retailmanagement.dto.request.CancelDraftShiftsRequest;
+import com.sba301.retailmanagement.dto.request.ConfirmDraftShiftsRequest;
 import com.sba301.retailmanagement.dto.request.ShiftRequest;
+import com.sba301.retailmanagement.dto.response.AutoAssignShiftsResponse;
 import com.sba301.retailmanagement.dto.response.ShiftAssignmentResponse;
 import com.sba301.retailmanagement.dto.response.ShiftResponse;
 import com.sba301.retailmanagement.service.ShiftService;
@@ -171,6 +175,65 @@ public class ShiftController {
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
             return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving assignments: " + e.getMessage());
+        }
+    }
+
+    // ==================== AUTO ASSIGN (DRAFT) ====================
+
+    @PostMapping("/auto-assign")
+    public String autoAssignDrafts(@RequestBody AutoAssignShiftsRequest request) {
+        String prefix = "[autoAssignDrafts]|storeId=" + (request != null ? request.getStoreId() : "null")
+                + "|from=" + (request != null ? request.getFrom() : "null")
+                + "|to=" + (request != null ? request.getTo() : "null");
+        log.info("{}|START", prefix);
+        try {
+            AutoAssignShiftsResponse response = shiftService.autoAssignDraftShifts(request);
+            log.info("{}|END|created={}", prefix, response.getSummary() != null ? response.getSummary().getCreatedDraftCount() : 0);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Auto assign draft success", response);
+        } catch (IllegalArgumentException e) {
+            log.warn("{}|BAD_REQUEST|{}", prefix, e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error auto assigning drafts: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/confirm-drafts")
+    public String confirmDrafts(@RequestBody ConfirmDraftShiftsRequest request) {
+        String prefix = "[confirmDrafts]|storeId=" + (request != null ? request.getStoreId() : "null")
+                + "|from=" + (request != null ? request.getFrom() : "null")
+                + "|to=" + (request != null ? request.getTo() : "null");
+        log.info("{}|START", prefix);
+        try {
+            List<ShiftAssignmentResponse> response = shiftService.confirmDraftShifts(request);
+            log.info("{}|END|confirmed={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Confirm drafts success", response);
+        } catch (IllegalArgumentException e) {
+            log.warn("{}|BAD_REQUEST|{}", prefix, e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error confirming drafts: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/cancel-drafts")
+    public String cancelDrafts(@RequestBody CancelDraftShiftsRequest request) {
+        String prefix = "[cancelDrafts]|storeId=" + (request != null ? request.getStoreId() : "null")
+                + "|from=" + (request != null ? request.getFrom() : "null")
+                + "|to=" + (request != null ? request.getTo() : "null");
+        log.info("{}|START", prefix);
+        try {
+            List<ShiftAssignmentResponse> response = shiftService.cancelDraftShifts(request);
+            log.info("{}|END|cancelled={}", prefix, response.size());
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Cancel drafts success", response);
+        } catch (IllegalArgumentException e) {
+            log.warn("{}|BAD_REQUEST|{}", prefix, e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.UNSUCCESSFUL, e.getMessage());
+        } catch (Exception e) {
+            log.error("{}|Exception={}", prefix, e.getMessage(), e);
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error cancelling drafts: " + e.getMessage());
         }
     }
 }

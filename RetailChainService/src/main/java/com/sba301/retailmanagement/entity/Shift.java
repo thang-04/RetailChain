@@ -40,6 +40,12 @@ public class Shift {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @Column(name = "min_staff", nullable = false)
+    private Integer minStaff = 1;
+
+    @Column(name = "max_staff", nullable = false)
+    private Integer maxStaff = 1;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

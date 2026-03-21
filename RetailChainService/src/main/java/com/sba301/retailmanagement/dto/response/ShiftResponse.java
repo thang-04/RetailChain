@@ -16,6 +16,8 @@ public class ShiftResponse {
     private String name;
     private String startTime;
     private String endTime;
+    private Integer minStaff;
+    private Integer maxStaff;
     private String createdAt;
     private boolean isDefault;
 }

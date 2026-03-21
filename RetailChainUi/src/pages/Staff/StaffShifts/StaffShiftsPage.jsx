@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import AssignStaffShiftModal from "./components/AssignStaffShiftModal";
 import CreateShiftModal from "./components/CreateShiftModal";
+import AutoAssignConfigModal from "./components/AutoAssignConfigModal";
 import shiftService from "@/services/shift.service";
 import storeService from "@/services/store.service";
+import staffQuotaService from "@/services/staffQuota.service";
+import { axiosPrivate } from "@/services/api/axiosClient";
 import useAuth from "@/contexts/AuthContext/useAuth";
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, getWeek, addMonths, subMonths, addYears, subYears, startOfYear, endOfYear, eachMonthOfInterval } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -51,15 +54,30 @@ const StaffShiftsPage = () => {
     const [shiftTypes, setShiftTypes] = useState([]); // Danh sách các loại ca (Shift entity)
     const [loading, setLoading] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [autoAssignLoading, setAutoAssignLoading] = useState(false);
+    const [confirmDraftLoading, setConfirmDraftLoading] = useState(false);
+    const [cancelDraftLoading, setCancelDraftLoading] = useState(false);
     const [storeDetail, setStoreDetail] = useState(null);
     const [stores, setStores] = useState([]); // Danh sách toàn bộ cửa hàng (cho Super Admin chọn)
     const [storesLoading, setStoresLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [draftSummary, setDraftSummary] = useState(null);
+    const [actionError, setActionError] = useState("");
+    const [isDraftMode, setIsDraftMode] = useState(false);
+    const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+    const [quotaLoading, setQuotaLoading] = useState(false);
+    const [quotaRows, setQuotaRows] = useState([]);
+    const [shiftConfigRows, setShiftConfigRows] = useState([]);
 
     const { user, isSuperAdmin } = useAuth();
     const navigate = useNavigate();
     // Lấy storeId từ URL hoặc từ user đang đăng nhập
     const storeId = urlStoreId || user?.storeId || null;
+    const numericStoreId = useMemo(() => {
+        if (storeDetail?.dbId) return Number(storeDetail.dbId);
+        const parsed = Number(storeId);
+        return Number.isFinite(parsed) ? parsed : null;
+    }, [storeDetail?.dbId, storeId]);
 
     // Load danh sách cửa hàng cho Super Admin
     useEffect(() => {
@@ -82,7 +100,7 @@ const StaffShiftsPage = () => {
     const filteredStores = useMemo(() => {
         return stores.filter(s =>
             s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            s.id.toLowerCase().includes(searchTerm.toLowerCase())
+            String(s.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [stores, searchTerm]);
 
@@ -92,22 +110,28 @@ const StaffShiftsPage = () => {
 
     // Load các loại ca của cửa hàng
     const loadShiftTypes = useCallback(async () => {
-        const numericId = storeDetail?.dbId || (typeof storeId === 'number' ? storeId : null);
-        if (!numericId) return;
+        if (!numericStoreId) {
+            setShiftTypes([]);
+            return [];
+        }
         try {
-            const result = await shiftService.getShiftsByStore(numericId);
+            const result = await shiftService.getShiftsByStore(numericStoreId);
             if (result?.code === 200 && result?.data) {
                 setShiftTypes(result.data);
+                return result.data;
             }
+            setShiftTypes([]);
+            return [];
         } catch (err) {
             console.error("Error loading shift types:", err);
+            setShiftTypes([]);
+            return [];
         }
-    }, [storeDetail?.dbId, storeId]);
+    }, [numericStoreId]);
 
     // Import ca mẫu từ hệ thống
     const handleInitializeTemplates = async () => {
-        const numericId = storeDetail?.dbId || (typeof storeId === 'number' ? storeId : null);
-        if (!numericId || isImporting) return;
+        if (!numericStoreId || isImporting) return;
 
         setIsImporting(true);
         try {
@@ -116,7 +140,7 @@ const StaffShiftsPage = () => {
             if (templatesRes?.code === 200 && templatesRes?.data?.length > 0) {
                 const templateIds = templatesRes.data.map(t => t.id);
                 // 2. Import vào cửa hàng hiện tại
-                const importRes = await shiftService.importTemplates(numericId, templateIds);
+                const importRes = await shiftService.importTemplates(numericStoreId, templateIds);
                 if (importRes?.code === 200) {
                     await loadShiftTypes();
                     await loadAssignments();
@@ -151,8 +175,7 @@ const StaffShiftsPage = () => {
 
     // Load assignments
     const loadAssignments = useCallback(async () => {
-        const numericId = storeDetail?.dbId || (typeof storeId === 'number' ? storeId : null);
-        if (!numericId) {
+        if (!numericStoreId) {
             setAssignments([]);
             return;
         }
@@ -160,7 +183,7 @@ const StaffShiftsPage = () => {
         try {
             const from = format(displayStart, "yyyy-MM-dd");
             const to = format(displayEnd, "yyyy-MM-dd");
-            const result = await shiftService.getAssignments(numericId, from, to);
+            const result = await shiftService.getAssignments(numericStoreId, from, to);
             if (result?.code === 200 && result?.data) {
                 setAssignments(result.data);
             } else {
@@ -172,7 +195,301 @@ const StaffShiftsPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [displayStart, displayEnd, storeDetail?.dbId, storeId]);
+    }, [displayStart, displayEnd, numericStoreId]);
+
+    const getCurrentRange = useCallback(() => ({
+        from: format(displayStart, "yyyy-MM-dd"),
+        to: format(displayEnd, "yyyy-MM-dd"),
+    }), [displayStart, displayEnd]);
+
+    const extractApiError = (err, fallbackMessage) => {
+        if (!err?.response?.data) return fallbackMessage;
+        const data = err.response.data;
+        if (typeof data === "string") {
+            try {
+                const parsed = JSON.parse(data);
+                return parsed?.desc || fallbackMessage;
+            } catch {
+                return data;
+            }
+        }
+        return data?.desc || fallbackMessage;
+    };
+
+    const loadQuotaRows = useCallback(async () => {
+        if (!numericStoreId) return;
+        setQuotaLoading(true);
+        try {
+            const [staffRes, quotaRes] = await Promise.all([
+                axiosPrivate.get(`/stores/${numericStoreId}/staff-list`),
+                staffQuotaService.getByStore(numericStoreId),
+            ]);
+
+            const staffList = staffRes?.code === 200 ? (staffRes.data || []) : [];
+            const quotaList = quotaRes?.code === 200 ? (quotaRes.data || []) : [];
+            const quotaByUserId = new Map(quotaList.map(q => [Number(q.userId), q]));
+
+            const rows = staffList
+                .filter(s => s?.id != null)
+                .map(s => {
+                    const quota = quotaByUserId.get(Number(s.id));
+                    return {
+                        userId: Number(s.id),
+                        fullName: s.fullName || s.username || `User ${s.id}`,
+                        minShiftsPerWeek: Number(quota?.minShiftsPerWeek ?? 5),
+                        maxShiftsPerWeek: Number(quota?.maxShiftsPerWeek ?? 6),
+                    };
+                });
+
+            setQuotaRows(rows);
+        } catch (err) {
+            setActionError(extractApiError(err, "Khong the tai danh sach quota"));
+        } finally {
+            setQuotaLoading(false);
+        }
+    }, [numericStoreId]);
+
+    const buildShiftConfigRows = useCallback((list) => {
+        return (Array.isArray(list) ? list : [])
+            .filter((s) => s?.id != null)
+            .map((s) => {
+                const min = Math.max(1, Number(s.minStaff ?? 1));
+                const max = Math.max(min, Number(s.maxStaff ?? min));
+                return {
+                    shiftId: Number(s.id),
+                    name: s.name || `Shift ${s.id}`,
+                    startTime: s.startTime || "--:--:--",
+                    endTime: s.endTime || "--:--:--",
+                    minStaff: min,
+                    maxStaff: max,
+                    selected: true,
+                };
+            });
+    }, []);
+
+    const prepareAutoAssignConfig = useCallback(async () => {
+        const latestShiftTypes = await loadShiftTypes();
+        const sourceShiftTypes = (latestShiftTypes && latestShiftTypes.length > 0)
+            ? latestShiftTypes
+            : shiftTypes;
+        setShiftConfigRows(buildShiftConfigRows(sourceShiftTypes));
+        await loadQuotaRows();
+    }, [buildShiftConfigRows, loadQuotaRows, loadShiftTypes, shiftTypes]);
+
+    const handleEnterDraftMode = async () => {
+        if (!numericStoreId) return;
+        setActionError("");
+        setDraftSummary(null);
+        setIsDraftMode(true);
+        await prepareAutoAssignConfig();
+        setIsConfigModalOpen(true);
+    };
+
+    const handleQuotaChange = (userId, field, value) => {
+        const parsed = Number(value);
+        setQuotaRows(prev => prev.map(row => {
+            if (row.userId !== userId) return row;
+            const next = {
+                ...row,
+                [field]: Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed)),
+            };
+            if (field === "minShiftsPerWeek" && next.maxShiftsPerWeek < next.minShiftsPerWeek) {
+                next.maxShiftsPerWeek = next.minShiftsPerWeek;
+            }
+            return next;
+        }));
+    };
+
+    const handleShiftToggle = (shiftId, checked) => {
+        setShiftConfigRows((prev) => prev.map((row) => (
+            row.shiftId === shiftId ? { ...row, selected: checked } : row
+        )));
+    };
+
+    const handleShiftStaffChange = (shiftId, field, value) => {
+        const parsed = Number(value);
+        setShiftConfigRows((prev) => prev.map((row) => {
+            if (row.shiftId !== shiftId) return row;
+            const next = {
+                ...row,
+                [field]: Number.isNaN(parsed) ? 1 : Math.max(1, Math.floor(parsed)),
+            };
+            if (field === "minStaff" && next.maxStaff < next.minStaff) {
+                next.maxStaff = next.minStaff;
+            }
+            return next;
+        }));
+    };
+
+    const persistQuotaSettings = async () => {
+        if (!numericStoreId || quotaRows.length === 0) return;
+        const payload = quotaRows.map(row => ({
+            userId: row.userId,
+            storeId: numericStoreId,
+            minShiftsPerWeek: Math.max(0, Number(row.minShiftsPerWeek || 0)),
+            maxShiftsPerWeek: Math.max(
+                Math.max(0, Number(row.minShiftsPerWeek || 0)),
+                Number(row.maxShiftsPerWeek || 0)
+            ),
+        }));
+        const result = await staffQuotaService.upsertMany(payload);
+        if (result?.code !== 200) {
+            throw new Error(result?.desc || "Khong the luu quota");
+        }
+    };
+
+    const persistShiftSettings = async () => {
+        if (!numericStoreId || shiftConfigRows.length === 0) return;
+        const currentById = new Map((shiftTypes || []).map((s) => [Number(s.id), s]));
+        const changedRows = shiftConfigRows
+            .map((row) => ({
+                ...row,
+                minStaff: Math.max(1, Number(row.minStaff || 1)),
+                maxStaff: Math.max(Math.max(1, Number(row.minStaff || 1)), Number(row.maxStaff || 1)),
+            }))
+            .filter((row) => {
+                const old = currentById.get(row.shiftId);
+                if (!old) return true;
+                const oldMin = Math.max(1, Number(old.minStaff || 1));
+                const oldMax = Math.max(oldMin, Number(old.maxStaff || oldMin));
+                return oldMin !== row.minStaff || oldMax !== row.maxStaff;
+            });
+
+        if (changedRows.length === 0) return;
+
+        const updateResults = await Promise.all(
+            changedRows.map((row) => shiftService.updateShift(row.shiftId, {
+                minStaff: row.minStaff,
+                maxStaff: row.maxStaff,
+            }))
+        );
+
+        const failed = updateResults.find((res) => res?.code !== 200);
+        if (failed) {
+            throw new Error(failed?.desc || "Khong the cap nhat min/max theo shift type");
+        }
+
+        await loadShiftTypes();
+    };
+
+    const handleOpenConfigModal = async () => {
+        if (!numericStoreId) return;
+        setActionError("");
+        await prepareAutoAssignConfig();
+        setIsConfigModalOpen(true);
+    };
+
+    const handleAutoAssignDrafts = async () => {
+        if (!numericStoreId || autoAssignLoading) return;
+        const selectedShiftIds = shiftConfigRows
+            .filter((row) => row.selected)
+            .map((row) => row.shiftId);
+        if (selectedShiftIds.length === 0) {
+            setActionError("Vui long chon it nhat 1 shift type de auto-assign");
+            return;
+        }
+        setActionError("");
+        setDraftSummary(null);
+        setAutoAssignLoading(true);
+        try {
+            await persistQuotaSettings();
+            await persistShiftSettings();
+            const { from, to } = getCurrentRange();
+            const result = await shiftService.autoAssignDrafts({
+                storeId: numericStoreId,
+                from,
+                to,
+                createdBy: user?.id || 1,
+                resetDraft: true,
+                shiftIds: selectedShiftIds,
+            });
+            if (result?.code === 200) {
+                setDraftSummary(result?.data?.summary || null);
+                const previewAssignments = Array.isArray(result?.data?.assignments) ? result.data.assignments : null;
+                if (previewAssignments) {
+                    setAssignments(previewAssignments);
+                } else {
+                    await loadAssignments();
+                }
+                setIsConfigModalOpen(false);
+            } else {
+                setActionError(result?.desc || "Khong the tao preview draft");
+            }
+        } catch (err) {
+            setActionError(extractApiError(err, "Khong the tao preview draft"));
+        } finally {
+            setAutoAssignLoading(false);
+        }
+    };
+
+    const handleConfirmDrafts = async () => {
+        if (!numericStoreId || confirmDraftLoading) return;
+        if (totalDraft === 0) {
+            setActionError("Chua co draft de submit");
+            return;
+        }
+        if (!window.confirm("Submit draft de luu thanh ca lam chinh thuc?")) return;
+        setActionError("");
+        setConfirmDraftLoading(true);
+        try {
+            const { from, to } = getCurrentRange();
+            const result = await shiftService.confirmDrafts({
+                storeId: numericStoreId,
+                from,
+                to,
+                confirmedBy: user?.id || 1,
+            });
+            if (result?.code === 200) {
+                setDraftSummary(null);
+                setIsDraftMode(false);
+                setIsConfigModalOpen(false);
+                await loadAssignments();
+            } else {
+                setActionError(result?.desc || "Khong the submit draft");
+            }
+        } catch (err) {
+            setActionError(extractApiError(err, "Khong the submit draft"));
+        } finally {
+            setConfirmDraftLoading(false);
+        }
+    };
+
+    const handleCancelDrafts = async () => {
+        if (!numericStoreId || cancelDraftLoading) return;
+
+        // Exit draft mode without preview data
+        if (totalDraft === 0) {
+            setIsDraftMode(false);
+            setIsConfigModalOpen(false);
+            setDraftSummary(null);
+            setActionError("");
+            return;
+        }
+
+        if (!window.confirm("Thoat draft mode va huy toan bo draft hien tai?")) return;
+        setActionError("");
+        setCancelDraftLoading(true);
+        try {
+            const { from, to } = getCurrentRange();
+            const result = await shiftService.cancelDrafts({
+                storeId: numericStoreId,
+                from,
+                to,
+            });
+            if (result?.code === 200) {
+                setDraftSummary(null);
+                setIsDraftMode(false);
+                setIsConfigModalOpen(false);
+                await loadAssignments();
+            } else {
+                setActionError(result?.desc || "Khong the huy draft");
+            }
+        } catch (err) {
+            setActionError(extractApiError(err, "Khong the huy draft"));
+        } finally {
+            setCancelDraftLoading(false);
+        }
+    };
 
     // Fetch store details
     useEffect(() => {
@@ -196,96 +513,8 @@ const StaffShiftsPage = () => {
         loadShiftTypes();
     }, [loadAssignments, loadShiftTypes]);
 
-    if (!storeId && isSuperAdmin()) {
-        return (
-            <div className="flex-1 flex flex-col items-center bg-slate-50 p-6 min-h-full">
-                <div className="w-full max-w-5xl">
-                    <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-slate-800 mb-2 font-display">Chọn cửa hàng</h2>
-                        <p className="text-slate-600">Vui lòng chọn một cửa hàng để quản lý và phân công lịch làm việc cho nhân viên.</p>
-                    </div>
-
-                    {/* Search & Stats */}
-                    <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="relative w-full md:w-96 group">
-                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
-                            <input
-                                type="text"
-                                placeholder="Tìm theo tên hoặc mã cửa hàng..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
-                            />
-                        </div>
-                        <div className="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
-                            Đang hiển thị <span className="text-primary font-bold">{filteredStores.length}</span> cửa hàng
-                        </div>
-                    </div>
-
-                    {/* Stores Grid */}
-                    {storesLoading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-pulse">
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-12 h-12 bg-slate-100 rounded-xl"></div>
-                                        <div className="flex-1">
-                                            <div className="h-4 bg-slate-100 rounded w-2/3 mb-2"></div>
-                                            <div className="h-3 bg-slate-100 rounded w-1/3"></div>
-                                        </div>
-                                    </div>
-                                    <div className="h-4 bg-slate-100 rounded w-full mb-3"></div>
-                                    <div className="h-10 bg-slate-50 rounded-xl w-full"></div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : filteredStores.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredStores.map(store => (
-                                <div
-                                    key={store.id}
-                                    onClick={() => handleStoreSelect(store.id)}
-                                    className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group"
-                                >
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                                            <span className="material-symbols-outlined">storefront</span>
-                                        </div>
-                                        <div className="flex-1">
-                                            <h3 className="font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">{store.name}</h3>
-                                            <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">{store.id}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-slate-500 text-sm mb-6 line-clamp-1">
-                                        <span className="material-symbols-outlined text-[18px] opacity-70">location_on</span>
-                                        {store.address}
-                                    </div>
-
-                                    <button className="w-full py-2.5 bg-slate-50 text-slate-600 font-bold text-sm rounded-xl group-hover:bg-primary group-hover:text-white transition-all flex items-center justify-center gap-2">
-                                        Chọn cửa hàng
-                                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-white p-12 rounded-3xl border border-slate-100 shadow-sm text-center">
-                            <span className="material-symbols-outlined text-5xl text-slate-200 mb-4 uppercase">search_off</span>
-                            <h3 className="text-xl font-bold text-slate-700 mb-1 uppercase">Không tìm thấy cửa hàng</h3>
-                            <p className="text-slate-500">Thử tìm kiếm với tên hoặc mã khác</p>
-                            <button
-                                onClick={() => setSearchTerm("")}
-                                className="mt-4 text-primary font-bold hover:underline"
-                            >
-                                Xóa tìm kiếm
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
+    // Store selection UI for Super Admin (no storeId) - render conditionally in main return
+    const showStoreSelector = !storeId && isSuperAdmin();
 
     // Navigation
     const handlePrev = () => {
@@ -304,19 +533,29 @@ const StaffShiftsPage = () => {
         setCurrentDate(new Date());
     };
 
-    // Grouping
-    const assignmentsByDateKey = {};
-    assignments.forEach(a => {
-        if (a.status === "CANCELLED") return;
-        const dateKey = a.workDate;
-        if (!assignmentsByDateKey[dateKey]) assignmentsByDateKey[dateKey] = [];
-        assignmentsByDateKey[dateKey].push(a);
-    });
+    // Grouping - normalize workDate to yyyy-MM-dd format
+    const assignmentsByDateKey = useMemo(() => {
+        const map = {};
+        assignments.forEach(a => {
+            if (a.status === "CANCELLED") return;
+            // Handle both "2026-03-18" and "2026-03-18T00:00:00" formats
+            const dateKey = a.workDate ? a.workDate.substring(0, 10) : a.workDate;
+            if (!map[dateKey]) map[dateKey] = [];
+            map[dateKey].push(a);
+        });
+        return map;
+    }, [assignments]);
 
     const timeToPixels = (timeStr) => {
         const [h, m] = timeStr.split(":").map(Number);
-        return (h - 8) * 80 + (m / 60) * 80;
+        // Cho phép hiển thị ca bắt đầu trước 8:00 (như ca sáng 6:00)
+        // Grid hiển thị từ 6:00 đến 22:00
+        return (h - 6) * 80 + (m / 60) * 80;
     };
+
+    // Giờ bắt đầu và kết thúc của grid (hiển thị từ 6:00 đến 22:00)
+    const GRID_START_HOUR = 6;
+    const GRID_END_HOUR = 22;
 
     const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     const headerRange = viewMode === "week"
@@ -325,8 +564,99 @@ const StaffShiftsPage = () => {
             : format(currentDate, "yyyy");
 
     const totalAssigned = assignments.filter(a => a.status === "ASSIGNED").length;
+    const totalDraft = assignments.filter(a => a.status === "DRAFT").length;
+    const autoAssignRangeLabel = useMemo(() => {
+        const { from, to } = getCurrentRange();
+        return `${from} -> ${to}`;
+    }, [getCurrentRange]);
 
-    return (
+    // Single return with conditional rendering - no early return pattern
+    return showStoreSelector ? (
+        <div className="flex-1 flex flex-col items-center bg-slate-50 p-6 min-h-full">
+            <div className="w-full max-w-5xl">
+                <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-slate-800 mb-2 font-display">Chọn cửa hàng</h2>
+                    <p className="text-slate-600">Vui lòng chọn một cửa hàng để quản lý và phân công lịch làm việc cho nhân viên.</p>
+                </div>
+
+                <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="relative w-full md:w-96 group">
+                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                        <input
+                            type="text"
+                            placeholder="Tìm theo tên hoặc mã cửa hàng..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                        />
+                    </div>
+                    <div className="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                        Đang hiển thị <span className="text-primary font-bold">{filteredStores.length}</span> cửa hàng
+                    </div>
+                </div>
+
+                {storesLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-pulse">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 bg-slate-100 rounded-xl"></div>
+                                    <div className="flex-1">
+                                        <div className="h-4 bg-slate-100 rounded w-2/3 mb-2"></div>
+                                        <div className="h-3 bg-slate-100 rounded w-1/3"></div>
+                                    </div>
+                                </div>
+                                <div className="h-4 bg-slate-100 rounded w-full mb-3"></div>
+                                <div className="h-10 bg-slate-50 rounded-xl w-full"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : filteredStores.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredStores.map(store => (
+                            <div
+                                key={store.id}
+                                onClick={() => handleStoreSelect(store.id)}
+                                className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                        <span className="material-symbols-outlined">storefront</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-slate-800 leading-tight group-hover:text-primary transition-colors">{store.name}</h3>
+                                        <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">{store.id}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 text-slate-500 text-sm mb-6 line-clamp-1">
+                                    <span className="material-symbols-outlined text-[18px] opacity-70">location_on</span>
+                                    {store.address}
+                                </div>
+
+                                <button className="w-full py-2.5 bg-slate-50 text-slate-600 font-bold text-sm rounded-xl group-hover:bg-primary group-hover:text-white transition-all flex items-center justify-center gap-2">
+                                    Chọn cửa hàng
+                                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white p-12 rounded-3xl border border-slate-100 shadow-sm text-center">
+                        <span className="material-symbols-outlined text-5xl text-slate-200 mb-4 uppercase">search_off</span>
+                        <h3 className="text-xl font-bold text-slate-700 mb-1 uppercase">Không tìm thấy cửa hàng</h3>
+                        <p className="text-slate-500">Thử tìm kiếm với tên hoặc mã khác</p>
+                        <button
+                            onClick={() => setSearchTerm("")}
+                            className="mt-4 text-primary font-bold hover:underline"
+                        >
+                            Xóa tìm kiếm
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    ) : (
         <div className="flex-1 flex flex-col h-full min-w-0 bg-white dark:bg-background-dark relative">
             {/* Header & Controls */}
             <header className="flex-none px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark z-10">
@@ -407,15 +737,25 @@ const StaffShiftsPage = () => {
                     <div className="flex flex-wrap items-center gap-3">
                         <button
                             onClick={() => setIsCreateShiftModalOpen(true)}
-                            disabled={!storeDetail?.dbId && typeof storeId !== 'number'}
+                            disabled={!numericStoreId}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-10 px-5 bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 whitespace-nowrap"
                         >
                             <span className="material-symbols-outlined text-[20px]">add_circle</span>
-                            Tạo ca làm mới
+                            Tao ca lam moi
                         </button>
+                        {!isDraftMode && (
+                            <button
+                                onClick={handleEnterDraftMode}
+                                disabled={!numericStoreId}
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-10 px-5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 whitespace-nowrap"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">auto_fix_high</span>
+                                Auto-assign
+                            </button>
+                        )}
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            disabled={!storeDetail?.dbId && typeof storeId !== 'number'}
+                            disabled={!numericStoreId}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-10 px-5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 whitespace-nowrap"
                         >
                             <span className="material-symbols-outlined text-[20px]">person_add</span>
@@ -466,8 +806,78 @@ const StaffShiftsPage = () => {
                                 Assigned: {totalAssigned} shift(s) this {viewMode}
                             </span>
                         </div>
+                        <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 rounded-full border border-amber-100 dark:border-amber-800/30">
+                            <span className="flex h-2 w-2 rounded-full bg-amber-500"></span>
+                            <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                                Draft: {totalDraft} shift(s)
+                            </span>
+                        </div>
                     </div>
                 </div>
+                {isDraftMode && (
+                    <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                Draft mode: cau hinh min/max va shift type trong modal, sau do generate preview
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    onClick={handleOpenConfigModal}
+                                    disabled={!numericStoreId || autoAssignLoading || confirmDraftLoading || cancelDraftLoading || quotaLoading}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+                                >
+                                    <span className={`material-symbols-outlined text-[18px] ${autoAssignLoading ? "animate-spin" : ""}`}>
+                                        {autoAssignLoading ? "progress_activity" : "tune"}
+                                    </span>
+                                    Mo cau hinh auto-assign
+                                </button>
+                                <button
+                                    onClick={handleConfirmDrafts}
+                                    disabled={!numericStoreId || confirmDraftLoading || autoAssignLoading || cancelDraftLoading || totalDraft === 0}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                                >
+                                    <span className={`material-symbols-outlined text-[18px] ${confirmDraftLoading ? "animate-spin" : ""}`}>
+                                        {confirmDraftLoading ? "progress_activity" : "check_circle"}
+                                    </span>
+                                    Submit
+                                </button>
+                                <button
+                                    onClick={handleCancelDrafts}
+                                    disabled={!numericStoreId || cancelDraftLoading || autoAssignLoading || confirmDraftLoading}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50"
+                                >
+                                    <span className={`material-symbols-outlined text-[18px] ${cancelDraftLoading ? "animate-spin" : ""}`}>
+                                        {cancelDraftLoading ? "progress_activity" : "cancel"}
+                                    </span>
+                                    Exit Draft Mode
+                                </button>
+                            </div>
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                            Min/Max va danh sach shift type chi hien thi trong modal cau hinh.
+                        </div>
+                    </div>
+                )}
+                {actionError && (
+                    <div className="mt-3 px-4 py-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+                        {actionError}
+                    </div>
+                )}
+                {draftSummary && (
+                    <div className="mt-3 px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 text-sm">
+                        <div className="font-semibold">
+                            Da tao {draftSummary.createdDraftCount || 0} draft.
+                        </div>
+                        {(draftSummary.understaffedNotes || []).length > 0 && (
+                            <div className="mt-1">
+                                Thieu nguoi: {(draftSummary.understaffedNotes || []).slice(0, 3).join(" | ")}
+                                {(draftSummary.understaffedNotes || []).length > 3
+                                    ? ` ... (+${(draftSummary.understaffedNotes || []).length - 3})`
+                                    : ""}
+                            </div>
+                        )}
+                    </div>
+                )}
             </header>
 
             {/* Calendar Grid Area */}
@@ -505,12 +915,12 @@ const StaffShiftsPage = () => {
                         </div>
 
                         {/* Scrollable Grid Content */}
-                        <div className="grid grid-cols-[60px_repeat(7,1fr)] relative min-h-[1000px] flex-1">
+                        <div className="grid grid-cols-[60px_repeat(7,1fr)] relative min-h-[1280px] flex-1">
                             {/* Time Labels Column */}
                             <div className="border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-background-dark text-xs text-slate-400 font-medium text-right py-2 select-none relative z-10 flex flex-col justify-between" style={{ paddingBottom: '20px' }}>
-                                {Array.from({ length: 13 }, (_, i) => (
+                                {Array.from({ length: 16 }, (_, i) => (
                                     <div key={i} className="h-[80px] pr-2 pt-0 w-full text-right border-b border-transparent">
-                                        {String(8 + i).padStart(2, "0")}:00
+                                        {String(GRID_START_HOUR + i).padStart(2, "0")}:00
                                     </div>
                                 ))}
                             </div>
@@ -520,7 +930,8 @@ const StaffShiftsPage = () => {
                                 className="col-span-7 grid grid-cols-7 relative"
                                 style={{
                                     backgroundSize: "100% 80px",
-                                    backgroundImage: "linear-gradient(to bottom, var(--tw-prose-td-borders, #e2e8f0) 1px, transparent 1px)"
+                                    backgroundImage: "linear-gradient(to bottom, var(--tw-prose-td-borders, #e2e8f0) 1px, transparent 1px)",
+                                    height: "1280px"
                                 }}
                             >
                                 {/* Current Time Line */}
@@ -581,6 +992,7 @@ const StaffShiftsPage = () => {
                                         >
                                             {dayAssignments.map((assignment, aIdx) => {
                                                 const color = SHIFT_COLORS[assignment.shiftId % SHIFT_COLORS.length] || SHIFT_COLORS[0];
+                                                const isDraft = assignment.status === "DRAFT";
                                                 const top = timeToPixels(assignment.startTime);
                                                 const bottom = timeToPixels(assignment.endTime);
                                                 const height = Math.max(bottom - top, 40);
@@ -593,7 +1005,7 @@ const StaffShiftsPage = () => {
                                                 return (
                                                     <div
                                                         key={assignment.id || aIdx}
-                                                        className={`absolute ${color.bg} border-l-4 ${color.border} rounded-md p-1.5 shadow-sm hover:shadow-md cursor-pointer transition-all hover:scale-[1.02] hover:z-20 overflow-hidden`}
+                                                        className={`absolute ${color.bg} border-l-4 ${color.border} rounded-md p-1.5 shadow-sm hover:shadow-md cursor-pointer transition-all hover:scale-[1.02] hover:z-20 overflow-hidden ${isDraft ? "opacity-75 border-dashed" : ""}`}
                                                         style={{
                                                             top: `${top}px`,
                                                             height: `${height}px`,
@@ -604,6 +1016,11 @@ const StaffShiftsPage = () => {
                                                     >
                                                         <div className="flex justify-between items-start">
                                                             <span className={`text-xs font-bold ${color.text} truncate`}>{assignment.shiftName}</span>
+                                                            {isDraft && (
+                                                                <span className="text-[9px] uppercase font-bold px-1 py-0.5 rounded bg-amber-200/80 text-amber-800">
+                                                                    Draft
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div className="mt-0.5 flex items-center gap-1">
                                                             <div className={`size-5 flex-shrink-0 rounded-full ${color.avatar} flex items-center justify-center text-[9px] font-bold`}>
@@ -664,15 +1081,17 @@ const StaffShiftsPage = () => {
                                         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 pr-1">
                                             {dayShifts.map(assignment => {
                                                 const color = SHIFT_COLORS[assignment.shiftId % SHIFT_COLORS.length] || SHIFT_COLORS[0];
+                                                const isDraft = assignment.status === "DRAFT";
                                                 return (
                                                     <div
                                                         key={assignment.id}
                                                         className={`text-[10px] py-1 px-1.5 rounded truncate font-medium border-l-[3px]
-                                                            ${color.bg} ${color.text} ${color.border}
+                                                            ${color.bg} ${color.text} ${color.border} ${isDraft ? "opacity-75 border-dashed" : ""}
                                                         `}
-                                                        title={`${assignment.shiftName}: ${assignment.userName}`}
+                                                        title={`${assignment.shiftName}: ${assignment.userName}${isDraft ? " (DRAFT)" : ""}`}
                                                     >
                                                         {assignment.startTime.substring(0, 5)} {assignment.userName}
+                                                        {isDraft && <span className="ml-1 uppercase text-[9px] font-bold">D</span>}
                                                     </div>
                                                 );
                                             })}
@@ -694,7 +1113,9 @@ const StaffShiftsPage = () => {
                             const monthName = format(monthDate, "MMMM");
                             const totalMonthShifts = assignments.filter(a => {
                                 if (a.status === "CANCELLED") return false;
-                                const d = new Date(a.workDate);
+                                // Handle both "2026-03-18" and "2026-03-18T00:00:00" formats
+                                const dateStr = a.workDate ? a.workDate.substring(0, 10) : a.workDate;
+                                const d = new Date(dateStr);
                                 return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
                             }).length;
 
@@ -750,21 +1171,35 @@ const StaffShiftsPage = () => {
             <AssignStaffShiftModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                storeId={storeDetail?.dbId || storeId}
+                storeId={numericStoreId || storeId}
                 onAssignSuccess={loadAssignments}
             />
 
             <CreateShiftModal
                 isOpen={isCreateShiftModalOpen}
                 onClose={() => setIsCreateShiftModalOpen(false)}
-                storeId={storeDetail?.dbId || storeId}
+                storeId={numericStoreId || storeId}
                 onCreateSuccess={() => {
                     loadShiftTypes();
                     loadAssignments();
                 }}
             />
+
+            <AutoAssignConfigModal
+                isOpen={isConfigModalOpen}
+                onOpenChange={setIsConfigModalOpen}
+                rangeLabel={autoAssignRangeLabel}
+                shiftRows={shiftConfigRows}
+                quotaRows={quotaRows}
+                quotaLoading={quotaLoading}
+                autoAssignLoading={autoAssignLoading}
+                onShiftToggle={handleShiftToggle}
+                onShiftStaffChange={handleShiftStaffChange}
+                onQuotaChange={handleQuotaChange}
+                onGenerate={handleAutoAssignDrafts}
+            />
         </div>
-    );
-};
+    );};
 
 export default StaffShiftsPage;
+

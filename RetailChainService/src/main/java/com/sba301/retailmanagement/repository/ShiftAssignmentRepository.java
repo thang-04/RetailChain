@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ShiftAssignmentRepository extends JpaRepository<ShiftAssignment, Long> {
@@ -30,4 +31,6 @@ public interface ShiftAssignmentRepository extends JpaRepository<ShiftAssignment
     List<ShiftAssignment> findByShift_StoreIdAndWorkDateBetween(Long storeId, LocalDate from, LocalDate to);
 
     List<ShiftAssignment> findByUserIdAndWorkDateAndStatus(Long userId, LocalDate workDate, ShiftStatus status);
+
+    List<ShiftAssignment> findByUser_StoreIdAndWorkDateBetweenAndStatusIn(Long storeId, LocalDate from, LocalDate to, Set<ShiftStatus> statuses);
 }
