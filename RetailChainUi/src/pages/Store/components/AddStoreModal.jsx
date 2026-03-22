@@ -27,6 +27,7 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
     // Reverse geocoding to get address from coordinates
     const handleLocationSelect = async (latlng) => {
         console.log(`Fetching address for: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}...`);
+        setMapPosition(latlng);
         const displayAddress = await getAddressFromCoords(latlng.lat, latlng.lng);
         setAddress(displayAddress);
     };

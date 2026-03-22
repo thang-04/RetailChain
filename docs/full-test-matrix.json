@@ -1,0 +1,842 @@
+﻿[
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "me",
+        "method":  "GET",
+        "path":  "/user/me",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get current user successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "users-list",
+        "method":  "GET",
+        "path":  "/user?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all users successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "roles-list",
+        "method":  "GET",
+        "path":  "/roles",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all roles successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "permissions-list",
+        "method":  "GET",
+        "path":  "/permissions",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all permissions successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "stores-list",
+        "method":  "GET",
+        "path":  "/stores",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all stores success",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "store-staff-list",
+        "method":  "GET",
+        "path":  "/stores/155/staff-list",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff list success",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "store-staff",
+        "method":  "GET",
+        "path":  "/stores/155/staff",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff success",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "warehouse-list",
+        "method":  "GET",
+        "path":  "/warehouse",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Warehouses retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "warehouse-central",
+        "method":  "GET",
+        "path":  "/warehouse/central",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Central warehouse retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "products-list",
+        "method":  "GET",
+        "path":  "/product?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Products retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "product-categories",
+        "method":  "GET",
+        "path":  "/product/categories",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Categories fetched",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "suppliers",
+        "method":  "GET",
+        "path":  "/supplier",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Suppliers retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "inventory-overview",
+        "method":  "GET",
+        "path":  "/inventory/overview",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Inventory overview retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "inventory-documents",
+        "method":  "GET",
+        "path":  "/inventory/documents?type=IMPORT\u0026page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Documents retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "stock-request-pending",
+        "method":  "GET",
+        "path":  "/stock-request/pending",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Pending requests retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "shifts-list",
+        "method":  "GET",
+        "path":  "/shifts?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all shifts success",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "attendance-my-history",
+        "method":  "GET",
+        "path":  "/attendance/my-history?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy lịch sử thành công",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "attendance-store",
+        "method":  "GET",
+        "path":  "/attendance/store/=0\u0026size=5",
+        "http":  500,
+        "apiCode":  500,
+        "desc":  null,
+        "error":  "The remote server returned an error: (500) Internal Server Error."
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "staff-quotas",
+        "method":  "GET",
+        "path":  "/staff-quotas?storeId=155",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get staff quota success",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "dashboard-summary",
+        "method":  "GET",
+        "path":  "/dashboard/summary?period=MONTH",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy dữ liệu dashboard thành công",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "create-shift-empty",
+        "method":  "POST",
+        "path":  "/shifts",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating shift: The given id must not be null",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "create-stock-request-empty",
+        "method":  "POST",
+        "path":  "/stock-request",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating stock request: The given id must not be null",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "upsert-staff-quota-empty",
+        "method":  "PUT",
+        "path":  "/staff-quotas",
+        "http":  200,
+        "apiCode":  202,
+        "desc":  "Danh sách quota trống",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "add-product-variant-empty",
+        "method":  "POST",
+        "path":  "/product/1/variants",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "role-create-empty",
+        "method":  "POST",
+        "path":  "/roles",
+        "http":  400,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (400) Bad Request."
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "warehouse-create-empty",
+        "method":  "POST",
+        "path":  "/warehouse",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating warehouse: could not execute statement [Column \u0027code\u0027 cannot be null] [insert into warehouses (address,code,contact_name,contact_phone,created_at,description,district,is_central,name,province,status,updated_at,ward) values (?,?,?,?,?,?,?,?,?,?,?,?,?)]; SQL [insert into warehouses (address,code,contact_name,contact_phone,created_at,description,district,is_central,name,province,status,updated_at,ward) values (?,?,?,?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "store-create-empty",
+        "method":  "POST",
+        "path":  "/stores",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating store: Error creating store: could not execute statement [Column \u0027name\u0027 cannot be null] [insert into stores (address,code,created_at,latitude,longitude,name,radius_meters,status,updated_at,warehouse_id) values (?,?,?,?,?,?,?,?,?,?)]; SQL [insert into stores (address,code,created_at,latitude,longitude,name,radius_meters,status,updated_at,warehouse_id) values (?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+        "error":  null
+    },
+    {
+        "role":  "SUPER_ADMIN",
+        "endpoint":  "user-create-empty",
+        "method":  "POST",
+        "path":  "/user",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating user: Role must be specified",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "me",
+        "method":  "GET",
+        "path":  "/user/me",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get current user successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "users-list",
+        "method":  "GET",
+        "path":  "/user?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all users successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "roles-list",
+        "method":  "GET",
+        "path":  "/roles",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "permissions-list",
+        "method":  "GET",
+        "path":  "/permissions",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "stores-list",
+        "method":  "GET",
+        "path":  "/stores",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all stores success",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "store-staff-list",
+        "method":  "GET",
+        "path":  "/stores/155/staff-list",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff list success",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "store-staff",
+        "method":  "GET",
+        "path":  "/stores/155/staff",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff success",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "warehouse-list",
+        "method":  "GET",
+        "path":  "/warehouse",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "warehouse-central",
+        "method":  "GET",
+        "path":  "/warehouse/central",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Central warehouse retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "products-list",
+        "method":  "GET",
+        "path":  "/product?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Products retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "product-categories",
+        "method":  "GET",
+        "path":  "/product/categories",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Categories fetched",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "suppliers",
+        "method":  "GET",
+        "path":  "/supplier",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "inventory-overview",
+        "method":  "GET",
+        "path":  "/inventory/overview",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Inventory overview retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "inventory-documents",
+        "method":  "GET",
+        "path":  "/inventory/documents?type=IMPORT\u0026page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Documents retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "stock-request-pending",
+        "method":  "GET",
+        "path":  "/stock-request/pending",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Pending requests retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "shifts-list",
+        "method":  "GET",
+        "path":  "/shifts?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all shifts success",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "attendance-my-history",
+        "method":  "GET",
+        "path":  "/attendance/my-history?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy lịch sử thành công",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "attendance-store",
+        "method":  "GET",
+        "path":  "/attendance/store/=0\u0026size=5",
+        "http":  500,
+        "apiCode":  500,
+        "desc":  null,
+        "error":  "The remote server returned an error: (500) Internal Server Error."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "staff-quotas",
+        "method":  "GET",
+        "path":  "/staff-quotas?storeId=155",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get staff quota success",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "dashboard-summary",
+        "method":  "GET",
+        "path":  "/dashboard/summary?period=MONTH",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy dữ liệu dashboard thành công",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "create-shift-empty",
+        "method":  "POST",
+        "path":  "/shifts",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating shift: The given id must not be null",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "create-stock-request-empty",
+        "method":  "POST",
+        "path":  "/stock-request",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating stock request: The given id must not be null",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "upsert-staff-quota-empty",
+        "method":  "PUT",
+        "path":  "/staff-quotas",
+        "http":  200,
+        "apiCode":  202,
+        "desc":  "Danh sách quota trống",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "add-product-variant-empty",
+        "method":  "POST",
+        "path":  "/product/1/variants",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+        "error":  null
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "role-create-empty",
+        "method":  "POST",
+        "path":  "/roles",
+        "http":  400,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (400) Bad Request."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "warehouse-create-empty",
+        "method":  "POST",
+        "path":  "/warehouse",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "store-create-empty",
+        "method":  "POST",
+        "path":  "/stores",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "endpoint":  "user-create-empty",
+        "method":  "POST",
+        "path":  "/user",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating user: could not execute statement [Column \u0027username\u0027 cannot be null] [insert into users (created_at,created_by_user_id,email,full_name,is_first_login,password,phone,status,store_id,updated_at,username) values (?,?,?,?,?,?,?,?,?,?,?)]; SQL [insert into users (created_at,created_by_user_id,email,full_name,is_first_login,password,phone,status,store_id,updated_at,username) values (?,?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "me",
+        "method":  "GET",
+        "path":  "/user/me",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get current user successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "users-list",
+        "method":  "GET",
+        "path":  "/user?page=0\u0026size=5",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "roles-list",
+        "method":  "GET",
+        "path":  "/roles",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "permissions-list",
+        "method":  "GET",
+        "path":  "/permissions",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "stores-list",
+        "method":  "GET",
+        "path":  "/stores",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all stores success",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "store-staff-list",
+        "method":  "GET",
+        "path":  "/stores/155/staff-list",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff list success",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "store-staff",
+        "method":  "GET",
+        "path":  "/stores/155/staff",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get store staff success",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "warehouse-list",
+        "method":  "GET",
+        "path":  "/warehouse",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "warehouse-central",
+        "method":  "GET",
+        "path":  "/warehouse/central",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Central warehouse retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "products-list",
+        "method":  "GET",
+        "path":  "/product?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Products retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "product-categories",
+        "method":  "GET",
+        "path":  "/product/categories",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Categories fetched",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "suppliers",
+        "method":  "GET",
+        "path":  "/supplier",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "inventory-overview",
+        "method":  "GET",
+        "path":  "/inventory/overview",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Inventory overview retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "inventory-documents",
+        "method":  "GET",
+        "path":  "/inventory/documents?type=IMPORT\u0026page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Documents retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "stock-request-pending",
+        "method":  "GET",
+        "path":  "/stock-request/pending",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Pending requests retrieved successfully",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "shifts-list",
+        "method":  "GET",
+        "path":  "/shifts?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get all shifts success",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "attendance-my-history",
+        "method":  "GET",
+        "path":  "/attendance/my-history?page=0\u0026size=5",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy lịch sử thành công",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "attendance-store",
+        "method":  "GET",
+        "path":  "/attendance/store/=0\u0026size=5",
+        "http":  500,
+        "apiCode":  500,
+        "desc":  null,
+        "error":  "The remote server returned an error: (500) Internal Server Error."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "staff-quotas",
+        "method":  "GET",
+        "path":  "/staff-quotas?storeId=155",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Get staff quota success",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "dashboard-summary",
+        "method":  "GET",
+        "path":  "/dashboard/summary?period=MONTH",
+        "http":  200,
+        "apiCode":  200,
+        "desc":  "Lấy dữ liệu dashboard thành công",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "create-shift-empty",
+        "method":  "POST",
+        "path":  "/shifts",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating shift: The given id must not be null",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "create-stock-request-empty",
+        "method":  "POST",
+        "path":  "/stock-request",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "upsert-staff-quota-empty",
+        "method":  "PUT",
+        "path":  "/staff-quotas",
+        "http":  200,
+        "apiCode":  202,
+        "desc":  "Danh sách quota trống",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "add-product-variant-empty",
+        "method":  "POST",
+        "path":  "/product/1/variants",
+        "http":  200,
+        "apiCode":  500,
+        "desc":  "Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+        "error":  null
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "role-create-empty",
+        "method":  "POST",
+        "path":  "/roles",
+        "http":  400,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (400) Bad Request."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "warehouse-create-empty",
+        "method":  "POST",
+        "path":  "/warehouse",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "store-create-empty",
+        "method":  "POST",
+        "path":  "/stores",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    },
+    {
+        "role":  "STAFF",
+        "endpoint":  "user-create-empty",
+        "method":  "POST",
+        "path":  "/user",
+        "http":  403,
+        "apiCode":  400,
+        "desc":  null,
+        "error":  "The remote server returned an error: (403) Forbidden."
+    }
+]

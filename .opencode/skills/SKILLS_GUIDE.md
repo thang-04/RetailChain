@@ -1,4 +1,4 @@
-# Hướng Dẫn Sử Dụng OpenCode Skills
+h# Hướng Dẫn Sử Dụng OpenCode Skills
 
 Tài liệu này hướng dẫn cách sử dụng các kỹ năng (skills) có sẵn trong OpenCode để hỗ trợ phát triển dự án RetailChain.
 

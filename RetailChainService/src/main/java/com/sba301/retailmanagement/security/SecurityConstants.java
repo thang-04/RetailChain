@@ -10,6 +10,7 @@ public final class SecurityConstants {
 
     private SecurityConstants() {
     }
+
     public static final String PROFILE_VIEW = "PROFILE_VIEW";
     public static final String PROFILE_UPDATE = "PROFILE_UPDATE";
     public static final String PASSWORD_CHANGE = "PASSWORD_CHANGE";

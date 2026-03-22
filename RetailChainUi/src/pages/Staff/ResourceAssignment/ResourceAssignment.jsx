@@ -42,7 +42,7 @@ const ResourceAssignment = () => {
                     <CardTitle>Transfer Requests</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <Table>
+                    <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Staff Name</TableHead>
@@ -64,7 +64,7 @@ const ResourceAssignment = () => {
                                     <Button size="sm" variant="outline">Review</Button>
                                 </TableCell>
                             </TableRow>
-                             <TableRow>
+                            <TableRow>
                                 <TableCell className="font-medium">Hoang Van E</TableCell>
                                 <TableCell>Store C</TableCell>
                                 <TableCell>Central Warehouse</TableCell>

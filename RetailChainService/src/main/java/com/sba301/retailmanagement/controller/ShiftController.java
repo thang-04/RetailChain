@@ -188,7 +188,8 @@ public class ShiftController {
         log.info("{}|START", prefix);
         try {
             AutoAssignShiftsResponse response = shiftService.autoAssignDraftShifts(request);
-            log.info("{}|END|created={}", prefix, response.getSummary() != null ? response.getSummary().getCreatedDraftCount() : 0);
+            log.info("{}|END|created={}", prefix,
+                    response.getSummary() != null ? response.getSummary().getCreatedDraftCount() : 0);
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Auto assign draft success", response);
         } catch (IllegalArgumentException e) {
             log.warn("{}|BAD_REQUEST|{}", prefix, e.getMessage());
