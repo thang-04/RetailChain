@@ -32,8 +32,8 @@ const AutoAssignConfigModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-5xl max-h-[88vh] overflow-hidden p-0 bg-white dark:bg-slate-900">
-                <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-200 dark:border-slate-700">
+            <DialogContent className="sm:max-w-5xl max-h-[88vh] overflow-hidden p-0 bg-white dark:bg-slate-900 flex flex-col">
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
                         Cau hinh Auto-assign
                     </DialogTitle>
@@ -42,7 +42,7 @@ const AutoAssignConfigModal = ({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="px-6 py-4 overflow-auto space-y-5">
+                <div className="px-6 py-4 overflow-auto space-y-5 flex-1 min-h-0">
                     <div className="rounded-lg border border-slate-200 dark:border-slate-700">
                         <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
                             <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -222,7 +222,7 @@ const AutoAssignConfigModal = ({
                     </div>
                 </div>
 
-                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 flex justify-end gap-2">
+                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40 flex justify-end gap-2 shrink-0">
                     <button
                         type="button"
                         onClick={() => onOpenChange(false)}
