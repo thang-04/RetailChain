@@ -244,6 +244,9 @@ public class StoreServiceImpl implements StoreService {
             if (request.getCode() == null || request.getCode().trim().isEmpty()) {
                 request.setCode("ST" + System.currentTimeMillis());
             }
+            if (request.getRadiusMeters() == null || request.getRadiusMeters() < 10) {
+                request.setRadiusMeters(50);
+            }
             if (storeRepository.findByCode(request.getCode()).isPresent()) {
                 log.error("{}|Store code already exists", prefix);
                 throw new IllegalArgumentException("Store code already exists");
@@ -294,6 +297,10 @@ public class StoreServiceImpl implements StoreService {
                 throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
+
+            if (request.getRadiusMeters() != null && request.getRadiusMeters() < 10) {
+                request.setRadiusMeters(50);
+            }
 
             storeMapper.updateEntity(store, request);
             store.setUpdatedAt(LocalDateTime.now());

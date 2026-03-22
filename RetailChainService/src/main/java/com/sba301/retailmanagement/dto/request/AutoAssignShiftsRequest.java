@@ -18,5 +18,6 @@ public class AutoAssignShiftsRequest {
     private Long createdBy;
     private Boolean resetDraft;
     private List<Long> shiftIds;
+    private List<AutoAssignStaffShiftPreferenceRequest> staffShiftPreferences;
 }
 

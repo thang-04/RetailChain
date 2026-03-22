@@ -102,7 +102,7 @@ const shiftService = {
 
     /**
      * Tự động tạo phân công ca bản nháp theo khoảng ngày
-     * @param {{ storeId: number, from: string, to: string, createdBy: number, resetDraft?: boolean }} data
+     * @param {{ storeId: number, from: string, to: string, createdBy: number, resetDraft?: boolean, shiftIds?: number[], staffShiftPreferences?: Array<{ userId: number, allowedShiftIds: number[] }> }} data
      */
     autoAssignDrafts: async (data) => {
         const response = await axiosPrivate.post('/shifts/auto-assign', data);

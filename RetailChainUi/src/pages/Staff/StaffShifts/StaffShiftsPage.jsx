@@ -40,6 +40,14 @@ const getInitials = (name) => {
     return name.substring(0, 2).toUpperCase();
 };
 
+const normalizeShiftIdList = (shiftIds) => Array.from(
+    new Set(
+        (Array.isArray(shiftIds) ? shiftIds : [])
+            .map((id) => Number(id))
+            .filter((id) => Number.isFinite(id) && id > 0)
+    )
+);
+
 const StaffShiftsPage = () => {
     const { id: urlStoreId } = useParams();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,7 +224,7 @@ const StaffShiftsPage = () => {
         return data?.desc || fallbackMessage;
     };
 
-    const loadQuotaRows = useCallback(async () => {
+    const loadQuotaRows = useCallback(async (availableShiftIds = []) => {
         if (!numericStoreId) return;
         setQuotaLoading(true);
         try {
@@ -228,6 +236,7 @@ const StaffShiftsPage = () => {
             const staffList = staffRes?.code === 200 ? (staffRes.data || []) : [];
             const quotaList = quotaRes?.code === 200 ? (quotaRes.data || []) : [];
             const quotaByUserId = new Map(quotaList.map(q => [Number(q.userId), q]));
+            const defaultAllowedShiftIds = normalizeShiftIdList(availableShiftIds);
 
             const rows = staffList
                 .filter(s => s?.id != null)
@@ -238,6 +247,7 @@ const StaffShiftsPage = () => {
                         fullName: s.fullName || s.username || `User ${s.id}`,
                         minShiftsPerWeek: Number(quota?.minShiftsPerWeek ?? 5),
                         maxShiftsPerWeek: Number(quota?.maxShiftsPerWeek ?? 6),
+                        allowedShiftIds: [...defaultAllowedShiftIds],
                     };
                 });
 
@@ -272,8 +282,9 @@ const StaffShiftsPage = () => {
         const sourceShiftTypes = (latestShiftTypes && latestShiftTypes.length > 0)
             ? latestShiftTypes
             : shiftTypes;
-        setShiftConfigRows(buildShiftConfigRows(sourceShiftTypes));
-        await loadQuotaRows();
+        const preparedShiftRows = buildShiftConfigRows(sourceShiftTypes);
+        setShiftConfigRows(preparedShiftRows);
+        await loadQuotaRows(preparedShiftRows.map((row) => row.shiftId));
     }, [buildShiftConfigRows, loadQuotaRows, loadShiftTypes, shiftTypes]);
 
     const handleEnterDraftMode = async () => {
@@ -298,6 +309,14 @@ const StaffShiftsPage = () => {
             }
             return next;
         }));
+    };
+
+    const handleAllowedShiftIdsChange = (userId, nextShiftIds) => {
+        setQuotaRows((prev) => prev.map((row) => (
+            row.userId === userId
+                ? { ...row, allowedShiftIds: normalizeShiftIdList(nextShiftIds) }
+                : row
+        )));
     };
 
     const handleShiftToggle = (shiftId, checked) => {
@@ -375,7 +394,9 @@ const StaffShiftsPage = () => {
     const handleOpenConfigModal = async () => {
         if (!numericStoreId) return;
         setActionError("");
-        await prepareAutoAssignConfig();
+        if (shiftConfigRows.length === 0 || quotaRows.length === 0) {
+            await prepareAutoAssignConfig();
+        }
         setIsConfigModalOpen(true);
     };
 
@@ -384,6 +405,7 @@ const StaffShiftsPage = () => {
         const selectedShiftIds = shiftConfigRows
             .filter((row) => row.selected)
             .map((row) => row.shiftId);
+        const selectedShiftIdSet = new Set(selectedShiftIds);
         if (selectedShiftIds.length === 0) {
             setActionError("Vui long chon it nhat 1 shift type de auto-assign");
             return;
@@ -402,6 +424,11 @@ const StaffShiftsPage = () => {
                 createdBy: user?.id || 1,
                 resetDraft: true,
                 shiftIds: selectedShiftIds,
+                staffShiftPreferences: quotaRows.map((row) => ({
+                    userId: row.userId,
+                    allowedShiftIds: normalizeShiftIdList(row.allowedShiftIds)
+                        .filter((shiftId) => selectedShiftIdSet.has(shiftId)),
+                })),
             });
             if (result?.code === 200) {
                 setDraftSummary(result?.data?.summary || null);
@@ -1196,6 +1223,7 @@ const StaffShiftsPage = () => {
                 onShiftToggle={handleShiftToggle}
                 onShiftStaffChange={handleShiftStaffChange}
                 onQuotaChange={handleQuotaChange}
+                onAllowedShiftIdsChange={handleAllowedShiftIdsChange}
                 onGenerate={handleAutoAssignDrafts}
             />
         </div>

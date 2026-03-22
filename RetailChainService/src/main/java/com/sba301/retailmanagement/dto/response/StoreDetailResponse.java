@@ -16,6 +16,9 @@ public class StoreDetailResponse {
     private String code;
     private String name;
     private String address;
+    private Double latitude;
+    private Double longitude;
+    private Integer radiusMeters;
     private Long warehouseId;
     private String manager; // Mock
     private String phone; // Mock

@@ -37,11 +37,19 @@ const AddStoreModal = ({ isOpen, onClose, onStoreAdded }) => {
             return;
         }
 
+        if (!mapPosition) {
+            toast.error('Vui lòng chọn vị trí trên bản đồ');
+            return;
+        }
+
         setSubmitting(true);
         try {
             const newStore = await storeService.createStore({
                 name: formData.name,
-                address: address
+                address: address,
+                latitude: mapPosition.lat,
+                longitude: mapPosition.lng,
+                radiusMeters: 50
             });
 
             console.log('Store created successfully:', newStore);

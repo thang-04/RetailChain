@@ -12,11 +12,23 @@ const AutoAssignConfigModal = ({
     onShiftToggle,
     onShiftStaffChange,
     onQuotaChange,
+    onAllowedShiftIdsChange,
     onGenerate,
 }) => {
     const selectedShiftCount = Array.isArray(shiftRows)
         ? shiftRows.filter((row) => row.selected).length
         : 0;
+    const selectedShiftRows = Array.isArray(shiftRows)
+        ? shiftRows.filter((row) => row.selected)
+        : [];
+
+    const handleAllowedShiftToggle = (userId, allowedShiftIds, shiftId) => {
+        const currentIds = Array.isArray(allowedShiftIds) ? allowedShiftIds : [];
+        const nextIds = currentIds.includes(shiftId)
+            ? currentIds.filter((id) => id !== shiftId)
+            : [...currentIds, shiftId];
+        onAllowedShiftIdsChange(userId, nextIds);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -26,7 +38,7 @@ const AutoAssignConfigModal = ({
                         Cau hinh Auto-assign
                     </DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 dark:text-slate-400">
-                        Chon loai ca, chinh min/max theo tung shift type va quota nhan vien trong khoang {rangeLabel}.
+                        Chon loai ca, chinh min/max theo tung shift type, quota va ca duoc phep cho tung nhan vien trong khoang {rangeLabel}.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -95,8 +107,13 @@ const AutoAssignConfigModal = ({
 
                     <div className="rounded-lg border border-slate-200 dark:border-slate-700">
                         <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
-                            <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                Quota nhan vien (Min/Max theo tuan)
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                    Quota nhan vien va ca duoc phep
+                                </div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                    0 ca = bo qua nhan vien nay khi auto-assign
+                                </div>
                             </div>
                         </div>
                         {quotaLoading ? (
@@ -109,32 +126,93 @@ const AutoAssignConfigModal = ({
                                             <th className="py-2 px-3">Nhan vien</th>
                                             <th className="py-2 px-3 w-28">Min/Week</th>
                                             <th className="py-2 px-3 w-28">Max/Week</th>
+                                            <th className="py-2 px-3 min-w-[320px]">Ca duoc xep</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {quotaRows.map((row) => (
-                                            <tr key={row.userId} className="border-t border-slate-200 dark:border-slate-700">
-                                                <td className="py-2 px-3 text-slate-800 dark:text-slate-200">{row.fullName}</td>
-                                                <td className="py-2 px-3">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        value={row.minShiftsPerWeek}
-                                                        onChange={(e) => onQuotaChange(row.userId, "minShiftsPerWeek", e.target.value)}
-                                                        className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1"
-                                                    />
-                                                </td>
-                                                <td className="py-2 px-3">
-                                                    <input
-                                                        type="number"
-                                                        min={row.minShiftsPerWeek}
-                                                        value={row.maxShiftsPerWeek}
-                                                        onChange={(e) => onQuotaChange(row.userId, "maxShiftsPerWeek", e.target.value)}
-                                                        className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1"
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {quotaRows.map((row) => {
+                                            const allowedShiftIds = Array.isArray(row.allowedShiftIds) ? row.allowedShiftIds : [];
+                                            const activeAllowedCount = selectedShiftRows.filter((shift) => (
+                                                allowedShiftIds.includes(shift.shiftId)
+                                            )).length;
+
+                                            return (
+                                                <tr key={row.userId} className="border-t border-slate-200 dark:border-slate-700 align-top">
+                                                    <td className="py-2 px-3 text-slate-800 dark:text-slate-200">
+                                                        <div className="font-medium">{row.fullName}</div>
+                                                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                            {activeAllowedCount}/{selectedShiftRows.length} ca dang bat
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2 px-3">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={row.minShiftsPerWeek}
+                                                            onChange={(e) => onQuotaChange(row.userId, "minShiftsPerWeek", e.target.value)}
+                                                            className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1"
+                                                        />
+                                                    </td>
+                                                    <td className="py-2 px-3">
+                                                        <input
+                                                            type="number"
+                                                            min={row.minShiftsPerWeek}
+                                                            value={row.maxShiftsPerWeek}
+                                                            onChange={(e) => onQuotaChange(row.userId, "maxShiftsPerWeek", e.target.value)}
+                                                            className="w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1"
+                                                        />
+                                                    </td>
+                                                    <td className="py-2 px-3">
+                                                        {selectedShiftRows.length > 0 ? (
+                                                            <div className="space-y-2">
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {selectedShiftRows.map((shift) => {
+                                                                        const isAllowed = allowedShiftIds.includes(shift.shiftId);
+                                                                        return (
+                                                                            <button
+                                                                                key={`${row.userId}-${shift.shiftId}`}
+                                                                                type="button"
+                                                                                onClick={() => handleAllowedShiftToggle(row.userId, allowedShiftIds, shift.shiftId)}
+                                                                                className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors ${
+                                                                                    isAllowed
+                                                                                        ? "bg-primary text-white border-primary"
+                                                                                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-primary"
+                                                                                }`}
+                                                                            >
+                                                                                {shift.name}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => onAllowedShiftIdsChange(
+                                                                            row.userId,
+                                                                            selectedShiftRows.map((shift) => shift.shiftId)
+                                                                        )}
+                                                                        className="text-xs font-medium text-primary hover:underline"
+                                                                    >
+                                                                        Chon tat ca
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => onAllowedShiftIdsChange(row.userId, [])}
+                                                                        className="text-xs font-medium text-slate-500 hover:underline"
+                                                                    >
+                                                                        Bo qua nhan vien nay
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                                Hay chon it nhat 1 shift type o bang ben tren.
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

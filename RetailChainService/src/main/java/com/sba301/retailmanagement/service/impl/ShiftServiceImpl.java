@@ -1,9 +1,10 @@
 package com.sba301.retailmanagement.service.impl;
 
-import com.sba301.retailmanagement.dto.request.ShiftAssignmentRequest;
 import com.sba301.retailmanagement.dto.request.AutoAssignShiftsRequest;
+import com.sba301.retailmanagement.dto.request.AutoAssignStaffShiftPreferenceRequest;
 import com.sba301.retailmanagement.dto.request.CancelDraftShiftsRequest;
 import com.sba301.retailmanagement.dto.request.ConfirmDraftShiftsRequest;
+import com.sba301.retailmanagement.dto.request.ShiftAssignmentRequest;
 import com.sba301.retailmanagement.dto.request.ShiftRequest;
 import com.sba301.retailmanagement.dto.response.AutoAssignShiftsResponse;
 import com.sba301.retailmanagement.dto.response.AutoAssignShiftsSummary;
@@ -460,6 +461,8 @@ public class ShiftServiceImpl implements ShiftService {
         }
         if (shifts.isEmpty()) throw new IllegalArgumentException("Cửa hàng chưa có ca làm để sắp xếp");
 
+        Map<Long, Set<Long>> allowedShiftIdsByUser = buildAllowedShiftIdsByUser(request.getStaffShiftPreferences());
+
         // Reset existing drafts if requested
         if (resetDraft) {
             Set<ShiftStatus> draftOnly = new HashSet<>(Collections.singletonList(ShiftStatus.DRAFT));
@@ -544,7 +547,15 @@ public class ShiftServiceImpl implements ShiftService {
                 if (need == 0) continue;
 
                 for (int i = 0; i < need; i++) {
-                    User chosen = chooseBestCandidate(staffList, quotaByUserId, assignedCountByUserWeek, shiftsByUserDate, d, shift);
+                    User chosen = chooseBestCandidate(
+                            staffList,
+                            quotaByUserId,
+                            assignedCountByUserWeek,
+                            shiftsByUserDate,
+                            allowedShiftIdsByUser,
+                            d,
+                            shift
+                    );
                     if (chosen == null) {
                         int have = headcountByShiftDate.getOrDefault(shift.getId() + "|" + dateKey, 0);
                         summary.getUnderstaffedNotes().add(dateKey + " • " + shift.getName() + " thiếu người (" + have + "/" + minStaff + ")");
@@ -772,6 +783,7 @@ public class ShiftServiceImpl implements ShiftService {
             Map<Long, StaffQuota> quotaByUserId,
             Map<String, Integer> assignedCountByUserWeek,
             Map<String, List<Shift>> shiftsByUserDate,
+            Map<Long, Set<Long>> allowedShiftIdsByUser,
             LocalDate workDate,
             Shift targetShift
     ) {
@@ -782,6 +794,11 @@ public class ShiftServiceImpl implements ShiftService {
         String dateKey = workDate.format(DATE_FORMATTER);
 
         for (User u : staffList) {
+            Set<Long> allowedShiftIds = allowedShiftIdsByUser.get(u.getId());
+            if (allowedShiftIds != null && !allowedShiftIds.contains(targetShift.getId())) {
+                continue;
+            }
+
             StaffQuota q = quotaByUserId.get(u.getId());
             int min = q != null && q.getMinShiftsPerWeek() != null ? q.getMinShiftsPerWeek() : 5;
             int max = q != null && q.getMaxShiftsPerWeek() != null ? q.getMaxShiftsPerWeek() : 6;
@@ -815,6 +832,31 @@ public class ShiftServiceImpl implements ShiftService {
         }
 
         return best;
+    }
+
+    private Map<Long, Set<Long>> buildAllowedShiftIdsByUser(
+            List<AutoAssignStaffShiftPreferenceRequest> staffShiftPreferences
+    ) {
+        if (staffShiftPreferences == null || staffShiftPreferences.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, Set<Long>> allowedShiftIdsByUser = new HashMap<>();
+        for (AutoAssignStaffShiftPreferenceRequest preference : staffShiftPreferences) {
+            if (preference == null || preference.getUserId() == null) {
+                continue;
+            }
+
+            Set<Long> allowedShiftIds = preference.getAllowedShiftIds() == null
+                    ? Collections.emptySet()
+                    : preference.getAllowedShiftIds().stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            allowedShiftIdsByUser.put(preference.getUserId(), allowedShiftIds);
+        }
+
+        return allowedShiftIdsByUser;
     }
 
     // ==================== MAPPING HELPERS ====================
