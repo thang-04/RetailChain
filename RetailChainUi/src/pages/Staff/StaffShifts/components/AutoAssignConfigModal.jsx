@@ -239,7 +239,7 @@ const AutoAssignConfigModal = ({
                         <span className={`material-symbols-outlined text-[18px] ${autoAssignLoading ? "animate-spin" : ""}`}>
                             {autoAssignLoading ? "progress_activity" : "auto_fix_high"}
                         </span>
-                        Generate Preview
+                        Xac nhan cau hinh va hien lich nhap
                     </button>
                 </div>
             </DialogContent>

@@ -845,7 +845,7 @@ const StaffShiftsPage = () => {
                     <div className="mt-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-3">
                         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                Draft mode: cau hinh min/max va shift type trong modal, sau do generate preview
+                                Draft mode: mo modal cau hinh, xac nhan cau hinh, sau do lich nhap se hien ngay tren calendar
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                                 <button
@@ -881,7 +881,7 @@ const StaffShiftsPage = () => {
                             </div>
                         </div>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
-                            Min/Max va danh sach shift type chi hien thi trong modal cau hinh.
+                            Sau khi bam xac nhan trong modal, he thong dong modal va render lich nhap tren giao dien de ban kiem tra truoc khi submit.
                         </div>
                     </div>
                 )}
@@ -893,7 +893,7 @@ const StaffShiftsPage = () => {
                 {draftSummary && (
                     <div className="mt-3 px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 text-sm">
                         <div className="font-semibold">
-                            Da tao {draftSummary.createdDraftCount || 0} draft.
+                            Da tao {draftSummary.createdDraftCount || 0} draft va hien thi tren lich.
                         </div>
                         {(draftSummary.understaffedNotes || []).length > 0 && (
                             <div className="mt-1">
