@@ -1,0 +1,35 @@
+﻿[
+    {
+        "role":  "SUPER_ADMIN",
+        "total":  28,
+        "http200":  26,
+        "http400":  null,
+        "http401":  0,
+        "http403":  0,
+        "http404":  0,
+        "http5xx":  null,
+        "apiCode500":  7
+    },
+    {
+        "role":  "STORE_MANAGER",
+        "total":  28,
+        "http200":  20,
+        "http400":  null,
+        "http401":  0,
+        "http403":  6,
+        "http404":  0,
+        "http5xx":  null,
+        "apiCode500":  5
+    },
+    {
+        "role":  "STAFF",
+        "total":  28,
+        "http200":  17,
+        "http400":  null,
+        "http401":  0,
+        "http403":  9,
+        "http404":  0,
+        "http5xx":  null,
+        "apiCode500":  3
+    }
+]

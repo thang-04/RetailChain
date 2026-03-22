@@ -33,7 +33,7 @@ public class AttendanceController {
 
     @PostMapping("/checkin")
     public String checkin(@RequestBody AttendanceCheckinRequest request,
-                          @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         String prefix = "[checkin]";
         log.info("{}|START", prefix);
         try {
@@ -49,7 +49,7 @@ public class AttendanceController {
 
     @PostMapping("/checkout")
     public String checkout(@RequestBody AttendanceCheckoutRequest request,
-                           @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         String prefix = "[checkout]";
         log.info("{}|START", prefix);
         try {
@@ -65,10 +65,10 @@ public class AttendanceController {
 
     @GetMapping("/my-history")
     public String getMyHistory(@AuthenticationPrincipal UserDetails userDetails,
-                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "30") int limit) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int limit) {
         String prefix = "[getMyHistory]";
         log.info("{}|START", prefix);
         try {
@@ -84,15 +84,16 @@ public class AttendanceController {
 
     @GetMapping("/user/{userId}")
     public String getUserHistory(@PathVariable Long userId,
-                                  @RequestParam Long storeId,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @RequestParam Long storeId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         String prefix = "[getUserHistory]|userId=" + userId;
         log.info("{}|START", prefix);
         try {
             User user = getCurrentUser(userDetails);
-            List<AttendanceHistoryResponse> response = attendanceService.getHistoryByUser(user, userId, storeId, from, to);
+            List<AttendanceHistoryResponse> response = attendanceService.getHistoryByUser(user, userId, storeId, from,
+                    to);
             log.info("{}|END|size={}", prefix, response.size());
             return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Lấy lịch sử thành công", response);
         } catch (Exception e) {
@@ -103,8 +104,8 @@ public class AttendanceController {
 
     @GetMapping("/store/{storeId}")
     public String getStoreAttendance(@PathVariable Long storeId,
-                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                     @RequestParam(required = false) String status) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String status) {
         String prefix = "[getStoreAttendance]|storeId=" + storeId;
         log.info("{}|START", prefix);
         try {
@@ -119,7 +120,7 @@ public class AttendanceController {
 
     @GetMapping("/dashboard/{storeId}")
     public String getDashboard(@PathVariable Long storeId,
-                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         String prefix = "[getDashboard]|storeId=" + storeId;
         log.info("{}|START", prefix);
         try {
@@ -148,8 +149,8 @@ public class AttendanceController {
 
     @PutMapping("/{id}/edit")
     public String editAttendance(@PathVariable Long id,
-                                  @RequestBody AttendanceEditRequest request,
-                                  @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody AttendanceEditRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
         String prefix = "[editAttendance]|id=" + id;
         log.info("{}|START", prefix);
         try {
@@ -165,8 +166,8 @@ public class AttendanceController {
 
     @PostMapping("/manual")
     public String createManualAttendance(@RequestBody AttendanceCheckinRequest request,
-                                         @RequestParam Long userId,
-                                         @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestParam Long userId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         String prefix = "[createManualAttendance]|userId=" + userId;
         log.info("{}|START", prefix);
         try {

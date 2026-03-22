@@ -119,17 +119,20 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // Generate random password
-        String tempPassword = generateRandomPassword();
+        // Use provided password or generate random one
+        String passwordToUse = (request.getPassword() != null && !request.getPassword().isBlank()) 
+                ? request.getPassword() 
+                : generateRandomPassword();
+        boolean isFirstLogin = (request.getPassword() == null || request.getPassword().isBlank());
 
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(tempPassword))
+                .password(passwordEncoder.encode(passwordToUse))
                 .fullName(request.getFullName())
                 .phone(request.getPhoneNumber())
                 .status(1) // Active
-                .isFirstLogin(true)
+                .isFirstLogin(isFirstLogin)
                 .roles(roles)
                 .createdByUserId(currentUser != null ? currentUser.getId() : null)
                 .build();
@@ -137,11 +140,13 @@ public class UserServiceImpl implements UserService {
         assignScopeToUser(user, request, currentUser, roles);
 
         User savedUser = userRepository.save(user);
-        log.info("Created user {} with scope: storeId={}. Temp password sent to email.",
-                savedUser.getUsername(), savedUser.getStoreId());
+        log.info("Created user {} with scope: storeId={}. Status={}, isFirstLogin={}",
+                savedUser.getUsername(), savedUser.getStoreId(), savedUser.getStatus(), savedUser.getIsFirstLogin());
 
-        // Send welcome email
-        sendMailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFullName(), tempPassword);
+        // Send welcome email only if a random password was generated
+        if (isFirstLogin) {
+            sendMailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFullName(), passwordToUse);
+        }
 
         return toDTO(savedUser);
     }

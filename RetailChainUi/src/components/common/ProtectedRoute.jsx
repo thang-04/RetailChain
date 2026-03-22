@@ -19,7 +19,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     }
 
     // Nếu có children thì render children, nếu không thì dùng Outlet cho Nested Routes
-    return children ? children : <Outlet />; 
+    return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

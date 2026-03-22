@@ -305,7 +305,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         User currentUser = getCurrentUser();
         Long createdByUserId = currentUser != null ? currentUser.getId() : null;
-        
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("TRF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -403,7 +403,7 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant, InventoryAction action, int quantity, int balance) {
         User currentUser = getCurrentUser();
         Long actorUserId = currentUser != null ? currentUser.getId() : null;
-        
+
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
@@ -570,7 +570,8 @@ public class InventoryServiceImpl implements InventoryService {
                         String sku = item.getVariant() != null ? item.getVariant().getSku() : "N/A";
                         String size = item.getVariant() != null ? item.getVariant().getSize() : "";
                         String color = item.getVariant() != null ? item.getVariant().getColor() : "";
-                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice() : java.math.BigDecimal.ZERO;
+                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice()
+                                : java.math.BigDecimal.ZERO;
                         long unitPriceLong = unitPrice != null ? unitPrice.longValue() : 0L;
                         long totalPriceLong = unitPriceLong * item.getQuantity();
 
@@ -596,7 +597,8 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status(doc.getStatus() != null ? doc.getStatus() : (doc.getDocumentType() == InventoryDocumentType.IMPORT ? "COMPLETED" : "PENDING"))
+                    .status(doc.getStatus() != null ? doc.getStatus()
+                            : (doc.getDocumentType() == InventoryDocumentType.IMPORT ? "COMPLETED" : "PENDING"))
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
@@ -856,7 +858,8 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         List<InventoryDocument> documents = inventoryDocumentRepository
-                .findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(warehouseId, InventoryDocumentType.TRANSFER);
+                .findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(warehouseId,
+                        InventoryDocumentType.TRANSFER);
 
         return documents.stream().map(doc -> {
             List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
@@ -879,7 +882,9 @@ public class InventoryServiceImpl implements InventoryService {
                         ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
                         return InventoryDocumentItemResponse.builder()
                                 .variantId(item.getVariantId())
-                                .productName(variant != null && variant.getProduct() != null ? variant.getProduct().getName() : null)
+                                .productName(
+                                        variant != null && variant.getProduct() != null ? variant.getProduct().getName()
+                                                : null)
                                 .sku(variant != null ? variant.getSku() : null)
                                 .quantity(item.getQuantity())
                                 .build();

@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ const StaffList = () => {
     fetchStaff();
   }, []);
 
-  const filteredStaff = staff.filter(s => 
+  const filteredStaff = staff.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.role.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,15 +62,15 @@ const StaffList = () => {
             <div className="flex items-center gap-2">
               <div className="relative w-64">
                 <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
-                <Input 
-                  placeholder="Search staff..." 
+                <Input
+                  placeholder="Search staff..."
                   className="pl-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Button variant="outline" size="icon">
-                 <Filter className="w-4 h-4" />
+                <Filter className="w-4 h-4" />
               </Button>
             </div>
           </div>
