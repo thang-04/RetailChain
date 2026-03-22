@@ -18,5 +18,6 @@ public class DashboardStoreRankingDTO {
      * Tổng số lượng tồn kho (sum quantity) của cửa hàng (theo warehouse gắn với store).
      */
     private Long stockQuantity;
+
 }
 

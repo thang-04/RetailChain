@@ -1,9 +1,11 @@
 package com.sba301.retailmanagement.service;
 
-import com.sba301.retailmanagement.dto.request.WarehouseRequest;
+import com.sba301.retailmanagement.dto.request.InventoryAdjustRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
+import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
+import com.sba301.retailmanagement.dto.response.InventoryDetailResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import java.util.List;
@@ -14,15 +16,13 @@ public interface InventoryService {
 
     List<WarehouseResponse> getAllWarehouses();
 
-    /**
-     * Lấy thông tin kho tổng (central warehouse).
-     * @return WarehouseResponse của kho tổng
-     */
     WarehouseResponse getCentralWarehouse();
 
     List<InventoryStockResponse> getStockByWarehouse(Long warehouseId);
 
     List<InventoryStockResponse> getStockByProduct(Long productId);
+
+    List<InventoryStockResponse> getStockByStore(Long storeId);
 
     void importStock(StockRequest request);
 
@@ -38,18 +38,15 @@ public interface InventoryService {
 
     void deleteDocument(Long id);
 
-    /**
-     * Lấy thông tin tổng quan tồn kho toàn hệ thống (dùng cho dashboard Inventory).
-     */
     InventoryOverviewResponse getInventoryOverview();
 
-    /**
-     * Nhập kho từ Excel data.
-     * @param items List of items with sku, productName, quantity, unitPrice, note
-     */
     void importStockFromExcel(List<Map<String, Object>> items);
 
     void confirmReceipt(Long documentId);
 
     List<com.sba301.retailmanagement.dto.response.InventoryDocumentResponse> getExportDocumentsByStore(Long storeId);
+
+    InventoryDetailResponse getInventoryDetail(String inventoryId);
+
+    void adjustInventory(String inventoryId, InventoryAdjustRequest request);
 }
