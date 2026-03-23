@@ -98,11 +98,10 @@ public class StockRequestServiceImpl implements StockRequestService {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
 
-            InventoryStockId stockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
-            InventoryStock stock = inventoryStockRepository.findById(stockId)
+            InventoryStock stock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(sourceWarehouse.getId(), variant.getId())
                     .orElse(null);
 
-            int availableStock = stock != null ? stock.getQuantity() : 0;
+            int availableStock = stock != null && stock.getQuantity() != null ? stock.getQuantity() : 0;
             String productName = variant.getProduct() != null ? variant.getProduct().getName() : "Sản phẩm #" + variant.getId();
             if (availableStock < itemReq.getQuantity()) {
                 throw new RuntimeException("Sản phẩm " + productName + " không đủ tồn kho tại kho tổng. Hiện có: " + availableStock);
@@ -121,6 +120,7 @@ public class StockRequestServiceImpl implements StockRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<StockRequestResponse> getPendingRequests() {
         return stockRequestRepository.findByStatusOrderByCreatedAtDesc(StockRequestStatus.PENDING)
                 .stream()
@@ -129,6 +129,7 @@ public class StockRequestServiceImpl implements StockRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<StockRequestResponse> getStoreRequests(Long storeId) {
         return stockRequestRepository.findByStoreIdOrderByCreatedAtDesc(storeId)
                 .stream()
@@ -137,6 +138,7 @@ public class StockRequestServiceImpl implements StockRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public StockRequestResponse getRequestById(Long id) {
         StockRequest stockRequest = stockRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("StockRequest not found: " + id));
@@ -233,7 +235,7 @@ public class StockRequestServiceImpl implements StockRequestService {
         return mapToResponse(savedRequest);
     }
 
-    private String generateRequestCode() {
+    private synchronized String generateRequestCode() {
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         long count = stockRequestRepository.count() + 1;
         return String.format("SR-%s-%03d", date, count);
@@ -283,9 +285,14 @@ public class StockRequestServiceImpl implements StockRequestService {
         Integer availableStock = 0;
         if (variant != null) {
             try {
-                InventoryStockId stockId = new InventoryStockId(variant.getId(), item.getVariantId());
-                InventoryStock stock = inventoryStockRepository.findById(stockId).orElse(null);
-                availableStock = stock != null ? stock.getQuantity() : 0;
+                // Lay sourceWarehouseId tu StockRequest cha thong qua item.getStockRequest()
+                StockRequest parentRequest = item.getStockRequest();
+                Long sourceWarehouseId = parentRequest != null ? parentRequest.getSourceWarehouseId() : null;
+                if (sourceWarehouseId != null) {
+                    InventoryStockId stockId = new InventoryStockId(sourceWarehouseId, item.getVariantId());
+                    InventoryStock stock = inventoryStockRepository.findById(stockId).orElse(null);
+                    availableStock = stock != null && stock.getQuantity() != null ? stock.getQuantity() : 0;
+                }
             } catch (Exception e) {
                 log.warn("Could not get stock for variant: {}", item.getVariantId());
             }

@@ -60,10 +60,12 @@ public class WarehouseController {
         try {
             WarehouseResponse response = inventoryService.getCentralWarehouse();
             log.info("{}|END", prefix);
-            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Central warehouse retrieved successfully", response);
+            return ResponseJson.toJsonWithData(ApiCode.SUCCESSFUL, "Central warehouse retrieved successfully",
+                    response);
         } catch (Exception e) {
             log.error("{}|Exception={}", prefix, e.getMessage(), e);
-            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error retrieving central warehouse: " + e.getMessage());
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL,
+                    "Error retrieving central warehouse: " + e.getMessage());
         }
     }
 

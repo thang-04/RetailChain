@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import authService from "../../services/auth.service";
 
 const ProfilePage = () => {
@@ -118,6 +119,27 @@ const ProfilePage = () => {
                                 </div>
                             )}
                         </div>
+                    </CardContent>
+                </Card>
+                <Card className="md:col-span-1 shadow-sm border-gray-200 dark:border-gray-800">
+                    <CardHeader>
+                        <CardTitle className="text-xl flex items-center gap-2">
+                            <span className="material-symbols-outlined">security</span>
+                            Bảo mật
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <p className="text-sm text-text-muted">
+                            Bạn nên thay đổi mật khẩu định kỳ để bảo vệ tài khoản của mình.
+                        </p>
+                        <Button 
+                            variant="outline" 
+                            className="w-full justify-start gap-2"
+                            onClick={() => window.location.href = '/change-password'}
+                        >
+                            <span className="material-symbols-outlined text-[20px]">lock_reset</span>
+                            Đổi mật khẩu
+                        </Button>
                     </CardContent>
                 </Card>
             </div>

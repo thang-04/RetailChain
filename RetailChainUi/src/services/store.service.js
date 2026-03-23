@@ -69,6 +69,9 @@ const storeService = {
         code: data.code,
         name: data.name,
         address: data.address,
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        radiusMeters: data.radiusMeters || 50,
         warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };
 
@@ -79,6 +82,9 @@ const storeService = {
           id: newStore.code,
           name: newStore.name,
           address: newStore.address,
+          latitude: newStore.latitude,
+          longitude: newStore.longitude,
+          radiusMeters: newStore.radiusMeters,
           manager: newStore.manager || "N/A",
           phone: newStore.phone || "N/A",
           status: newStore.status === 1 ? "Active" : (newStore.status === 0 ? "Inactive" : "Active"),
@@ -119,6 +125,9 @@ const storeService = {
       const requestData = {
         name: data.name,
         address: data.address,
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        radiusMeters: data.radiusMeters || 50,
         status: statusMap[data.status] ?? 1,
         warehouseId: data.warehouseId ? parseInt(data.warehouseId) : null
       };

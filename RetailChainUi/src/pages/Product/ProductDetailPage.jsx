@@ -29,10 +29,41 @@ const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [categories, setCategories] = useState([]);
     const [chainStock, setChainStock] = useState([]);
+    
+    // Chain Stock Pagination State
+    const [chainStockPage, setChainStockPage] = useState(1);
+    const STOCK_ITEMS_PER_PAGE = 5;
 
     // Variant states
     const [isVariantFormOpen, setIsVariantFormOpen] = useState(false);
     const [savingVariant, setSavingVariant] = useState(false);
+
+    const getStatusBadge = (quantity) => {
+        if (quantity > 100) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">RẤT TỐT</span>;
+        } else if (quantity > 10) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-100">CÒN HÀNG</span>;
+        } else if (quantity > 0) {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-100">SẮP HẾT HÀNG</span>;
+        } else {
+            return <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-100">HẾT HÀNG</span>;
+        }
+    };
+
+    const getGenderLabel = (gender) => {
+        switch (String(gender || "").toUpperCase()) {
+            case "MEN":
+                return "Nam";
+            case "WOMEN":
+                return "Nữ";
+            case "KIDS":
+                return "Trẻ em";
+            case "UNISEX":
+                return "Dùng chung";
+            default:
+                return gender || "Chưa xác định";
+        }
+    };
 
     useEffect(() => {
         const loadPageData = async () => {
@@ -68,7 +99,7 @@ const ProductDetailPage = () => {
 
     const getCategoryName = (id) => {
         const cat = categories.find(c => c.id === id);
-        return cat ? cat.name : "Unknown";
+        return cat ? cat.name : "Không xác định";
     };
 
     const handleCreateVariant = async (formData) => {
@@ -83,7 +114,7 @@ const ProductDetailPage = () => {
                 ? payload
                 : (payload?.data || payload?.result || payload?.items || payload?.variants || []);
 
-            alert(`Đã tạo ${createdVariants.length} variants thành công.`);
+            alert(`Đã tạo ${createdVariants.length} phiên bản thành công.`);
 
             // Refresh product details to get new variants
             const productRes = await productService.getProductBySlug(slug);
@@ -96,7 +127,7 @@ const ProductDetailPage = () => {
             setIsVariantFormOpen(false);
         } catch (error) {
             console.error("Failed to add variant", error);
-            alert("Tạo variants thất bại: " + (error.response?.data?.desc || error.message));
+            alert("Tạo phiên bản thất bại: " + (error.response?.data?.desc || error.message));
         } finally {
             setSavingVariant(false);
         }
@@ -148,8 +179,8 @@ const ProductDetailPage = () => {
     if (!product) {
         return (
             <div className="flex flex-col h-full items-center justify-center gap-4">
-                <p className="text-slate-500">Product not found.</p>
-                <Button onClick={() => navigate("/products")}>Back to List</Button>
+                <p className="text-slate-500">Không tìm thấy sản phẩm.</p>
+                <Button onClick={() => navigate("/products")}>Quay lại danh sách</Button>
             </div>
         );
     }
@@ -163,7 +194,7 @@ const ProductDetailPage = () => {
                         <ChevronLeft className="w-5 h-5" />
                     </Button>
                     <nav className="flex items-center text-sm font-medium text-slate-500">
-                        <Link to="/products" className="hover:text-primary transition-colors">Products</Link>
+                        <Link to="/products" className="hover:text-primary transition-colors">Sản phẩm</Link>
                         <ChevronRight className="w-4 h-4 mx-1 text-slate-400" />
                         <span className="text-slate-900 dark:text-white font-semibold">{product.name}</span>
                     </nav>
@@ -171,7 +202,7 @@ const ProductDetailPage = () => {
                 <div className="flex items-center gap-3">
                     <Button onClick={() => navigate(`/products/${slug}/edit`)} className="bg-primary hover:bg-primary/90 text-white font-bold flex items-center gap-2">
                         <Edit3 className="w-4 h-4" />
-                        Edit Product
+                        Chỉnh sửa sản phẩm
                     </Button>
                 </div>
             </header>
@@ -198,9 +229,9 @@ const ProductDetailPage = () => {
                                                 ? "bg-green-100 text-green-700 border-green-200"
                                                 : product.status === 2
                                                     ? "bg-amber-100 text-amber-700 border-amber-200"
-                                                    : "bg-slate-100 text-slate-600 border-slate-200"
+                                                : "bg-slate-100 text-slate-600 border-slate-200"
                                                 }`}>
-                                                {product.status === 1 ? "ACTIVE" : product.status === 2 ? "OUT OF STOCK" : "INACTIVE"}
+                                                {product.status === 1 ? "ĐANG KINH DOANH" : product.status === 2 ? "HẾT HÀNG" : "NGỪNG KINH DOANH"}
                                             </span>
                                             <span className="text-slate-400 font-mono text-xs">#{product.code}</span>
                                         </div>
@@ -208,7 +239,7 @@ const ProductDetailPage = () => {
                                     <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-slate-500 font-medium flex items-center gap-2">
-                                                <Layers className="w-4 h-4" /> Category
+                                                <Layers className="w-4 h-4" /> Danh mục
                                             </span>
                                             <span className="text-slate-900 dark:text-white font-semibold">
                                                 {getCategoryName(product.categoryId)}
@@ -216,13 +247,13 @@ const ProductDetailPage = () => {
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-slate-500 font-medium flex items-center gap-2">
-                                                <UserCircle2 className="w-4 h-4" /> Gender
+                                                <UserCircle2 className="w-4 h-4" /> Giới tính
                                             </span>
-                                            <span className="text-slate-900 dark:text-white font-semibold capitalize">{product.gender?.toLowerCase()}</span>
+                                            <span className="text-slate-900 dark:text-white font-semibold">{getGenderLabel(product.gender)}</span>
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-slate-500 font-medium flex items-center gap-2">
-                                                <Calendar className="w-4 h-4" /> Created At
+                                                <Calendar className="w-4 h-4" /> Ngày tạo
                                             </span>
                                             <span className="text-slate-900 dark:text-white font-semibold">
                                                 {new Date(product.createdAt).toLocaleDateString()}
@@ -236,9 +267,9 @@ const ProductDetailPage = () => {
                         {/* Right: Details and Tabs */}
                         <div className="lg:col-span-2 space-y-6">
                             <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-8">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Description</h3>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Mô tả</h3>
                                 <p className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">
-                                    {product.description || "No description provided for this product."}
+                                    {product.description || "Chưa có mô tả cho sản phẩm này."}
                                 </p>
                             </div>
 
@@ -246,12 +277,12 @@ const ProductDetailPage = () => {
                                 <div className="flex items-end justify-between px-1">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <Package className="w-5 h-5 text-primary" /> Variants
+                                            <Package className="w-5 h-5 text-primary" /> Phiên bản
                                         </h3>
                                         <p className="text-sm text-slate-500">Hiển thị theo nhóm màu, mỗi màu có nhiều size.</p>
                                     </div>
                                     <Button onClick={() => setIsVariantFormOpen(true)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white">
-                                        <Plus className="w-4 h-4 mr-2" /> Tạo variants
+                                        <Plus className="w-4 h-4 mr-2" /> Tạo phiên bản
                                     </Button>
                                 </div>
                                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
@@ -302,7 +333,7 @@ const ProductDetailPage = () => {
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">Chưa có variants. Hãy tạo ở phía trên.</td>
+                                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">Chưa có phiên bản. Hãy tạo ở phía trên.</td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -314,21 +345,22 @@ const ProductDetailPage = () => {
                                 <div className="flex items-end justify-between px-1">
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Chain Inventory</h3>
-                                        <p className="text-sm text-slate-500">Stock availability across all locations.</p>
+                                        <p className="text-sm text-slate-500">Tình trạng tồn kho trên toàn hệ thống.</p>
                                     </div>
                                 </div>
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                                     <table className="w-full text-left border-collapse text-sm">
                                         <thead>
                                             <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-widest text-slate-500 font-bold">
-                                                <th className="px-6 py-4">Location</th>
+                                                <th className="px-6 py-4">Vị trí</th>
                                                 <th className="px-6 py-4 text-center">SKU</th>
-                                                <th className="px-6 py-4 text-right">Available</th>
-                                                <th className="px-6 py-4 text-center">Last Updated</th>
+                                                <th className="px-6 py-4 text-right">Khả dụng</th>
+                                                <th className="px-6 py-4 text-center">Trạng thái</th>
+                                                <th className="px-6 py-4 text-center">Cập nhật lần cuối</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                                            {chainStock.length > 0 ? chainStock.map((stock, idx) => (
+                                            {chainStock.length > 0 ? chainStock.slice((chainStockPage - 1) * STOCK_ITEMS_PER_PAGE, chainStockPage * STOCK_ITEMS_PER_PAGE).map((stock, idx) => (
                                                 <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                                                     <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
                                                         <div className="flex items-center gap-3">
@@ -344,17 +376,54 @@ const ProductDetailPage = () => {
                                                     <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">
                                                         {stock.quantity.toLocaleString()}
                                                     </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        {getStatusBadge(stock.quantity)}
+                                                    </td>
                                                     <td className="px-6 py-4 text-center text-slate-500 text-xs">
                                                         {new Date(stock.lastUpdated).toLocaleString()}
                                                     </td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">No inventory records found for this product.</td>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400">Không tìm thấy bản ghi tồn kho cho sản phẩm này.</td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
+
+                                    {/* Pagination Footer */}
+                                    {chainStock.length > 0 && (
+                                        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                Hiển thị <span className="font-bold text-slate-900 dark:text-white">{(chainStockPage - 1) * STOCK_ITEMS_PER_PAGE + 1}-{Math.min(chainStockPage * STOCK_ITEMS_PER_PAGE, chainStock.length)}</span> trên <span className="font-bold text-slate-900 dark:text-white">{chainStock.length}</span> vị trí
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="w-8 h-8"
+                                                    onClick={() => setChainStockPage(p => Math.max(1, p - 1))}
+                                                    disabled={chainStockPage === 1}
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </Button>
+                                                
+                                                <div className="flex items-center gap-1 mx-1">
+                                                    <span className="text-xs font-medium">Trang {chainStockPage} / {Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE) || 1}</span>
+                                                </div>
+
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="w-8 h-8"
+                                                    onClick={() => setChainStockPage(p => Math.min(Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE), p + 1))}
+                                                    disabled={chainStockPage >= Math.ceil(chainStock.length / STOCK_ITEMS_PER_PAGE)}
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -364,7 +433,7 @@ const ProductDetailPage = () => {
 
             {/* Footer Attribution */}
             <div className="h-10 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-center shrink-0">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Nexus Retail Systems • Enterprise Management</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 RetailChain • Quản lý doanh nghiệp</p>
             </div>
 
             <ProductVariantForm

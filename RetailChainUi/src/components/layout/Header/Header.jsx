@@ -41,7 +41,7 @@ const Header = ({ toggleSidebar }) => {
                     </span>
                     <Input
                         className="pl-10 bg-background-light dark:bg-gray-800 border-none shadow-none focus-visible:ring-primary/20"
-                        placeholder="Search stores, SKUs..."
+                        placeholder="Tìm cửa hàng, SKU..."
                         type="text"
                     />
                 </div>
@@ -65,21 +65,21 @@ const Header = ({ toggleSidebar }) => {
 
                 <div className="flex items-center gap-3 border-l pl-4 ml-2">
                     <span className="text-sm font-medium hidden md:block cursor-pointer" onClick={() => navigate("/profile")}>
-                        {user?.fullName || user?.username || 'User'}
+                        {user?.fullName || user?.username || 'Người dùng'}
                     </span>
                     
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
                                 <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                                    {(user?.fullName || user?.username || 'U').charAt(0).toUpperCase()}
+                                    {(user?.fullName || user?.username || 'N').charAt(0).toUpperCase()}
                                 </AvatarFallback>
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 mt-2">
                             <DropdownMenuLabel className="font-normal">
                                 <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{user?.fullName || 'User'}</p>
+                                    <p className="text-sm font-medium leading-none">{user?.fullName || 'Người dùng'}</p>
                                     <p className="text-xs leading-none text-text-muted mt-1">
                                         {user?.email || `@${user?.username}`}
                                     </p>

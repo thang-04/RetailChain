@@ -2,6 +2,10 @@ package com.sba301.retailmanagement.service;
 
 import com.sba301.retailmanagement.dto.request.ShiftAssignmentRequest;
 import com.sba301.retailmanagement.dto.request.ShiftRequest;
+import com.sba301.retailmanagement.dto.request.AutoAssignShiftsRequest;
+import com.sba301.retailmanagement.dto.request.CancelDraftShiftsRequest;
+import com.sba301.retailmanagement.dto.request.ConfirmDraftShiftsRequest;
+import com.sba301.retailmanagement.dto.response.AutoAssignShiftsResponse;
 import com.sba301.retailmanagement.dto.response.ShiftAssignmentResponse;
 import com.sba301.retailmanagement.dto.response.ShiftResponse;
 
@@ -28,4 +32,10 @@ public interface ShiftService {
     List<ShiftAssignmentResponse> getAssignmentsByStoreAndDateRange(Long storeId, LocalDate from, LocalDate to);
 
     List<ShiftAssignmentResponse> getAssignmentsByUser(Long userId);
+
+    AutoAssignShiftsResponse autoAssignDraftShifts(AutoAssignShiftsRequest request);
+
+    List<ShiftAssignmentResponse> confirmDraftShifts(ConfirmDraftShiftsRequest request);
+
+    List<ShiftAssignmentResponse> cancelDraftShifts(CancelDraftShiftsRequest request);
 }

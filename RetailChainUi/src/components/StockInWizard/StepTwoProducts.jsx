@@ -225,6 +225,9 @@ const StepTwoProducts = ({
                                                     )}
                                                 </SelectContent>
                                             </Select>
+                                            {errors[`item_${item.id}`] && (
+                                                <p className="text-xs text-red-500 mt-1">{errors[`item_${item.id}`]}</p>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Input
@@ -232,8 +235,11 @@ const StepTwoProducts = ({
                                                 min="1"
                                                 value={item.quantity}
                                                 onChange={(e) => handleItemChange(item.id, 'quantity', e.target.value)}
-                                                className="w-24"
+                                                className={`w-24 ${errors[`qty_${item.id}`] ? "border-red-500" : ""}`}
                                             />
+                                            {errors[`qty_${item.id}`] && (
+                                                <p className="text-xs text-red-500 mt-1">{errors[`qty_${item.id}`]}</p>
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <Button

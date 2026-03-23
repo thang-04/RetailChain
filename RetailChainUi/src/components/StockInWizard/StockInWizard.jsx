@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Save, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -141,8 +141,12 @@ const StockInWizard = () => {
 
     // Submit
     const handleSubmit = async () => {
+        if (!validateStep(1)) {
+            toast.error("Vui lòng điền đầy đủ thông tin bước 1");
+            return;
+        }
         if (!validateStep(2)) {
-            toast.error("Vui lòng điền đầy đủ thông tin");
+            toast.error("Vui lòng điền đầy đủ thông tin bước 2");
             return;
         }
 

@@ -11,7 +11,7 @@ const BulkActions = ({ suppliers, categories, onBulkSupplierChange, onBulkCatego
     <div className="flex gap-4">
       <Select onValueChange={onBulkSupplierChange}>
         <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Bulk NCC..." />
+          <SelectValue placeholder="Áp dụng NCC..." />
         </SelectTrigger>
         <SelectContent>
           {suppliers?.map((supplier) => (
@@ -24,7 +24,7 @@ const BulkActions = ({ suppliers, categories, onBulkSupplierChange, onBulkCatego
 
       <Select onValueChange={onBulkCategoryChange}>
         <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Bulk Danh mục..." />
+          <SelectValue placeholder="Áp dụng danh mục..." />
         </SelectTrigger>
         <SelectContent>
           {categories?.map((cat) => (

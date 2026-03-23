@@ -1,0 +1,85 @@
+﻿"role","endpoint","method","path","http","apiCode","desc","error"
+"SUPER_ADMIN","me","GET","/user/me","200","200","Get current user successfully",
+"SUPER_ADMIN","users-list","GET","/user?page=0&size=5","200","200","Get all users successfully",
+"SUPER_ADMIN","roles-list","GET","/roles","200","200","Get all roles successfully",
+"SUPER_ADMIN","permissions-list","GET","/permissions","200","200","Get all permissions successfully",
+"SUPER_ADMIN","stores-list","GET","/stores","200","200","Get all stores success",
+"SUPER_ADMIN","store-staff-list","GET","/stores/155/staff-list","200","200","Get store staff list success",
+"SUPER_ADMIN","store-staff","GET","/stores/155/staff","200","200","Get store staff success",
+"SUPER_ADMIN","warehouse-list","GET","/warehouse","200","200","Warehouses retrieved successfully",
+"SUPER_ADMIN","warehouse-central","GET","/warehouse/central","200","200","Central warehouse retrieved successfully",
+"SUPER_ADMIN","products-list","GET","/product?page=0&size=5","200","200","Products retrieved successfully",
+"SUPER_ADMIN","product-categories","GET","/product/categories","200","200","Categories fetched",
+"SUPER_ADMIN","suppliers","GET","/supplier","200","200","Suppliers retrieved successfully",
+"SUPER_ADMIN","inventory-overview","GET","/inventory/overview","200","200","Inventory overview retrieved successfully",
+"SUPER_ADMIN","inventory-documents","GET","/inventory/documents?type=IMPORT&page=0&size=5","200","200","Documents retrieved successfully",
+"SUPER_ADMIN","stock-request-pending","GET","/stock-request/pending","200","200","Pending requests retrieved successfully",
+"SUPER_ADMIN","shifts-list","GET","/shifts?page=0&size=5","200","200","Get all shifts success",
+"SUPER_ADMIN","attendance-my-history","GET","/attendance/my-history?page=0&size=5","200","200","Lấy lịch sử thành công",
+"SUPER_ADMIN","attendance-store","GET","/attendance/store/=0&size=5","500","500",,"The remote server returned an error: (500) Internal Server Error."
+"SUPER_ADMIN","staff-quotas","GET","/staff-quotas?storeId=155","200","200","Get staff quota success",
+"SUPER_ADMIN","dashboard-summary","GET","/dashboard/summary?period=MONTH","200","200","Lấy dữ liệu dashboard thành công",
+"SUPER_ADMIN","create-shift-empty","POST","/shifts","200","500","Error creating shift: The given id must not be null",
+"SUPER_ADMIN","create-stock-request-empty","POST","/stock-request","200","500","Error creating stock request: The given id must not be null",
+"SUPER_ADMIN","upsert-staff-quota-empty","PUT","/staff-quotas","200","202","Danh sách quota trống",
+"SUPER_ADMIN","add-product-variant-empty","POST","/product/1/variants","200","500","Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+"SUPER_ADMIN","role-create-empty","POST","/roles","400","400",,"The remote server returned an error: (400) Bad Request."
+"SUPER_ADMIN","warehouse-create-empty","POST","/warehouse","200","500","Error creating warehouse: could not execute statement [Column 'code' cannot be null] [insert into warehouses (address,code,contact_name,contact_phone,created_at,description,district,is_central,name,province,status,updated_at,ward) values (?,?,?,?,?,?,?,?,?,?,?,?,?)]; SQL [insert into warehouses (address,code,contact_name,contact_phone,created_at,description,district,is_central,name,province,status,updated_at,ward) values (?,?,?,?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+"SUPER_ADMIN","store-create-empty","POST","/stores","200","500","Error creating store: Error creating store: could not execute statement [Column 'name' cannot be null] [insert into stores (address,code,created_at,latitude,longitude,name,radius_meters,status,updated_at,warehouse_id) values (?,?,?,?,?,?,?,?,?,?)]; SQL [insert into stores (address,code,created_at,latitude,longitude,name,radius_meters,status,updated_at,warehouse_id) values (?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+"SUPER_ADMIN","user-create-empty","POST","/user","200","500","Error creating user: Role must be specified",
+"STORE_MANAGER","me","GET","/user/me","200","200","Get current user successfully",
+"STORE_MANAGER","users-list","GET","/user?page=0&size=5","200","200","Get all users successfully",
+"STORE_MANAGER","roles-list","GET","/roles","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","permissions-list","GET","/permissions","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","stores-list","GET","/stores","200","200","Get all stores success",
+"STORE_MANAGER","store-staff-list","GET","/stores/155/staff-list","200","200","Get store staff list success",
+"STORE_MANAGER","store-staff","GET","/stores/155/staff","200","200","Get store staff success",
+"STORE_MANAGER","warehouse-list","GET","/warehouse","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","warehouse-central","GET","/warehouse/central","200","200","Central warehouse retrieved successfully",
+"STORE_MANAGER","products-list","GET","/product?page=0&size=5","200","200","Products retrieved successfully",
+"STORE_MANAGER","product-categories","GET","/product/categories","200","200","Categories fetched",
+"STORE_MANAGER","suppliers","GET","/supplier","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","inventory-overview","GET","/inventory/overview","200","200","Inventory overview retrieved successfully",
+"STORE_MANAGER","inventory-documents","GET","/inventory/documents?type=IMPORT&page=0&size=5","200","200","Documents retrieved successfully",
+"STORE_MANAGER","stock-request-pending","GET","/stock-request/pending","200","200","Pending requests retrieved successfully",
+"STORE_MANAGER","shifts-list","GET","/shifts?page=0&size=5","200","200","Get all shifts success",
+"STORE_MANAGER","attendance-my-history","GET","/attendance/my-history?page=0&size=5","200","200","Lấy lịch sử thành công",
+"STORE_MANAGER","attendance-store","GET","/attendance/store/=0&size=5","500","500",,"The remote server returned an error: (500) Internal Server Error."
+"STORE_MANAGER","staff-quotas","GET","/staff-quotas?storeId=155","200","200","Get staff quota success",
+"STORE_MANAGER","dashboard-summary","GET","/dashboard/summary?period=MONTH","200","200","Lấy dữ liệu dashboard thành công",
+"STORE_MANAGER","create-shift-empty","POST","/shifts","200","500","Error creating shift: The given id must not be null",
+"STORE_MANAGER","create-stock-request-empty","POST","/stock-request","200","500","Error creating stock request: The given id must not be null",
+"STORE_MANAGER","upsert-staff-quota-empty","PUT","/staff-quotas","200","202","Danh sách quota trống",
+"STORE_MANAGER","add-product-variant-empty","POST","/product/1/variants","200","500","Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+"STORE_MANAGER","role-create-empty","POST","/roles","400","400",,"The remote server returned an error: (400) Bad Request."
+"STORE_MANAGER","warehouse-create-empty","POST","/warehouse","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","store-create-empty","POST","/stores","403","400",,"The remote server returned an error: (403) Forbidden."
+"STORE_MANAGER","user-create-empty","POST","/user","200","500","Error creating user: could not execute statement [Column 'username' cannot be null] [insert into users (created_at,created_by_user_id,email,full_name,is_first_login,password,phone,status,store_id,updated_at,username) values (?,?,?,?,?,?,?,?,?,?,?)]; SQL [insert into users (created_at,created_by_user_id,email,full_name,is_first_login,password,phone,status,store_id,updated_at,username) values (?,?,?,?,?,?,?,?,?,?,?)]; constraint [null]",
+"STAFF","me","GET","/user/me","200","200","Get current user successfully",
+"STAFF","users-list","GET","/user?page=0&size=5","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","roles-list","GET","/roles","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","permissions-list","GET","/permissions","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","stores-list","GET","/stores","200","200","Get all stores success",
+"STAFF","store-staff-list","GET","/stores/155/staff-list","200","200","Get store staff list success",
+"STAFF","store-staff","GET","/stores/155/staff","200","200","Get store staff success",
+"STAFF","warehouse-list","GET","/warehouse","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","warehouse-central","GET","/warehouse/central","200","200","Central warehouse retrieved successfully",
+"STAFF","products-list","GET","/product?page=0&size=5","200","200","Products retrieved successfully",
+"STAFF","product-categories","GET","/product/categories","200","200","Categories fetched",
+"STAFF","suppliers","GET","/supplier","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","inventory-overview","GET","/inventory/overview","200","200","Inventory overview retrieved successfully",
+"STAFF","inventory-documents","GET","/inventory/documents?type=IMPORT&page=0&size=5","200","200","Documents retrieved successfully",
+"STAFF","stock-request-pending","GET","/stock-request/pending","200","200","Pending requests retrieved successfully",
+"STAFF","shifts-list","GET","/shifts?page=0&size=5","200","200","Get all shifts success",
+"STAFF","attendance-my-history","GET","/attendance/my-history?page=0&size=5","200","200","Lấy lịch sử thành công",
+"STAFF","attendance-store","GET","/attendance/store/=0&size=5","500","500",,"The remote server returned an error: (500) Internal Server Error."
+"STAFF","staff-quotas","GET","/staff-quotas?storeId=155","200","200","Get staff quota success",
+"STAFF","dashboard-summary","GET","/dashboard/summary?period=MONTH","200","200","Lấy dữ liệu dashboard thành công",
+"STAFF","create-shift-empty","POST","/shifts","200","500","Error creating shift: The given id must not be null",
+"STAFF","create-stock-request-empty","POST","/stock-request","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","upsert-staff-quota-empty","PUT","/staff-quotas","200","202","Danh sách quota trống",
+"STAFF","add-product-variant-empty","POST","/product/1/variants","200","500","Error creating variants: Pháº£i truyá»n size/color hoáº·c danh sÃ¡ch sizes/colors Äá» táº¡o variant",
+"STAFF","role-create-empty","POST","/roles","400","400",,"The remote server returned an error: (400) Bad Request."
+"STAFF","warehouse-create-empty","POST","/warehouse","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","store-create-empty","POST","/stores","403","400",,"The remote server returned an error: (403) Forbidden."
+"STAFF","user-create-empty","POST","/user","403","400",,"The remote server returned an error: (403) Forbidden."

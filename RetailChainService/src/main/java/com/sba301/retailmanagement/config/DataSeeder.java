@@ -85,7 +85,8 @@ public class DataSeeder implements CommandLineRunner {
                 SecurityConstants.PRODUCT_VIEW, SecurityConstants.PRODUCT_CREATE, SecurityConstants.PRODUCT_UPDATE,
                 SecurityConstants.PRODUCT_DELETE,
                 SecurityConstants.INVENTORY_VIEW, SecurityConstants.INVENTORY_CREATE,
-                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER,SecurityConstants.SUPPLIER_VIEW,
+                SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER,
+                SecurityConstants.SUPPLIER_VIEW,
                 SecurityConstants.SUPPLIER_CREATE,
                 SecurityConstants.SUPPLIER_UPDATE,
                 SecurityConstants.SUPPLIER_DELETE));
@@ -100,7 +101,7 @@ public class DataSeeder implements CommandLineRunner {
                 SecurityConstants.PRODUCT_VIEW,
                 SecurityConstants.INVENTORY_VIEW, SecurityConstants.INVENTORY_CREATE,
                 SecurityConstants.INVENTORY_UPDATE, SecurityConstants.INVENTORY_TRANSFER,
-                SecurityConstants.STORE_VIEW,SecurityConstants.SUPPLIER_VIEW,
+                SecurityConstants.STORE_VIEW, SecurityConstants.SUPPLIER_VIEW,
                 SecurityConstants.SUPPLIER_CREATE,
                 SecurityConstants.SUPPLIER_UPDATE,
                 SecurityConstants.SUPPLIER_DELETE));

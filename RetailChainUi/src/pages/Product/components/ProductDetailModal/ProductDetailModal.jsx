@@ -14,21 +14,36 @@ import { Calendar, Tag, Layers, FileText, QrCode } from "lucide-react";
 const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
     if (!product) return null;
 
+    const getGenderLabel = (gender) => {
+        switch (String(gender || "").toUpperCase()) {
+            case "MEN":
+                return "Nam";
+            case "WOMEN":
+                return "Nữ";
+            case "UNISEX":
+                return "Dùng chung";
+            case "KIDS":
+                return "Trẻ em";
+            default:
+                return gender || "Chưa xác định";
+        }
+    };
+
     const getCategoryName = (id) => {
         switch (id) {
-            case 1: return "Fashion";
-            case 2: return "Shirts";
-            case 3: return "Pants";
-            case 4: return "Bags";
-            default: return "Unknown";
+            case 1: return "Thời trang";
+            case 2: return "Áo";
+            case 3: return "Quần";
+            case 4: return "Túi xách";
+            default: return "Không xác định";
         }
     };
 
     const getStatusBadge = (status) => {
         if (status === 1 || status === "ACTIVE") {
-            return <Badge className="bg-emerald-500 hover:bg-emerald-600">Active</Badge>;
+            return <Badge className="bg-emerald-500 hover:bg-emerald-600">Đang kinh doanh</Badge>;
         }
-        return <Badge variant="secondary">Inactive</Badge>;
+        return <Badge variant="secondary">Ngừng kinh doanh</Badge>;
     };
 
     return (
@@ -47,7 +62,7 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
                                     <div className="text-4xl font-bold mb-2">IMG</div>
-                                    <span className="text-xs uppercase tracking-wider">No Image</span>
+                                    <span className="text-xs uppercase tracking-wider">Không có ảnh</span>
                                 </div>
                             )}
                         </div>
@@ -76,7 +91,7 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                                         <Layers className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-500 uppercase font-semibold">Category</div>
+                                        <div className="text-xs text-slate-500 uppercase font-semibold">Danh mục</div>
                                         <div className="font-medium text-slate-700 dark:text-slate-300">
                                             {getCategoryName(product.categoryId)}
                                         </div>
@@ -88,9 +103,9 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                                         <Tag className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-500 uppercase font-semibold">Gender</div>
+                                        <div className="text-xs text-slate-500 uppercase font-semibold">Giới tính</div>
                                         <div className="font-medium text-slate-700 dark:text-slate-300">
-                                            {product.gender || "Unisex"}
+                                            {getGenderLabel(product.gender)}
                                         </div>
                                     </div>
                                 </div>
@@ -100,9 +115,9 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                                         <FileText className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Description</div>
+                                        <div className="text-xs text-slate-500 uppercase font-semibold mb-1">Mô tả</div>
                                         <div className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                                            {product.description || "No description available."}
+                                            {product.description || "Chưa có mô tả."}
                                         </div>
                                     </div>
                                 </div>
@@ -112,9 +127,9 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                                         <QrCode className="w-4 h-4" />
                                     </div>
                                     <div>
-                                        <div className="text-xs text-slate-500 uppercase font-semibold">Slug (SEO)</div>
+                                        <div className="text-xs text-slate-500 uppercase font-semibold">Đường dẫn (SEO)</div>
                                         <div className="font-mono text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded mt-1">
-                                            {product.slug || "N/A"}
+                                            {product.slug || "Chưa có"}
                                         </div>
                                     </div>
                                 </div>
@@ -122,8 +137,8 @@ const ProductDetailModal = ({ open, onOpenChange, product, onEdit }) => {
                         </div>
 
                         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 transition-all">
-                            <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-                            <Button onClick={() => { onOpenChange(false); onEdit(product); }}>Edit Product</Button>
+                            <Button variant="outline" onClick={() => onOpenChange(false)}>Đóng</Button>
+                            <Button onClick={() => { onOpenChange(false); onEdit(product); }}>Chỉnh sửa sản phẩm</Button>
                         </div>
                     </div>
                 </div>

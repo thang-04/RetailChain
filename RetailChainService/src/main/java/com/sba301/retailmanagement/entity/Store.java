@@ -35,16 +35,25 @@ public class Store {
     @Column(name = "status", nullable = false)
     private Integer status = 1;
 
-    @Column(name = "warehouse_id", nullable = false, insertable = false, updatable = false)
-    private Long warehouseId;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "radius_meters")
+    private Integer radiusMeters;
+
+    @Column(name = "warehouse_id", insertable = false, updatable = false)
+    private Long warehouseId;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
 

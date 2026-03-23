@@ -12,6 +12,19 @@ import { Link, useParams } from "react-router-dom";
 
 const STAFF_PREVIEW_LIMIT = 5;
 
+const getStatusLabel = (status) => {
+    switch (status) {
+        case "Active":
+            return "Đang làm việc";
+        case "On Leave":
+            return "Tạm nghỉ";
+        case "Inactive":
+            return "Ngừng hoạt động";
+        default:
+            return status;
+    }
+};
+
 const StoreStaffWidget = ({ staff }) => {
     const { id } = useParams();
 
@@ -28,7 +41,7 @@ const StoreStaffWidget = ({ staff }) => {
                     </Badge>
                 </div>
                 <Link to={`/store/${id}/staff`} className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer">
-                    View All
+                    Xem tất cả
                 </Link>
             </CardHeader>
             <CardContent className="p-0">
@@ -60,7 +73,7 @@ const StoreStaffWidget = ({ staff }) => {
                                     <TableCell className="px-4 py-3 text-right">
                                         <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border ${person.statusColor} ml-auto`}>
                                             <span className={`size-1.5 rounded-full ${person.dotColor}`}></span>
-                                            {person.status}
+                                            {getStatusLabel(person.status)}
                                         </div>
                                     </TableCell>
                                 </TableRow>

@@ -11,63 +11,75 @@ const Sidebar = ({ isOpen, onClose }) => {
     // ... existing items ...
     {
       path: "/",
-      label: "Dashboard",
+      label: "Bảng điều khiển",
       icon: "dashboard",
       filledIcon: true,
       show: true,
     },
     {
       path: isSuperAdmin() ? "/store" : (user?.storeCode ? `/store/${user.storeCode}` : (user?.storeId ? `/store/${user.storeId}` : "#")),
-      label: isSuperAdmin() ? "Stores" : "My Store",
+      label: isSuperAdmin() ? "Cửa hàng" : "Cửa hàng của tôi",
       icon: "storefront",
       show: hasPermission('STORE_VIEW') || isStoreManager(),
     },
     {
       path: "/products",
-      label: "Products",
+      label: "Sản phẩm",
       icon: "inventory_2",
       show: hasPermission('PRODUCT_VIEW') || isStoreManager() || isStaff(),
     },
     {
       path: "/inventory",
-      label: "Inventory",
+      label: "Tồn kho",
       icon: "inventory",
       show: hasPermission('INVENTORY_VIEW') || isStoreManager() || isStaff(),
     },
     {
       path: "/stock-in",
-      label: "Stock In",
+      label: "Nhập kho",
       icon: "input_circle",
-      show: hasPermission('INVENTORY_CREATE'),
+      show: isSuperAdmin(),
     },
     {
       path: "/stock-out",
-      label: "Stock Out",
+      label: "Xuất kho",
       icon: "output_circle",
-      show: hasPermission('INVENTORY_CREATE'),
+      show: isSuperAdmin(),
     },
     {
       path: "/reports",
-      label: "Reports",
+      label: "Báo cáo",
       icon: "bar_chart",
-      show: hasPermission('REPORT_SYSTEM_VIEW') || hasPermission('REPORT_STORE_VIEW') || isStoreManager(),
+      show: false, // Ẩn hoàn toàn khỏi System Admin
     },
     {
       path: "/staff/shifts",
-      label: "Staff Shifts",
+      label: "Ca làm việc",
       icon: "calendar_month",
       filledIcon: true,
       show: isSuperAdmin() || isStoreManager(),
     },
     {
+      path: "/attendance",
+      label: "Chấm công",
+      icon: "access_time",
+      show: isStaff() || isStoreManager(),
+    },
+    {
+      path: "/staff/attendance",
+      label: "Quản lý chấm công",
+      icon: "fact_check",
+      show: isSuperAdmin() || isStoreManager(),
+    },
+    {
       path: "/roles",
-      label: "Roles & Permissions",
+      label: "Vai trò và quyền hạn",
       icon: "admin_panel_settings",
-      show: hasPermission('ROLE_VIEW'),
+      show: isSuperAdmin(),
     },
     {
       path: "/users",
-      label: "User Management",
+      label: "Quản lý người dùng",
       icon: "manage_accounts",
       show: hasPermission('STAFF_VIEW'),
     }
@@ -109,7 +121,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             item.path === "/"
               ? location.pathname === "/"
               : location.pathname === item.path ||
-                location.pathname.startsWith(item.path + "/");
+              location.pathname.startsWith(item.path + "/");
 
           return (
             <Button

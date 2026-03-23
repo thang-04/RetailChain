@@ -30,15 +30,43 @@ export const AuthProvider = ({ children }) => {
         initAuth();
     }, []);
 
-    const login = async (email, password) => {
-        const response = await authService.login(email, password);
-        const token = response.data?.accessToken || response.data?.token;
-        if (response.code === 200 && token && token !== 'undefined') {
-            localStorage.setItem('token', token);
-            setUser(response.data.user);
-            return response.data;
+    const firstTimeChangePassword = async (data, tempToken) => {
+        try {
+            const response = await authService.firstTimeChangePassword(data, tempToken);
+            if (response.code === 200) {
+                const { accessToken, refreshToken, user } = response.data;
+                localStorage.setItem('token', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+                setUser(user);
+                return response.data;
+            }
+            throw new Error(response.message || 'Thay đổi mật khẩu thất bại');
+        } catch (error) {
+            throw error;
         }
-        throw new Error(response.message || 'Login failed');
+    };
+
+    const login = async (email, password) => {
+        try {
+            const response = await authService.login(email, password);
+            if (response.code === 200) {
+                const data = response.data;
+                if (data.requireChangePassword) {
+                    return data;
+                }
+                
+                const token = data.accessToken || data.token;
+                if (token && token !== 'undefined') {
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    setUser(data.user);
+                    return data;
+                }
+            }
+            throw new Error(response.message || 'Login failed');
+        } catch (error) {
+            throw error;
+        }
     };
 
     const logout = async () => {
@@ -48,6 +76,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Logout failed', error);
         } finally {
             localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
             setUser(null);
         }
     };
@@ -74,6 +103,7 @@ export const AuthProvider = ({ children }) => {
             loading,
             login,
             logout,
+            firstTimeChangePassword,
             isSuperAdmin,
             isStoreManager,
             isStaff,

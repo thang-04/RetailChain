@@ -7,7 +7,7 @@ const KPIGrid = ({ data }) => {
     const navigate = useNavigate();
     const kpis = Array.isArray(data) ? data : [];
 
-    const desiredKeys = ["totalProducts", "activeStores", "inventoryValue", "inventoryDocuments"];
+    const desiredKeys = ["totalProducts", "activeStores", "inventoryValue", "inventoryDocuments", "totalVariants", "inventoryFlowValue", "totalStockQuantity"];
     const keyToItem = new Map(kpis.map((k) => [k.key, k]));
     const displayKpis = desiredKeys
       .map((key) => keyToItem.get(key))

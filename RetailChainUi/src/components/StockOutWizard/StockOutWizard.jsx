@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Save, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -121,18 +121,26 @@ const StockOutWizard = () => {
     };
 
     const handleSubmit = async () => {
+        if (!formData.sourceWarehouseId || isNaN(parseInt(formData.sourceWarehouseId))) {
+            toast.error("Vui lòng chọn kho xuất hàng");
+            return;
+        }
+        if (!validateStep(1)) {
+            return;
+        }
+
         try {
             setSubmitting(true);
-            
+
             const validItems = items.filter(item => item.variantId && item.quantity > 0);
-            
+
             const transferData = {
-                sourceWarehouseId: parseInt(formData.sourceWarehouseId),
-                targetWarehouseId: parseInt(formData.targetWarehouseId),
+                sourceWarehouseId: Number(formData.sourceWarehouseId),
+                targetWarehouseId: Number(formData.targetWarehouseId),
                 note: formData.note,
                 items: validItems.map(item => ({
-                    variantId: parseInt(item.variantId),
-                    quantity: parseInt(item.quantity)
+                    variantId: Number(item.variantId),
+                    quantity: Number(item.quantity)
                 }))
             };
 
@@ -162,8 +170,7 @@ const StockOutWizard = () => {
                 );
             case 2:
                 return (
-                    <StepTwoProducts 
-                        formData={formData}
+                    <StepTwoProducts
                         items={items}
                         setItems={setItems}
                         productVariants={productVariants}

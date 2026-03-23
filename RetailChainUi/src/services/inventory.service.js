@@ -37,6 +37,19 @@ const inventoryService = {
     return axiosPrivate.get(`/inventory/product/${productId}`);
   },
 
+  /**
+   * Lấy tồn kho theo cửa hàng (store).
+   * GET /api/inventory?storeId={storeId}
+   */
+  getInventoryByStore: async (storeId) => {
+    const raw = await axiosPrivate.get(`/inventory?storeId=${encodeURIComponent(storeId)}`);
+    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (res && res.code === 200 && res.data) {
+      return res.data;
+    }
+    return [];
+  },
+
   importStock: async (data) => {
     // data: { warehouseId, note, items: [{ variantId, quantity, note }] }
     return axiosPrivate.post('/inventory/import', data);
@@ -151,6 +164,27 @@ const inventoryService = {
       return res.data;
     }
     return null;
+  },
+
+  /**
+   * Lấy chi tiết một bản ghi tồn kho hiện tại theo inventoryId (warehouseId-variantId).
+   * GET /api/inventory/{inventoryId}
+   */
+  getInventoryDetail: async (inventoryId) => {
+    const raw = await axiosPrivate.get(`/inventory/${encodeURIComponent(inventoryId)}`);
+    const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (res && res.code === 200 && res.data) {
+      return res.data;
+    }
+    return null;
+  },
+
+  /**
+   * Điều chỉnh tồn kho thủ công.
+   * PUT /api/inventory/{inventoryId}
+   */
+  updateInventoryQuantity: async (inventoryId, payload) => {
+    return axiosPrivate.put(`/inventory/${encodeURIComponent(inventoryId)}`, payload);
   },
 
   // --- Wrapper for Legacy Components ---

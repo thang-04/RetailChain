@@ -11,7 +11,8 @@ const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
   const series = Array.isArray(data) ? data : [];
   const amounts = series.map((d) => (typeof d?.amount === "number" ? d.amount : 0));
   const max = Math.max(0, ...amounts);
-  const min = Math.min(0, ...amounts);
+  const dataMin = amounts.length > 0 ? Math.min(...amounts) : 0;
+  const min = Math.min(0, dataMin);
 
   const formatMoneyShort = (n) => {
     if (typeof n !== "number") return "0";
@@ -29,8 +30,8 @@ const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
     const h = 50;
     const padTop = 5;
     const padBottom = 45;
-    const yMin = min;
-    const yMax = max === min ? min + 1 : max;
+    const yMin = Math.min(min, 0);
+    const yMax = max === min ? Math.max(1, max + 1) : max;
 
     const points = series.map((d, i) => {
       const x = (w * i) / (n - 1);
@@ -80,7 +81,7 @@ const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
         <CardTitle className="text-base font-medium text-text-main dark:text-white tracking-wide">Hiệu suất thời gian thực</CardTitle>
         <Select value={timeRange} onValueChange={onTimeRangeChange}>
           <SelectTrigger className="w-[120px] h-8 text-xs bg-gray-50 dark:bg-gray-800 border-none shadow-none">
-            <SelectValue placeholder="Period" />
+            <SelectValue placeholder="Kỳ xem" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="30days">30 ngày</SelectItem>

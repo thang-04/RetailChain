@@ -5,7 +5,7 @@ import useAuth from '../../contexts/AuthContext/useAuth';
 const ProtectedRoute = ({ allowedRoles, children }) => {
     const { user, loading, hasRole } = useAuth();
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div>Đang tải...</div>;
 
     if (!user) {
         return <Navigate to="/login" replace />;
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     }
 
     // Nếu có children thì render children, nếu không thì dùng Outlet cho Nested Routes
-    return children ? children : <Outlet />; 
+    return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

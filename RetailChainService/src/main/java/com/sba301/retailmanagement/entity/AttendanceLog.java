@@ -57,6 +57,21 @@ public class AttendanceLog {
     @Column(name = "note", length = 255)
     private String note;
 
+    @Column(name = "status", length = 20)
+    private String status; // ONTIME, LATE, EARLY_LEAVE, FORGOT
+
+    @Column(name = "work_hours")
+    private Double workHours;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "distance_meters")
+    private Double distanceMeters;
+
     @Column(name = "created_by")
     private Long createdBy;
 

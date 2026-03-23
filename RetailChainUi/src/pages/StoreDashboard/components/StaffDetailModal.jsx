@@ -1,11 +1,27 @@
 // src/pages/StoreDashboard/components/StaffDetailModal.jsx
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { X, User, Mail, Shield, Activity } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const STATUS_OPTIONS = ["Active", "On Leave", "Inactive"];
+const STATUS_OPTIONS = [
+    { value: "Active", label: "Đang làm việc" },
+    { value: "On Leave", label: "Đang nghỉ phép" },
+    { value: "Inactive", label: "Ngừng hoạt động" },
+];
+
+const getStatusLabel = (status) => {
+    switch (status) {
+        case "Active":
+            return "Đang làm việc";
+        case "On Leave":
+            return "Đang nghỉ phép";
+        case "Inactive":
+            return "Ngừng hoạt động";
+        default:
+            return status;
+    }
+};
 
 const InfoRow = ({ icon, label, value }) => (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 dark:border-slate-800 last:border-0">
@@ -106,13 +122,15 @@ const StaffDetailModal = ({ staff, mode, onClose, onSave }) => {
                                     onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))}
                                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                 >
-                                    {STATUS_OPTIONS.map(s => (
-                                        <option key={s} value={s}>{s}</option>
+                                    {STATUS_OPTIONS.map((statusOption) => (
+                                        <option key={statusOption.value} value={statusOption.value}>
+                                            {statusOption.label}
+                                        </option>
                                     ))}
                                 </select>
                             ) : (
                                 <Badge variant="secondary" className={`w-fit border-none ${statusColor[staff.status] || "bg-slate-100 text-slate-600"}`}>
-                                    {staff.status}
+                                    {getStatusLabel(staff.status)}
                                 </Badge>
                             )}
                         </div>

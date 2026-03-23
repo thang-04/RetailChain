@@ -1,17 +1,20 @@
 package com.sba301.retailmanagement.service.impl;
 
+import com.sba301.retailmanagement.dto.request.InventoryAdjustRequest;
 import com.sba301.retailmanagement.dto.request.InventoryItemRequest;
 import com.sba301.retailmanagement.dto.request.StockRequest;
 import com.sba301.retailmanagement.dto.request.TransferRequest;
 import com.sba301.retailmanagement.dto.request.WarehouseRequest;
 import com.sba301.retailmanagement.dto.response.InventoryDocumentResponse;
 import com.sba301.retailmanagement.dto.response.InventoryDocumentItemResponse;
+import com.sba301.retailmanagement.dto.response.InventoryDetailResponse;
 import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
 import com.sba301.retailmanagement.entity.*;
 import com.sba301.retailmanagement.enums.InventoryAction;
 import com.sba301.retailmanagement.enums.InventoryDocumentType;
+import com.sba301.retailmanagement.enums.RoleConstant;
 import com.sba301.retailmanagement.repository.*;
 import com.sba301.retailmanagement.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +24,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -94,20 +97,28 @@ public class InventoryServiceImpl implements InventoryService {
         return stocks.stream().map(stock -> {
             String sku = "UNKNOWN";
             String productName = "UNKNOWN";
+            String variantName = null;
 
             if (stock.getVariant() != null) {
                 sku = stock.getVariant().getSku();
                 if (stock.getVariant().getProduct() != null) {
                     productName = stock.getVariant().getProduct().getName();
                 }
+                String size = stock.getVariant().getSize();
+                String color = stock.getVariant().getColor();
+                variantName = buildVariantName(size, color);
             }
 
             return InventoryStockResponse.builder()
+                    .inventoryId(buildInventoryId(
+                            stock.getId().getWarehouseId(),
+                            stock.getId().getVariantId()))
                     .warehouseId(stock.getId().getWarehouseId())
                     .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
                     .variantId(stock.getId().getVariantId())
                     .sku(sku)
                     .productName(productName)
+                    .variantName(variantName)
                     .quantity(stock.getQuantity())
                     .lastUpdated(stock.getUpdatedAt())
                     .build();
@@ -120,24 +131,178 @@ public class InventoryServiceImpl implements InventoryService {
         return stocks.stream().map(stock -> {
             String sku = "UNKNOWN";
             String productName = "UNKNOWN";
+            String variantName = null;
 
             if (stock.getVariant() != null) {
                 sku = stock.getVariant().getSku();
                 if (stock.getVariant().getProduct() != null) {
                     productName = stock.getVariant().getProduct().getName();
                 }
+                String size = stock.getVariant().getSize();
+                String color = stock.getVariant().getColor();
+                variantName = buildVariantName(size, color);
             }
 
             return InventoryStockResponse.builder()
+                    .inventoryId(buildInventoryId(
+                            stock.getId().getWarehouseId(),
+                            stock.getId().getVariantId()))
                     .warehouseId(stock.getId().getWarehouseId())
                     .warehouseName(stock.getWarehouse() != null ? stock.getWarehouse().getName() : "UNKNOWN")
                     .variantId(stock.getId().getVariantId())
                     .sku(sku)
                     .productName(productName)
+                    .variantName(variantName)
                     .quantity(stock.getQuantity())
                     .lastUpdated(stock.getUpdatedAt())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryStockResponse> getStockByStore(Long storeId) {
+        User currentUser = getCurrentUser();
+        validateStoreAccess(currentUser, storeId);
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found: " + storeId));
+
+        Long warehouseId = store.getWarehouseId();
+        if (warehouseId == null) {
+            throw new RuntimeException("Store is not linked to any warehouse: " + storeId);
+        }
+
+        return getStockByWarehouse(warehouseId).stream()
+                .peek(resp -> {
+                    resp.setInventoryId(buildInventoryId(resp.getWarehouseId(), resp.getVariantId()));
+                    resp.setWarehouseName(store.getWarehouse() != null
+                            ? store.getWarehouse().getName()
+                            : resp.getWarehouseName());
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public InventoryDetailResponse getInventoryDetail(String inventoryId) {
+        ParsedInventoryId parsed = parseInventoryId(inventoryId);
+
+        InventoryStockId stockId = new InventoryStockId(parsed.warehouseId(), parsed.variantId());
+        InventoryStock stock = inventoryStockRepository.findById(stockId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found for id: " + inventoryId));
+
+        Warehouse warehouse = stock.getWarehouse();
+        if (warehouse == null) {
+            warehouse = warehouseRepository.findById(parsed.warehouseId())
+                    .orElseThrow(() -> new RuntimeException("Warehouse not found: " + parsed.warehouseId()));
+        }
+
+        Store store = storeRepository.findByWarehouseId(warehouse.getId())
+                .orElse(null);
+
+        User currentUser = getCurrentUser();
+        if (store != null) {
+            validateStoreAccess(currentUser, store.getId());
+        }
+
+        ProductVariant variant = stock.getVariant();
+        String sku = variant != null ? variant.getSku() : "UNKNOWN";
+        String productName = (variant != null && variant.getProduct() != null)
+                ? variant.getProduct().getName()
+                : "UNKNOWN";
+        String variantName = variant != null
+                ? buildVariantName(variant.getSize(), variant.getColor())
+                : null;
+
+        return InventoryDetailResponse.builder()
+                .inventoryId(inventoryId)
+                .storeId(store != null ? store.getId() : null)
+                .storeName(store != null ? store.getName() : null)
+                .warehouseId(warehouse.getId())
+                .warehouseName(warehouse.getName())
+                .variantId(parsed.variantId())
+                .sku(sku)
+                .productName(productName)
+                .variantName(variantName)
+                .quantity(stock.getQuantity())
+                .lastUpdated(stock.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void adjustInventory(String inventoryId, InventoryAdjustRequest request) {
+        ParsedInventoryId parsed = parseInventoryId(inventoryId);
+
+        InventoryStockId stockId = new InventoryStockId(parsed.warehouseId(), parsed.variantId());
+        InventoryStock stock = inventoryStockRepository.findById(stockId)
+                .orElseThrow(() -> new RuntimeException("Inventory not found for id: " + inventoryId));
+
+        Warehouse warehouse = stock.getWarehouse();
+        if (warehouse == null) {
+            warehouse = warehouseRepository.findById(parsed.warehouseId())
+                    .orElseThrow(() -> new RuntimeException("Warehouse not found: " + parsed.warehouseId()));
+        }
+
+        Store store = storeRepository.findByWarehouseId(warehouse.getId()).orElse(null);
+        User currentUser = getCurrentUser();
+        if (store != null) {
+            validateStoreAccess(currentUser, store.getId());
+        }
+
+        Integer newQuantity = request.getQuantity();
+        if (newQuantity == null || newQuantity < 0) {
+            throw new RuntimeException("Quantity must be non-negative");
+        }
+
+        int oldQuantity = stock.getQuantity() != null ? stock.getQuantity() : 0;
+        int delta = newQuantity - oldQuantity;
+
+        // Nếu không thay đổi thì bỏ qua
+        if (delta == 0) {
+            return;
+        }
+
+        // Tạo document điều chỉnh
+        InventoryDocument document = new InventoryDocument();
+        document.setDocumentCode("ADJ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        document.setDocumentType(InventoryDocumentType.ADJUST);
+        document.setTargetWarehouseId(warehouse.getId());
+        document.setTargetWarehouse(warehouse);
+        document.setNote(request.getReason());
+        Long actorUserId = currentUser != null ? currentUser.getId() : null;
+        document.setCreatedBy(actorUserId != null ? actorUserId : 0L);
+        document.setCreatedAt(LocalDateTime.now());
+        document.setTotalAmount(BigDecimal.ZERO);
+
+        InventoryDocument savedDoc = inventoryDocumentRepository.save(document);
+
+        ProductVariant variant = stock.getVariant();
+        if (variant == null) {
+            variant = productVariantRepository.findById(parsed.variantId())
+                    .orElseThrow(() -> new RuntimeException("Product Variant not found: " + parsed.variantId()));
+        }
+
+        InventoryDocumentItem docItem = new InventoryDocumentItem();
+        docItem.setDocumentId(savedDoc.getId());
+        docItem.setDocument(savedDoc);
+        docItem.setVariantId(variant.getId());
+        docItem.setVariant(variant);
+        docItem.setQuantity(Math.abs(delta));
+        docItem.setNote(request.getReason());
+        InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
+
+        // Cập nhật tồn kho
+        stock.setQuantity(newQuantity);
+        stock.setUpdatedAt(LocalDateTime.now());
+        inventoryStockRepository.save(stock);
+
+        // Ghi lịch sử điều chỉnh
+        createHistory(savedDoc, savedItem, warehouse, variant, InventoryAction.ADJUST, Math.abs(delta), newQuantity);
+
+        // Cập nhật trạng thái sản phẩm
+        if (variant.getProductId() != null) {
+            updateProductStatus(variant.getProductId());
+        }
     }
 
     @Override
@@ -193,7 +358,7 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryStock stock = inventoryStockRepository.findById(stockId)
                     .orElse(new InventoryStock(stockId, warehouse, variant, 0, LocalDateTime.now()));
 
-            int oldQuantity = stock.getQuantity();
+            int oldQuantity = stock.getQuantity() != null ? stock.getQuantity() : 0;
             int newQuantity = oldQuantity + itemReq.getQuantity();
             stock.setQuantity(newQuantity);
             stock.setUpdatedAt(LocalDateTime.now());
@@ -239,12 +404,13 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
 
-            // Check Stock first
+            // Check Stock first (with pessimistic lock)
             InventoryStockId stockId = new InventoryStockId(warehouse.getId(), variant.getId());
-            InventoryStock stock = inventoryStockRepository.findById(stockId)
+            InventoryStock stock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(warehouse.getId(), variant.getId())
                     .orElseThrow(() -> new RuntimeException("Stock record not found for variant: " + variant.getId()));
 
-            if (stock.getQuantity() < itemReq.getQuantity()) {
+            int currentQty = stock.getQuantity() != null ? stock.getQuantity() : 0;
+            if (currentQty < itemReq.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for variant: " + variant.getId());
             }
 
@@ -259,8 +425,7 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
 
             // Update Stock
-            int oldQuantity = stock.getQuantity();
-            int newQuantity = oldQuantity - itemReq.getQuantity();
+            int newQuantity = currentQty - itemReq.getQuantity();
             stock.setQuantity(newQuantity);
             stock.setUpdatedAt(LocalDateTime.now());
             inventoryStockRepository.save(stock);
@@ -305,7 +470,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         User currentUser = getCurrentUser();
         Long createdByUserId = currentUser != null ? currentUser.getId() : null;
-        
+
         // Create Document
         InventoryDocument document = new InventoryDocument();
         document.setDocumentCode("TRF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -345,11 +510,12 @@ public class InventoryServiceImpl implements InventoryService {
 
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
-            InventoryStock sourceStock = inventoryStockRepository.findById(sourceStockId)
+            InventoryStock sourceStock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(sourceWarehouse.getId(), variant.getId())
                     .orElseThrow(() -> new RuntimeException(
                             "Stock record not found in Source Warehouse for variant: " + variant.getId()));
 
-            if (sourceStock.getQuantity() < itemReq.getQuantity()) {
+            int sourceOldQty = sourceStock.getQuantity() != null ? sourceStock.getQuantity() : 0;
+            if (sourceOldQty < itemReq.getQuantity()) {
                 throw new RuntimeException("Insufficient stock in Source Warehouse for variant: " + variant.getId());
             }
 
@@ -364,7 +530,6 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
 
             // Update Source Stock
-            int sourceOldQty = sourceStock.getQuantity();
             int sourceNewQty = sourceOldQty - itemReq.getQuantity();
             sourceStock.setQuantity(sourceNewQty);
             sourceStock.setUpdatedAt(LocalDateTime.now());
@@ -376,10 +541,10 @@ public class InventoryServiceImpl implements InventoryService {
 
             // 2. Process Target Warehouse (IN)
             InventoryStockId targetStockId = new InventoryStockId(targetWarehouse.getId(), variant.getId());
-            InventoryStock targetStock = inventoryStockRepository.findById(targetStockId)
+            InventoryStock targetStock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(targetWarehouse.getId(), variant.getId())
                     .orElse(new InventoryStock(targetStockId, targetWarehouse, variant, 0, LocalDateTime.now()));
 
-            int targetOldQty = targetStock.getQuantity();
+            int targetOldQty = targetStock.getQuantity() != null ? targetStock.getQuantity() : 0;
             int targetNewQty = targetOldQty + itemReq.getQuantity();
             targetStock.setQuantity(targetNewQty);
             targetStock.setUpdatedAt(LocalDateTime.now());
@@ -403,13 +568,12 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant, InventoryAction action, int quantity, int balance) {
         User currentUser = getCurrentUser();
         Long actorUserId = currentUser != null ? currentUser.getId() : null;
-        
+
         InventoryHistory history = new InventoryHistory();
         history.setDocumentId(doc.getId());
         history.setDocument(doc);
         history.setDocumentItemId(item.getId());
         history.setDocumentItem(item);
-        history.setWarehouseId(warehouse.getId());
         history.setWarehouse(warehouse);
         history.setVariantId(variant.getId());
         history.setVariant(variant);
@@ -570,7 +734,8 @@ public class InventoryServiceImpl implements InventoryService {
                         String sku = item.getVariant() != null ? item.getVariant().getSku() : "N/A";
                         String size = item.getVariant() != null ? item.getVariant().getSize() : "";
                         String color = item.getVariant() != null ? item.getVariant().getColor() : "";
-                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice() : java.math.BigDecimal.ZERO;
+                        java.math.BigDecimal unitPrice = item.getVariant() != null ? item.getVariant().getPrice()
+                                : java.math.BigDecimal.ZERO;
                         long unitPriceLong = unitPrice != null ? unitPrice.longValue() : 0L;
                         long totalPriceLong = unitPriceLong * item.getQuantity();
 
@@ -596,7 +761,8 @@ public class InventoryServiceImpl implements InventoryService {
                     .targetWarehouseId(doc.getTargetWarehouseId())
                     .targetWarehouseName(doc.getTargetWarehouse() != null ? doc.getTargetWarehouse().getName() : null)
                     .note(doc.getNote())
-                    .status(doc.getStatus() != null ? doc.getStatus() : (doc.getDocumentType() == InventoryDocumentType.IMPORT ? "COMPLETED" : "PENDING"))
+                    .status(doc.getStatus() != null ? doc.getStatus()
+                            : (doc.getDocumentType() == InventoryDocumentType.IMPORT ? "COMPLETED" : "PENDING"))
                     .createdBy(String.valueOf(doc.getCreatedBy()))
                     .createdAt(doc.getCreatedAt())
                     .totalItems(totalItems)
@@ -626,7 +792,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public InventoryOverviewResponse getInventoryOverview() {
+    public InventoryOverviewResponse getInventoryOverview(LocalDateTime from, LocalDateTime to) {
         List<InventoryStock> stocks = inventoryStockRepository.findAll();
 
         long totalQuantity = 0L;
@@ -648,9 +814,29 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
 
-        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI
-        // demo
-        double growthPercentage = 2.4d;
+        // Tinh growthPercentage bang cach so sanh gia tri kỳ hien tai voi kỳ trước
+        double growthPercentage = 0.0;
+        if (from != null && to != null) {
+            // Tinh gia tri kỳ hiện tại
+            BigDecimal currentValue = inventoryDocumentRepository.sumTotalAmountBetween(from, to);
+
+            // Tinh kỳ trước (cùng độ dài, ngay trước 'from')
+            long periodDays = java.time.Duration.between(from, to).toDays();
+            LocalDateTime prevFrom = from.minusDays(periodDays);
+            LocalDateTime prevTo = from;
+            BigDecimal prevValue = inventoryDocumentRepository.sumTotalAmountBetween(prevFrom, prevTo);
+
+            // Tinh phần trăm thay đổi
+            if (prevValue != null && prevValue.compareTo(BigDecimal.ZERO) > 0) {
+                growthPercentage = currentValue.subtract(prevValue)
+                        .divide(prevValue, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100))
+                        .doubleValue();
+            } else if (currentValue != null && currentValue.compareTo(BigDecimal.ZERO) > 0) {
+                // Neu khong co du lieu kỳ trước, danh gia 100% growth
+                growthPercentage = 100.0;
+            }
+        }
 
         return InventoryOverviewResponse.builder()
                 .totalStockQuantity(totalQuantity)
@@ -658,6 +844,11 @@ public class InventoryServiceImpl implements InventoryService {
                 .criticalStoreCount((long) criticalWarehouses.size())
                 .growthPercentage(growthPercentage)
                 .build();
+    }
+
+    @Override
+    public InventoryOverviewResponse getInventoryOverview() {
+        return getInventoryOverview(null, null);
     }
 
     private User getCurrentUser() {
@@ -671,6 +862,61 @@ public class InventoryServiceImpl implements InventoryService {
             log.debug("No authenticated user found");
         }
         return null;
+    }
+
+    private String buildInventoryId(Long warehouseId, Long variantId) {
+        if (warehouseId == null || variantId == null) {
+            return null;
+        }
+        return warehouseId + "-" + variantId;
+    }
+
+    private String buildVariantName(String size, String color) {
+        if ((size == null || size.isEmpty()) && (color == null || color.isEmpty())) {
+            return null;
+        }
+        if (size != null && !size.isEmpty() && color != null && !color.isEmpty()) {
+            return size + " / " + color;
+        }
+        return size != null && !size.isEmpty() ? size : color;
+    }
+
+    private ParsedInventoryId parseInventoryId(String inventoryId) {
+        try {
+            String[] parts = inventoryId.split("-");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Invalid inventoryId format");
+            }
+            Long warehouseId = Long.parseLong(parts[0]);
+            Long variantId = Long.parseLong(parts[1]);
+            return new ParsedInventoryId(warehouseId, variantId);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid inventoryId: " + inventoryId);
+        }
+    }
+
+    private void validateStoreAccess(User user, Long storeId) {
+        if (storeId == null) {
+            throw new RuntimeException("storeId is required");
+        }
+        if (user == null) {
+            throw new RuntimeException("Unauthenticated user");
+        }
+
+        boolean isSuperAdmin = user.getRoles().stream()
+                .anyMatch(role -> RoleConstant.SUPER_ADMIN.name().equalsIgnoreCase(role.getCode()));
+
+        if (isSuperAdmin) {
+            return;
+        }
+
+        Long userStoreId = user.getStoreId();
+        if (userStoreId == null || !userStoreId.equals(storeId)) {
+            throw new RuntimeException("User does not have access to store: " + storeId);
+        }
+    }
+
+    private record ParsedInventoryId(Long warehouseId, Long variantId) {
     }
 
     @Override
@@ -856,7 +1102,8 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         List<InventoryDocument> documents = inventoryDocumentRepository
-                .findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(warehouseId, InventoryDocumentType.TRANSFER);
+                .findByTargetWarehouseIdAndDocumentTypeOrderByCreatedAtDesc(warehouseId,
+                        InventoryDocumentType.TRANSFER);
 
         return documents.stream().map(doc -> {
             List<InventoryDocumentItem> items = inventoryDocumentItemRepository.findByDocumentId(doc.getId());
@@ -879,7 +1126,9 @@ public class InventoryServiceImpl implements InventoryService {
                         ProductVariant variant = productVariantRepository.findById(item.getVariantId()).orElse(null);
                         return InventoryDocumentItemResponse.builder()
                                 .variantId(item.getVariantId())
-                                .productName(variant != null && variant.getProduct() != null ? variant.getProduct().getName() : null)
+                                .productName(
+                                        variant != null && variant.getProduct() != null ? variant.getProduct().getName()
+                                                : null)
                                 .sku(variant != null ? variant.getSku() : null)
                                 .quantity(item.getQuantity())
                                 .build();

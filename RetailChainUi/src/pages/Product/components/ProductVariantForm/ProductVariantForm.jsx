@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 
+const PRESET_COLORS = ["Đen", "Trắng", "Đỏ", "Xanh dương", "Xanh lá", "Vàng", "Xám"];
+const PRESET_SIZES = ["S", "M", "L", "XL"];
+
 const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) => {
     const [formData, setFormData] = useState({
         sizes: [],
@@ -23,6 +26,8 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
 
     const [sizeInput, setSizeInput] = useState("");
     const [colorInput, setColorInput] = useState("");
+    const [showCustomColor, setShowCustomColor] = useState(false);
+    const [showCustomSize, setShowCustomSize] = useState(false);
 
     // Reset when opened
     React.useEffect(() => {
@@ -35,6 +40,8 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
             });
             setSizeInput("");
             setColorInput("");
+            setShowCustomColor(false);
+            setShowCustomSize(false);
         }
     }, [open]);
 
@@ -74,6 +81,18 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
             ...prev,
             [field]: (prev[field] || []).filter((x) => x.toLowerCase() !== token.toLowerCase()),
         }));
+    };
+
+    const toggleToken = (field, token) => {
+        setFormData((prev) => {
+            const current = prev[field] || [];
+            const existingToken = current.find((x) => x.toLowerCase() === token.toLowerCase());
+            if (existingToken) {
+                return { ...prev, [field]: current.filter((x) => x !== existingToken) };
+            } else {
+                return { ...prev, [field]: [...current, token] };
+            }
+        });
     };
 
     const onKeyDownAdd = (e, field) => {
@@ -128,7 +147,7 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
             <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-2xl">
                 <DialogHeader className="p-6 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                        Tạo variants
+                        Tạo phiên bản sản phẩm
                     </DialogTitle>
                     <DialogDescription className="text-slate-500 dark:text-slate-400">
                         Nhập danh sách size và màu của <span className="font-semibold">{product?.name || "sản phẩm"}</span>. Hệ thống sẽ tự tạo tất cả tổ hợp size × màu.
@@ -140,59 +159,117 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
                         <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                             Danh sách màu <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                            value={colorInput}
-                            onChange={(e) => setColorInput(e.target.value)}
-                            onKeyDown={(e) => onKeyDownAdd(e, "colors")}
-                            placeholder="Ví dụ: Đen, Trắng... (nhấn Enter để thêm)"
-                            className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
-                        />
-                        <div className="flex flex-wrap gap-2 pt-1">
-                            {(formData.colors || []).map((c) => (
-                                <Badge key={c} variant="secondary" className="gap-1">
-                                    <span>{c}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeToken("colors", c)}
-                                        className="ml-1 rounded-full px-1 hover:bg-slate-200/70 dark:hover:bg-slate-700/70"
-                                        aria-label={`Xoá màu ${c}`}
+                        <div className="flex flex-wrap gap-2 pt-1 mb-2">
+                            {PRESET_COLORS.map((c) => {
+                                const isSelected = (formData.colors || []).some((x) => x.toLowerCase() === c.toLowerCase());
+                                return (
+                                    <Badge
+                                        key={c}
+                                        variant={isSelected ? "default" : "outline"}
+                                        className={`cursor-pointer px-3 py-1 text-sm ${isSelected ? "" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                        onClick={() => toggleToken("colors", c)}
                                     >
-                                        ×
-                                    </button>
-                                </Badge>
-                            ))}
+                                        {c}
+                                    </Badge>
+                                );
+                            })}
+                            <Badge
+                                variant={showCustomColor ? "default" : "outline"}
+                                className={`cursor-pointer px-3 py-1 text-sm ${showCustomColor ? "" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                onClick={() => setShowCustomColor(!showCustomColor)}
+                            >
+                                Khác...
+                            </Badge>
                         </div>
-                        <p className="text-xs text-slate-500">
-                            Tip: Bạn có thể dán nhiều giá trị, ngăn cách bằng dấu phẩy hoặc xuống dòng.
-                        </p>
+
+                        {showCustomColor && (
+                            <div className="mt-2 animate-in fade-in slide-in-from-top-2">
+                                <Input
+                                    value={colorInput}
+                                    onChange={(e) => setColorInput(e.target.value)}
+                                    onKeyDown={(e) => onKeyDownAdd(e, "colors")}
+                                    placeholder="Nhập màu khác (nhấn Enter để thêm)"
+                                    className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
+                                />
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    {(formData.colors || [])
+                                        .filter((c) => !PRESET_COLORS.some((pc) => pc.toLowerCase() === c.toLowerCase()))
+                                        .map((c) => (
+                                            <Badge key={c} variant="secondary" className="gap-1">
+                                                <span>{c}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeToken("colors", c)}
+                                                    className="ml-1 rounded-full px-1 hover:bg-slate-200/70 dark:hover:bg-slate-700/70"
+                                                    aria-label={`Xoá màu ${c}`}
+                                                >
+                                                    ×
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2">
+                                    Mẹo: Bạn có thể dán nhiều giá trị, ngăn cách bằng dấu phẩy hoặc xuống dòng.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
                         <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                             Danh sách size <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                            value={sizeInput}
-                            onChange={(e) => setSizeInput(e.target.value)}
-                            onKeyDown={(e) => onKeyDownAdd(e, "sizes")}
-                            placeholder="Ví dụ: S, M, L... (nhấn Enter để thêm)"
-                            className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
-                        />
-                        <div className="flex flex-wrap gap-2 pt-1">
-                            {(formData.sizes || []).map((s) => (
-                                <Badge key={s} variant="secondary" className="gap-1">
-                                    <span>{s}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeToken("sizes", s)}
-                                        className="ml-1 rounded-full px-1 hover:bg-slate-200/70 dark:hover:bg-slate-700/70"
-                                        aria-label={`Xoá size ${s}`}
+                        <div className="flex flex-wrap gap-2 pt-1 mb-2">
+                            {PRESET_SIZES.map((s) => {
+                                const isSelected = (formData.sizes || []).some((x) => x.toLowerCase() === s.toLowerCase());
+                                return (
+                                    <Badge
+                                        key={s}
+                                        variant={isSelected ? "default" : "outline"}
+                                        className={`cursor-pointer px-3 py-1 text-sm ${isSelected ? "" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                        onClick={() => toggleToken("sizes", s)}
                                     >
-                                        ×
-                                    </button>
-                                </Badge>
-                            ))}
+                                        {s}
+                                    </Badge>
+                                );
+                            })}
+                            <Badge
+                                variant={showCustomSize ? "default" : "outline"}
+                                className={`cursor-pointer px-3 py-1 text-sm ${showCustomSize ? "" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                onClick={() => setShowCustomSize(!showCustomSize)}
+                            >
+                                Khác...
+                            </Badge>
                         </div>
+
+                        {showCustomSize && (
+                            <div className="mt-2 animate-in fade-in slide-in-from-top-2">
+                                <Input
+                                    value={sizeInput}
+                                    onChange={(e) => setSizeInput(e.target.value)}
+                                    onKeyDown={(e) => onKeyDownAdd(e, "sizes")}
+                                    placeholder="Nhập size khác (nhấn Enter để thêm)"
+                                    className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
+                                />
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                    {(formData.sizes || [])
+                                        .filter((s) => !PRESET_SIZES.some((ps) => ps.toLowerCase() === s.toLowerCase()))
+                                        .map((s) => (
+                                            <Badge key={s} variant="secondary" className="gap-1">
+                                                <span>{s}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeToken("sizes", s)}
+                                                    className="ml-1 rounded-full px-1 hover:bg-slate-200/70 dark:hover:bg-slate-700/70"
+                                                    aria-label={`Xoá size ${s}`}
+                                                >
+                                                    ×
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -214,11 +291,11 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
 
                     <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="font-semibold text-slate-600">
-                            Huỷ
+                            Hủy
                         </Button>
                         <Button type="submit" disabled={!canSubmit} className="font-bold shadow-lg shadow-primary/20">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            {loading ? "Đang lưu..." : "Tạo variants"}
+                            {loading ? "Đang lưu..." : "Tạo phiên bản"}
                         </Button>
                     </DialogFooter>
                 </form>

@@ -152,6 +152,18 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasAuthority('" + PRODUCT_DELETE + "')")
+    @DeleteMapping("/{id}")
+    public String deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProduct(id);
+            return ResponseJson.toJsonString(ApiCode.SUCCESSFUL, "Product deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseJson.toJsonString(ApiCode.ERROR_INTERNAL, "Error deleting product: " + e.getMessage());
+        }
+    }
+
     @PreAuthorize("hasAuthority('" + PRODUCT_VIEW + "')")
     @GetMapping("/next-code")
     public String getNextCode(@RequestParam Long categoryId) {

@@ -96,7 +96,36 @@ const shiftService = {
     getAssignmentsByUser: async (userId) => {
         const response = await axiosPrivate.get(`/shifts/assignments/user/${userId}`);
         return response;
-    }
+    },
+
+    // ==================== AUTO ASSIGN (DRAFT) ====================
+
+    /**
+     * Tự động tạo phân công ca bản nháp theo khoảng ngày
+     * @param {{ storeId: number, from: string, to: string, createdBy: number, resetDraft?: boolean, shiftIds?: number[], staffShiftPreferences?: Array<{ userId: number, allowedShiftIds: number[] }> }} data
+     */
+    autoAssignDrafts: async (data) => {
+        const response = await axiosPrivate.post('/shifts/auto-assign', data);
+        return response;
+    },
+
+    /**
+     * Xác nhận tất cả bản nháp trong khoảng ngày (DRAFT -> ASSIGNED)
+     * @param {{ storeId: number, from: string, to: string, confirmedBy: number }} data
+     */
+    confirmDrafts: async (data) => {
+        const response = await axiosPrivate.post('/shifts/confirm-drafts', data);
+        return response;
+    },
+
+    /**
+     * Hủy tất cả bản nháp trong khoảng ngày (DRAFT -> CANCELLED)
+     * @param {{ storeId: number, from: string, to: string }} data
+     */
+    cancelDrafts: async (data) => {
+        const response = await axiosPrivate.post('/shifts/cancel-drafts', data);
+        return response;
+    },
 };
 
 export default shiftService;

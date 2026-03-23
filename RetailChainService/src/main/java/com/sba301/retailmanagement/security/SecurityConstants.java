@@ -10,6 +10,7 @@ public final class SecurityConstants {
 
     private SecurityConstants() {
     }
+
     public static final String PROFILE_VIEW = "PROFILE_VIEW";
     public static final String PROFILE_UPDATE = "PROFILE_UPDATE";
     public static final String PASSWORD_CHANGE = "PASSWORD_CHANGE";
@@ -57,4 +58,16 @@ public final class SecurityConstants {
     public static final String DESIGN_CREATE = "DESIGN_CREATE";
     public static final String DESIGN_UPDATE = "DESIGN_UPDATE";
     public static final String DESIGN_DELETE = "DESIGN_DELETE";
+
+    // Bug 1.5 fix: Add missing permissions
+    public static final String ORDER_VIEW = "ORDER_VIEW";
+    public static final String ORDER_CREATE = "ORDER_CREATE";
+    public static final String ORDER_UPDATE = "ORDER_UPDATE";
+    public static final String ORDER_DELETE = "ORDER_DELETE";
+    public static final String STAFF_VIEW = "STAFF_VIEW";
+    public static final String STAFF_CREATE = "STAFF_CREATE";
+    public static final String STAFF_UPDATE = "STAFF_UPDATE";
+    public static final String STAFF_DELETE = "STAFF_DELETE";
+    public static final String STORE_MANAGER_ALL = "STORE_MANAGER_ALL";
+    public static final String STORE_MANAGER_SCOPE = "STORE_MANAGER_SCOPE";
 }

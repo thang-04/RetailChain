@@ -34,7 +34,7 @@ build/
 
 # Ignore all PEM keys
 *.pem
-.env
+*.env
 
 # IntelliJ
 .idea/

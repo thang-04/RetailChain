@@ -1,5 +1,5 @@
 import React, { useState, memo } from "react";
-import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-function ProductTable({ products, categories, onEditClick, onViewClick }) {
+function ProductTable({ products, categories, onEditClick, onViewClick, onDeleteClick }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -36,19 +36,19 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
     if (status === 1 || status === "ACTIVE" || status === "Active") {
       return (
         <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800">
-          Active
+          Đang kinh doanh
         </Badge>
       );
     } else if (status === 2 || status === "OUT_OF_STOCK" || status === "Out of Stock") {
       return (
         <Badge className="bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
-          Out of Stock
+          Hết hàng
         </Badge>
       );
     } else {
       return (
         <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
-          Inactive
+          Ngừng kinh doanh
         </Badge>
       );
     }
@@ -57,7 +57,18 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
   // Helper to map category ID to name
   const getCategoryName = (id) => {
     const cat = categories && categories.find(c => c.id === id);
-    return cat ? cat.name : "Unknown";
+    return cat ? cat.name : "Không rõ";
+  };
+
+  const getGenderLabel = (gender) => {
+    const genderMap = {
+      MEN: "Nam",
+      WOMEN: "Nữ",
+      UNISEX: "Dùng chung",
+      KIDS: "Trẻ em",
+    };
+
+    return genderMap[gender] || gender;
   };
 
   return (
@@ -66,14 +77,14 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
         <Table>
           <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
             <TableRow className="border-b border-slate-200 dark:border-slate-800 hover:bg-transparent">
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Code</TableHead>
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Image</TableHead>
-              <TableHead className="w-[20%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Product Name</TableHead>
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Category</TableHead>
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Gender</TableHead>
-              <TableHead className="w-[20%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Description</TableHead>
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Status</TableHead>
-              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Actions</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Mã</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Ảnh</TableHead>
+              <TableHead className="w-[20%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Tên sản phẩm</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Danh mục</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Giới tính</TableHead>
+              <TableHead className="w-[20%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs">Mô tả</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-center">Trạng thái</TableHead>
+              <TableHead className="w-[10%] px-6 py-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -89,7 +100,7 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
                     >
                       {product.image ? (
                         <img src={product.image} className="w-full h-full object-cover" alt={product.name} />
-                      ) : "NO IMG"}
+                      ) : "CHƯA CÓ"}
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4">
@@ -103,7 +114,7 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
                     </Badge>
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    {product.gender}
+                    {getGenderLabel(product.gender)}
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-slate-900 dark:text-white truncate max-w-[200px]">
                     {product.description}
@@ -118,9 +129,18 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
                         size="icon"
                         className="h-8 w-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                         onClick={() => onViewClick(product)}
-                        title="View Detail"
+                        title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        onClick={() => onDeleteClick(product)}
+                        title="Xóa sản phẩm"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -129,7 +149,7 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
             ) : (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center text-slate-500">
-                  No products found.
+                  Không tìm thấy sản phẩm.
                 </TableCell>
               </TableRow>
             )}
@@ -140,7 +160,7 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
       {/* Pagination Footer */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30">
         <div className="text-sm text-slate-500 dark:text-slate-400">
-          Showing <span className="font-bold text-slate-900 dark:text-white">{totalItems > 0 ? startIndex + 1 : 0}-{endIndex}</span> of <span className="font-bold text-slate-900 dark:text-white">{totalItems}</span> products
+          Hiển thị <span className="font-bold text-slate-900 dark:text-white">{totalItems > 0 ? startIndex + 1 : 0}-{endIndex}</span> trên tổng <span className="font-bold text-slate-900 dark:text-white">{totalItems}</span> sản phẩm
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -155,7 +175,7 @@ function ProductTable({ products, categories, onEditClick, onViewClick }) {
 
           {/* Simple Page Indicator */}
           <div className="flex items-center gap-1 mx-2">
-            <span className="text-sm font-medium">Page {currentPage} of {totalPages || 1}</span>
+            <span className="text-sm font-medium">Trang {currentPage} / {totalPages || 1}</span>
           </div>
 
           <Button

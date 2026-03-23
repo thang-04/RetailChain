@@ -291,12 +291,12 @@ const CreateStockRequestModal = ({ isOpen, onClose, storeId, storeWarehouseId, o
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {filteredProducts.map(product => {
-                    const isAdded = items.some(i => 
-                      i.variantId === product.id || 
-                      product.variants?.some(v => v.id === i.variantId)
-                    );
+                    // Product không có variant: kiểm tra như cũ
+                    // Product có variant: luôn enable để có thể thêm nhiều variant
+                    const hasNoVariants = !product.variants || product.variants.length === 0;
+                    const isAdded = hasNoVariants && items.some(i => i.variantId === product.id);
                     const image = getProductImage(product);
-                    
+
                     return (
                       <button
                         key={product.id}

@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -184,5 +183,19 @@ public class JwtTokenProvider {
                 .getPayload();
 
         return claims.getSubject();
+    }
+
+    public String generateTemporaryToken(User user) {
+        Instant now = Instant.now();
+        Instant expiryDate = now.plusSeconds(1800); // 30 minutes for temp token
+
+        return Jwts.builder()
+                .subject(user.getEmail())
+                .claim(USER_ID_CLAIMS, user.getId())
+                .claim(PERMISSIONS_CLAIMS, Collections.singletonList("FORCE_CHANGE_PASSWORD"))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiryDate))
+                .signWith(getSigningKey(), Jwts.SIG.HS512)
+                .compact();
     }
 }

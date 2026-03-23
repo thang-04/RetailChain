@@ -56,8 +56,10 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
             // Filter roles based on current user's authority
             let filteredRoles = [];
             if (isSuperAdmin()) {
-                filteredRoles = rolesData.filter(r => r.code === 'STORE_MANAGER');
+                // SuperAdmin can manage both Store Managers and Staff
+                filteredRoles = rolesData.filter(r => r.code === 'STORE_MANAGER' || r.code === 'STAFF');
             } else if (isStoreManager()) {
+                // Store Manager can only manage Staff
                 filteredRoles = rolesData.filter(r => r.code === 'STAFF');
             }
             setRoles(filteredRoles);
@@ -109,7 +111,7 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
             onSuccess();
             onClose();
         } catch (err) {
-            setError(err.response?.data || err.message || 'Failed to update user');
+            setError(err.response?.data || err.message || 'Không thể cập nhật người dùng');
         } finally {
             setLoading(false);
         }
@@ -121,27 +123,27 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px] sm:max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Edit User: {userToEdit?.username}</DialogTitle>
+                    <DialogTitle>Chỉnh sửa người dùng: {userToEdit?.username}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     {error && <div className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</div>}
 
                     <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="fullName">Họ và tên <span className="text-red-500">*</span></Label>
                         <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <Label htmlFor="phoneNumber">Số điện thoại</Label>
                         <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Role <span className="text-red-500">*</span></Label>
+                        <Label>Vai trò <span className="text-red-500">*</span></Label>
                         <Select value={formData.roleId} onValueChange={(val) => handleSelectChange('roleId', val)} required>
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a role" />
+                                <SelectValue placeholder="Chọn vai trò" />
                             </SelectTrigger>
                             <SelectContent>
                                 {roles.map(r => (
@@ -155,10 +157,10 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
 
                     {(selectedRoleObj?.code === 'STORE_MANAGER' || selectedRoleObj?.code === 'STAFF') && (
                         <div className="space-y-2">
-                            <Label>Assign Store</Label>
+                            <Label>Gán cửa hàng</Label>
                             <Select value={formData.storeId} onValueChange={(val) => handleSelectChange('storeId', val)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a store" />
+                                    <SelectValue placeholder="Chọn cửa hàng" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {stores.map(s => (
@@ -170,9 +172,9 @@ const EditUserDialog = ({ isOpen, onClose, onSuccess, userToEdit }) => {
                     )}
 
                     <DialogFooter className="mt-6">
-                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? 'Saving...' : 'Save Changes'}
+                            {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
                         </Button>
                     </DialogFooter>
                 </form>

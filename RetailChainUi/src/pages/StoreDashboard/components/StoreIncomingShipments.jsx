@@ -1,13 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
-  Package, Truck, Search, CheckCircle2, Clock,
+  Package, Truck, Search, CheckCircle2, Clock, RotateCcw,
   ArrowRight, Eye, Calendar
 } from "lucide-react";
 import inventoryService from "@/services/inventory.service";
@@ -18,6 +34,9 @@ const StoreIncomingShipments = ({ storeId }) => {
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [showDetail, setShowDetail] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (storeId) {
@@ -67,6 +86,25 @@ const StoreIncomingShipments = ({ storeId }) => {
     return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
+  const filteredShipments = useMemo(() => {
+    let result = shipments;
+
+    // Filter by date
+    if (dateFrom) {
+      result = result.filter(s => new Date(s.createdAt) >= new Date(dateFrom));
+    }
+    if (dateTo) {
+      result = result.filter(s => new Date(s.createdAt) <= new Date(dateTo));
+    }
+
+    // Filter by status
+    if (statusFilter !== "all") {
+      result = result.filter(s => s.status === statusFilter);
+    }
+
+    return result;
+  }, [shipments, dateFrom, dateTo, statusFilter]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -96,8 +134,55 @@ const StoreIncomingShipments = ({ storeId }) => {
         </Badge>
       </div>
 
-      {/* Shipment List */}
-      {shipments.length === 0 ? (
+      {/* Filter Bar */}
+      <div className="flex flex-wrap items-end gap-3 p-4 bg-muted/30 rounded-lg">
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs font-medium">Từ ngày</Label>
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-[160px]"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs font-medium">Đến ngày</Label>
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-[160px]"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <Label className="text-xs font-medium">Trạng thái</Label>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Chọn trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="PENDING">Chờ xác nhận</SelectItem>
+              <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setDateFrom("");
+            setDateTo("");
+            setStatusFilter("all");
+          }}
+          className="gap-1"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Xóa lọc
+        </Button>
+      </div>
+
+      {/* Table View */}
+      {filteredShipments.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Package className="w-12 h-12 text-muted-foreground mb-3" />
@@ -105,50 +190,43 @@ const StoreIncomingShipments = ({ storeId }) => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {shipments.map((shipment) => (
-            <Card 
-              key={shipment.id} 
-              className="cursor-pointer hover:border-primary transition-colors"
-              onClick={() => {
-                setSelectedShipment(shipment);
-                setShowDetail(true);
-              }}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                      <Truck className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{shipment.documentCode}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(shipment.createdAt)}
-                        <span className="mx-1">•</span>
-                        <Package className="w-3 h-3" />
-                        {shipment.totalItems || 0} sản phẩm
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {getStatusBadge(shipment.status)}
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </div>
-                
-                {/* Source Warehouse */}
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="text-xs uppercase tracking-wider">Kho nguồn:</span>
-                  <span className="font-medium text-foreground">{shipment.sourceWarehouseName || '-'}</span>
-                  <ArrowRight className="w-3 h-3" />
-                  <span className="font-medium text-foreground">{shipment.targetWarehouseName || 'Cửa hàng'}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-center">STT</TableHead>
+              <TableHead>Mã phiếu</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead>Kho gửi</TableHead>
+              <TableHead className="text-center">Số SP</TableHead>
+              <TableHead className="text-center">Tổng SL</TableHead>
+              <TableHead className="text-center">Trạng thái</TableHead>
+              <TableHead className="text-center">Hành động</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredShipments.map((shipment, index) => (
+              <TableRow key={shipment.id} className="cursor-pointer hover:bg-muted/50">
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell className="font-medium">{shipment.documentCode || shipment.id}</TableCell>
+                <TableCell>{formatDate(shipment.createdAt)}</TableCell>
+                <TableCell>{shipment.sourceWarehouseName || '-'}</TableCell>
+                <TableCell className="text-center">{shipment.totalItems || 0}</TableCell>
+                <TableCell className="text-center">
+                  {shipment.totalQuantity || 0}
+                </TableCell>
+                <TableCell className="text-center">{getStatusBadge(shipment.status)}</TableCell>
+                <TableCell className="text-center">
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setSelectedShipment(shipment);
+                    setShowDetail(true);
+                  }}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       {/* Detail Dialog */}
