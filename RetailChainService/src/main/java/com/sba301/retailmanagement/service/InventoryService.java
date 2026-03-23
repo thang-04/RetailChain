@@ -8,6 +8,7 @@ import com.sba301.retailmanagement.dto.response.InventoryOverviewResponse;
 import com.sba301.retailmanagement.dto.response.InventoryDetailResponse;
 import com.sba301.retailmanagement.dto.response.InventoryStockResponse;
 import com.sba301.retailmanagement.dto.response.WarehouseResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ public interface InventoryService {
     void deleteWarehouse(Long id);
 
     void deleteDocument(Long id);
+
+    InventoryOverviewResponse getInventoryOverview(LocalDateTime from, LocalDateTime to);
 
     InventoryOverviewResponse getInventoryOverview();
 

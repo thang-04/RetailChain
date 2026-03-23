@@ -241,12 +241,15 @@ public class AuthServiceImpl implements AuthService {
                         User user = userRepository.findByEmail(request.getEmail())
                                          .orElseThrow(() -> new ResourceNotFoundException(
                                                          "User not found with email: " + request.getEmail()));
-                        
+
                         // If they somehow reset via OTP, we should probably clear isFirstLogin if it was set
                         // but based on forgotPassword logic, we block it. Still, the check here is good.
                         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
                                 throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
                         }
+
+                        // Bug 1.4 fix: Revoke all refresh tokens when password is changed via OTP
+                        refreshTokenService.deleteByUser(user);
 
                         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                         user.setIsFirstLogin(false);

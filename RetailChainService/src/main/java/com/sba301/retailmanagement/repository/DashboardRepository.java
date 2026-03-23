@@ -41,13 +41,15 @@ public interface DashboardRepository extends JpaRepository<Store, Long> {
             s.id,
             s.code,
             s.name,
-            COALESCE(SUM(COALESCE(st.quantity, 0)), 0L)
+            COALESCE(SUM(COALESCE(st.quantity, 0)), 0L),
+            COALESCE(SUM(COALESCE(d.totalAmount, 0)), 0L)
         )
         FROM Store s
         LEFT JOIN s.warehouse w
         LEFT JOIN InventoryStock st ON st.warehouse.id = w.id
+        LEFT JOIN InventoryDocument d ON d.targetWarehouseId = w.id AND d.documentType = 'IMPORT'
         GROUP BY s.id, s.code, s.name
-        ORDER BY COALESCE(SUM(COALESCE(st.quantity, 0)), 0L) DESC
+        ORDER BY COALESCE(SUM(COALESCE(d.totalAmount, 0)), 0L) DESC
         """)
     List<DashboardStoreRankingDTO> getStoreRanking(Pageable pageable);
 }

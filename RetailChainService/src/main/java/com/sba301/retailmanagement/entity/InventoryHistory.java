@@ -35,12 +35,12 @@ public class InventoryHistory {
     @JoinColumn(name = "document_item_id", insertable = false, updatable = false)
     private InventoryDocumentItem documentItem;
 
-    @Column(name = "warehouse_id", nullable = false)
-    private Long warehouseId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_id", insertable = false, updatable = false)
     private Warehouse warehouse;
+
+    @Column(name = "warehouse_id", insertable = false, updatable = false)
+    private Long warehouseId;
 
     @Column(name = "variant_id", nullable = false)
     private Long variantId;

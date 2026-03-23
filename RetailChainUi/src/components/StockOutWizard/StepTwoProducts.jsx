@@ -47,19 +47,24 @@ const StepTwoProducts = ({ items, setItems, productVariants, categories, errors 
     };
 
     const handleRemoveItem = (id) => {
+        if (!window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
+            return;
+        }
         if (items.length > 1) {
             setItems(items.filter(item => item.id !== id));
+        } else {
+            setItems([{ id: Date.now(), variantId: '', quantity: 1 }]);
         }
     };
 
     const handleQuantityChange = (id, value) => {
-        const qty = parseInt(value) || 0;
-        setItems(items.map(item => 
+        const qty = Number(value) || 0;
+        setItems(items.map(item =>
             item.id === id ? { ...item, quantity: qty } : item
         ));
     };
 
-    const totalQuantity = items.filter(i => i.variantId).reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+    const totalQuantity = items.filter(i => i.variantId).reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
 
     const selectedItems = items.filter(i => i.variantId);
 

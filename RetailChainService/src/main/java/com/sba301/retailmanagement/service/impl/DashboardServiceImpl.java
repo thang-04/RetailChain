@@ -48,7 +48,7 @@ public class DashboardServiceImpl implements DashboardService {
         long totalVariants = productVariantRepository.count();
         long activeStores = storeRepository.countByStatus(1);
 
-        InventoryOverviewResponse invOverview = inventoryService.getInventoryOverview();
+        InventoryOverviewResponse invOverview = inventoryService.getInventoryOverview(from, to);
         long totalStockQuantity = invOverview != null && invOverview.getTotalStockQuantity() != null
                 ? invOverview.getTotalStockQuantity()
                 : 0L;

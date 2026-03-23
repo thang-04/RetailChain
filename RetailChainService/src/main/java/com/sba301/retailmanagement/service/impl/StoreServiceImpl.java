@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -323,6 +324,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteStore(String slug) {
         String prefix = "[deleteStore]|slug=" + slug;
         log.info("{}|START", prefix);
@@ -333,6 +335,37 @@ public class StoreServiceImpl implements StoreService {
                 throw new ResourceNotFoundException("Store not found with code: " + slug);
             }
             Store store = storeOptional.get();
+            Long storeId = store.getId();
+            Long warehouseId = store.getWarehouse() != null ? store.getWarehouse().getId() : null;
+
+            // Bug 4.2 fix: Xoa users lien quan truoc
+            List<User> users = userRepository.findByStoreId(storeId);
+            if (users != null && !users.isEmpty()) {
+                for (User user : users) {
+                    user.setStoreId(null);
+                    user.setStatus(0); // Inactive
+                }
+                userRepository.saveAll(users);
+                log.info("{}|Da xoa {} users lien quan", prefix, users.size());
+            }
+
+            // Xoa inventory stocks lien quan (neu can)
+            if (warehouseId != null) {
+                List<InventoryStock> stocks = inventoryStockRepository.findByWarehouseId(warehouseId);
+                if (stocks != null && !stocks.isEmpty()) {
+                    inventoryStockRepository.deleteAll(stocks);
+                    log.info("{}|Da xoa {} inventory stocks", prefix, stocks.size());
+                }
+            }
+
+            // Xoa shift records
+            List<Shift> shifts = shiftRepository.findByStoreId(storeId);
+            if (shifts != null && !shifts.isEmpty()) {
+                shiftRepository.deleteAll(shifts);
+                log.info("{}|Da xoa {} shifts", prefix, shifts.size());
+            }
+
+            // Xoa store (warehouse se bi orphan nhung khong bi xoa cascade)
             storeRepository.delete(store);
 
             log.info("{}|END", prefix);

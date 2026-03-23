@@ -358,7 +358,7 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryStock stock = inventoryStockRepository.findById(stockId)
                     .orElse(new InventoryStock(stockId, warehouse, variant, 0, LocalDateTime.now()));
 
-            int oldQuantity = stock.getQuantity();
+            int oldQuantity = stock.getQuantity() != null ? stock.getQuantity() : 0;
             int newQuantity = oldQuantity + itemReq.getQuantity();
             stock.setQuantity(newQuantity);
             stock.setUpdatedAt(LocalDateTime.now());
@@ -404,12 +404,13 @@ public class InventoryServiceImpl implements InventoryService {
             ProductVariant variant = productVariantRepository.findById(itemReq.getVariantId())
                     .orElseThrow(() -> new RuntimeException("Product Variant not found: " + itemReq.getVariantId()));
 
-            // Check Stock first
+            // Check Stock first (with pessimistic lock)
             InventoryStockId stockId = new InventoryStockId(warehouse.getId(), variant.getId());
-            InventoryStock stock = inventoryStockRepository.findById(stockId)
+            InventoryStock stock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(warehouse.getId(), variant.getId())
                     .orElseThrow(() -> new RuntimeException("Stock record not found for variant: " + variant.getId()));
 
-            if (stock.getQuantity() < itemReq.getQuantity()) {
+            int currentQty = stock.getQuantity() != null ? stock.getQuantity() : 0;
+            if (currentQty < itemReq.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for variant: " + variant.getId());
             }
 
@@ -424,8 +425,7 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
 
             // Update Stock
-            int oldQuantity = stock.getQuantity();
-            int newQuantity = oldQuantity - itemReq.getQuantity();
+            int newQuantity = currentQty - itemReq.getQuantity();
             stock.setQuantity(newQuantity);
             stock.setUpdatedAt(LocalDateTime.now());
             inventoryStockRepository.save(stock);
@@ -510,11 +510,12 @@ public class InventoryServiceImpl implements InventoryService {
 
             // 1. Process Source Warehouse (OUT)
             InventoryStockId sourceStockId = new InventoryStockId(sourceWarehouse.getId(), variant.getId());
-            InventoryStock sourceStock = inventoryStockRepository.findById(sourceStockId)
+            InventoryStock sourceStock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(sourceWarehouse.getId(), variant.getId())
                     .orElseThrow(() -> new RuntimeException(
                             "Stock record not found in Source Warehouse for variant: " + variant.getId()));
 
-            if (sourceStock.getQuantity() < itemReq.getQuantity()) {
+            int sourceOldQty = sourceStock.getQuantity() != null ? sourceStock.getQuantity() : 0;
+            if (sourceOldQty < itemReq.getQuantity()) {
                 throw new RuntimeException("Insufficient stock in Source Warehouse for variant: " + variant.getId());
             }
 
@@ -529,7 +530,6 @@ public class InventoryServiceImpl implements InventoryService {
             InventoryDocumentItem savedItem = inventoryDocumentItemRepository.save(docItem);
 
             // Update Source Stock
-            int sourceOldQty = sourceStock.getQuantity();
             int sourceNewQty = sourceOldQty - itemReq.getQuantity();
             sourceStock.setQuantity(sourceNewQty);
             sourceStock.setUpdatedAt(LocalDateTime.now());
@@ -541,10 +541,10 @@ public class InventoryServiceImpl implements InventoryService {
 
             // 2. Process Target Warehouse (IN)
             InventoryStockId targetStockId = new InventoryStockId(targetWarehouse.getId(), variant.getId());
-            InventoryStock targetStock = inventoryStockRepository.findById(targetStockId)
+            InventoryStock targetStock = inventoryStockRepository.findByWarehouseIdAndVariantIdWithLock(targetWarehouse.getId(), variant.getId())
                     .orElse(new InventoryStock(targetStockId, targetWarehouse, variant, 0, LocalDateTime.now()));
 
-            int targetOldQty = targetStock.getQuantity();
+            int targetOldQty = targetStock.getQuantity() != null ? targetStock.getQuantity() : 0;
             int targetNewQty = targetOldQty + itemReq.getQuantity();
             targetStock.setQuantity(targetNewQty);
             targetStock.setUpdatedAt(LocalDateTime.now());
@@ -793,7 +793,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public InventoryOverviewResponse getInventoryOverview() {
+    public InventoryOverviewResponse getInventoryOverview(LocalDateTime from, LocalDateTime to) {
         List<InventoryStock> stocks = inventoryStockRepository.findAll();
 
         long totalQuantity = 0L;
@@ -815,9 +815,29 @@ public class InventoryServiceImpl implements InventoryService {
             }
         }
 
-        // Hiện tại chưa có dữ liệu so sánh kỳ trước, tạm thời mock cứng 2.4% như UI
-        // demo
-        double growthPercentage = 2.4d;
+        // Tinh growthPercentage bang cach so sanh gia tri kỳ hien tai voi kỳ trước
+        double growthPercentage = 0.0;
+        if (from != null && to != null) {
+            // Tinh gia tri kỳ hiện tại
+            BigDecimal currentValue = inventoryDocumentRepository.sumTotalAmountBetween(from, to);
+
+            // Tinh kỳ trước (cùng độ dài, ngay trước 'from')
+            long periodDays = java.time.Duration.between(from, to).toDays();
+            LocalDateTime prevFrom = from.minusDays(periodDays);
+            LocalDateTime prevTo = from;
+            BigDecimal prevValue = inventoryDocumentRepository.sumTotalAmountBetween(prevFrom, prevTo);
+
+            // Tinh phần trăm thay đổi
+            if (prevValue != null && prevValue.compareTo(BigDecimal.ZERO) > 0) {
+                growthPercentage = currentValue.subtract(prevValue)
+                        .divide(prevValue, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100))
+                        .doubleValue();
+            } else if (currentValue != null && currentValue.compareTo(BigDecimal.ZERO) > 0) {
+                // Neu khong co du lieu kỳ trước, danh gia 100% growth
+                growthPercentage = 100.0;
+            }
+        }
 
         return InventoryOverviewResponse.builder()
                 .totalStockQuantity(totalQuantity)
@@ -825,6 +845,11 @@ public class InventoryServiceImpl implements InventoryService {
                 .criticalStoreCount((long) criticalWarehouses.size())
                 .growthPercentage(growthPercentage)
                 .build();
+    }
+
+    @Override
+    public InventoryOverviewResponse getInventoryOverview() {
+        return getInventoryOverview(null, null);
     }
 
     private User getCurrentUser() {
