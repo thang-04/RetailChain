@@ -8,6 +8,19 @@ import { cn } from "@/lib/utils";
 const StoreCard = ({ store }) => {
   const navigate = useNavigate();
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "Active":
+        return "Hoạt động";
+      case "Inactive":
+        return "Tạm dừng";
+      case "Maintenance":
+        return "Bảo trì";
+      default:
+        return status;
+    }
+  };
+
   // Map status to badge styles
   const getStatusStyle = (status) => {
     switch (status) {
@@ -61,7 +74,7 @@ const StoreCard = ({ store }) => {
             className={cn("gap-1.5 px-2.5 py-1 rounded-full font-medium border shrink-0", getStatusStyle(store.status))}
           >
             <span className={cn("size-1.5 rounded-full", getStatusDotColor(store.status))}></span>
-            {store.status}
+            {getStatusLabel(store.status)}
           </Badge>
         </div>
 
@@ -82,7 +95,7 @@ const StoreCard = ({ store }) => {
             <div className="flex items-center gap-2.5">
               <Package className="w-4 h-4 text-slate-400 shrink-0" />
               <span className="text-sm text-slate-600 dark:text-slate-400 truncate">
-                Warehouse: <span className="font-medium text-slate-900 dark:text-slate-200">{store.warehouse}</span>
+                Kho: <span className="font-medium text-slate-900 dark:text-slate-200">{store.warehouse}</span>
               </span>
             </div>
           )}

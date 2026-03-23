@@ -29,7 +29,7 @@ const ProductFilter = ({ filters, onFilterChange, categories }) => {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
         <Input
           className="w-full h-12 pl-12 pr-4 bg-transparent border-none text-slate-900 dark:text-white placeholder:text-slate-400 focus-visible:ring-0 text-base font-normal shadow-none"
-          placeholder="Search products by name or code..."
+          placeholder="Tìm sản phẩm theo tên hoặc mã..."
           value={filters.search}
           onChange={handleInputChange}
         />
@@ -42,10 +42,10 @@ const ProductFilter = ({ filters, onFilterChange, categories }) => {
         <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
         <Select value={filters.category} onValueChange={handleCategoryChange}>
           <SelectTrigger className="w-full h-12 pl-12 pr-4 bg-transparent border-none text-slate-900 dark:text-white focus:ring-0 text-sm font-medium shadow-none">
-            <SelectValue placeholder="All Categories" />
+            <SelectValue placeholder="Tất cả danh mục" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">Tất cả danh mục</SelectItem>
             {categories && categories.map(cat => (
               <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
             ))}
@@ -60,12 +60,12 @@ const ProductFilter = ({ filters, onFilterChange, categories }) => {
         <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
         <Select value={filters.status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-full h-12 pl-12 pr-4 bg-transparent border-none text-slate-900 dark:text-white focus:ring-0 text-sm font-medium shadow-none">
-            <SelectValue placeholder="Status: All" />
+            <SelectValue placeholder="Trạng thái: Tất cả" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Status: All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="all">Trạng thái: Tất cả</SelectItem>
+            <SelectItem value="active">Đang kinh doanh</SelectItem>
+            <SelectItem value="inactive">Ngừng kinh doanh</SelectItem>
           </SelectContent>
         </Select>
       </div>

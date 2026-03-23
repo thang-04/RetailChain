@@ -19,6 +19,26 @@ const StoreStaffPage = () => {
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("All");
 
+    const getRoleLabel = (role) => {
+        const roleMap = {
+            STAFF: 'Nhân viên',
+            STORE_MANAGER: 'Quản lý cửa hàng',
+        };
+
+        return roleMap[role] || role;
+    };
+
+    const getStatusLabel = (status) => {
+        const statusMap = {
+            All: 'Tất cả',
+            Active: 'Đang làm việc',
+            "On Leave": 'Tạm nghỉ',
+            Inactive: 'Ngừng hoạt động',
+        };
+
+        return statusMap[status] || status;
+    };
+
     const fetchStaff = async () => {
         setLoading(true);
         try {
@@ -83,7 +103,7 @@ const StoreStaffPage = () => {
     };
 
     if (loading) {
-        return <div className="p-10 text-center">Loading staff data...</div>;
+        return <div className="p-10 text-center">Đang tải dữ liệu nhân viên...</div>;
     }
 
     // Filter logic
@@ -100,23 +120,23 @@ const StoreStaffPage = () => {
         <div className="max-w-[1200px] mx-auto flex flex-col gap-6 font-display text-slate-900 dark:text-white antialiased">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-2 text-sm">
-                <a className="text-slate-500 hover:text-primary transition-colors font-medium" href={`/store/${id}`}>Store {id}</a>
+                <a className="text-slate-500 hover:text-primary transition-colors font-medium" href={`/store/${id}`}>Cửa hàng {id}</a>
                 <span className="text-slate-300 material-symbols-outlined text-[16px]">chevron_right</span>
-                <span className="text-slate-900 dark:text-white font-medium">Staff Management</span>
+                <span className="text-slate-900 dark:text-white font-medium">Quản lý nhân viên</span>
             </div>
 
             {/* Page Heading & Actions */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Store Staff</h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Manage employee roles, access permissions, and schedules.</p>
+                    <h1 className="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Nhân sự cửa hàng</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">Quản lý vai trò, quyền truy cập và lịch làm việc của nhân viên.</p>
                 </div>
                 <Button
                     onClick={() => setIsAddModalOpen(true)}
                     className="group flex items-center justify-center gap-2 h-10 px-5 bg-primary hover:bg-[#1d617a] text-white text-sm font-semibold rounded-lg shadow-sm shadow-primary/30 transition-all active:scale-95"
                 >
                     <span className="material-symbols-outlined text-[20px]">add</span>
-                    <span>Add Staff</span>
+                    <span>Thêm nhân sự</span>
                 </Button>
             </div>
 
@@ -130,7 +150,7 @@ const StoreStaffPage = () => {
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px]">search</span>
                             <input
                                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                placeholder="Search staff by name or email..."
+                                placeholder="Tìm nhân viên theo tên hoặc email..."
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -143,9 +163,9 @@ const StoreStaffPage = () => {
                                 value={selectedRole}
                                 onChange={(e) => setSelectedRole(e.target.value)}
                             >
-                                <option value="">All Roles</option>
+                                <option value="">Tất cả vai trò</option>
                                 {uniqueRoles.map(role => (
-                                    <option key={role} value={role}>{role}</option>
+                                    <option key={role} value={role}>{getRoleLabel(role)}</option>
                                 ))}
                             </select>
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px] pointer-events-none">expand_more</span>
@@ -163,7 +183,7 @@ const StoreStaffPage = () => {
                                     }`}
                             >
                                 {selectedStatus === status && <span className="material-symbols-outlined text-[16px]">check_circle</span>}
-                                {status}
+                                {getStatusLabel(status)}
                             </button>
                         ))}
                     </div>
@@ -202,7 +222,7 @@ const StoreStaffPage = () => {
                                         </td>
                                         <td className="py-4 px-6">
                                             <div className="inline-flex items-center px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium">
-                                                {staff.role}
+                                                {getRoleLabel(staff.role)}
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-slate-500 dark:text-slate-400 text-xs">
@@ -211,7 +231,7 @@ const StoreStaffPage = () => {
                                         <td className="py-4 px-6">
                                             <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${staff.statusColor}`}>
                                                 <span className={`size-1.5 rounded-full ${staff.dotColor}`}></span>
-                                                {staff.status}
+                                                {getStatusLabel(staff.status)}
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-right">
@@ -240,13 +260,13 @@ const StoreStaffPage = () => {
                 </div>
                 {/* Pagination */}
                 <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">Showing <span className="font-semibold text-slate-900 dark:text-white">{filteredStaff.length > 0 ? 1 : 0}-{filteredStaff.length}</span> of <span className="font-semibold text-slate-900 dark:text-white">{staffList.length}</span> staff</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">Hiển thị <span className="font-semibold text-slate-900 dark:text-white">{filteredStaff.length > 0 ? 1 : 0}-{filteredStaff.length}</span> trên tổng <span className="font-semibold text-slate-900 dark:text-white">{staffList.length}</span> nhân sự</p>
                     <div className="flex gap-2">
                         <button className="flex items-center justify-center px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled="">
-                            Previous
+                            Trước
                         </button>
                         <button className="flex items-center justify-center px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                            Next
+                            Sau
                         </button>
                     </div>
                 </div>

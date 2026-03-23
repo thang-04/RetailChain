@@ -30,10 +30,10 @@ const WarehouseDetail = () => {
                 if (foundWh) {
                     setWarehouseInfo({
                         ...foundWh,
-                        manager: "N/A", // Mock field
+                        manager: "Chưa có", // Mock field
                         metrics: {
                             totalItems: 0, // Will be calculated from stock
-                            inboundDaily: "N/A"
+                            inboundDaily: "Chưa có"
                         }
                     });
 
@@ -62,14 +62,14 @@ const WarehouseDetail = () => {
 
     const getStockStatusBadge = (stock) => {
         // Determine status based on stock level logic (simplified)
-        if (stock <= 0) return <Badge variant="destructive">Out of Stock</Badge>;
-        if (stock < 50) return <Badge className="bg-orange-500 hover:bg-orange-600">Low Stock</Badge>;
-        if (stock > 2000) return <Badge variant="secondary">Overstock</Badge>;
-        return <Badge className="bg-green-600 hover:bg-green-700">In Stock</Badge>;
+        if (stock <= 0) return <Badge variant="destructive">Hết hàng</Badge>;
+        if (stock < 50) return <Badge className="bg-orange-500 hover:bg-orange-600">Sắp hết</Badge>;
+        if (stock > 2000) return <Badge variant="secondary">Tồn kho cao</Badge>;
+        return <Badge className="bg-green-600 hover:bg-green-700">Còn hàng</Badge>;
     };
 
-    if (loading) return <div className="p-10 text-center">Loading warehouse details...</div>;
-    if (!warehouseInfo) return <div className="p-10 text-center">Warehouse not found</div>;
+    if (loading) return <div className="p-10 text-center">Đang tải chi tiết kho...</div>;
+    if (!warehouseInfo) return <div className="p-10 text-center">Không tìm thấy kho</div>;
 
     return (
         <div className="p-6 space-y-6">
@@ -80,19 +80,19 @@ const WarehouseDetail = () => {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">{warehouseInfo.name}</h1>
                     <p className="text-muted-foreground flex items-center gap-2">
-                        Code: {warehouseInfo.code} • Type: {warehouseInfo.warehouseType === 1 ? 'Main' : 'Store'}
+                        Mã: {warehouseInfo.code} • Loại: {warehouseInfo.warehouseType === 1 ? 'Kho tổng' : 'Kho cửa hàng'}
                     </p>
                 </div>
                 <div className="ml-auto flex gap-2">
-                    <Button variant="outline">Export Report</Button>
-                    <Button onClick={() => navigate('/transfers')}>Create Transfer</Button>
+                    <Button variant="outline">Xuất báo cáo</Button>
+                    <Button onClick={() => navigate('/transfers')}>Tạo phiếu chuyển kho</Button>
                 </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Items</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Tổng số mặt hàng</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{warehouseInfo.metrics?.totalItems || 0}</div>
@@ -101,7 +101,7 @@ const WarehouseDetail = () => {
                 {/* ... Other cards kept static for now ... */}
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">Occupancy</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Công suất</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">---%</div>
@@ -111,21 +111,21 @@ const WarehouseDetail = () => {
 
             <Tabs defaultValue="inventory" className="w-full">
                 <TabsList>
-                    <TabsTrigger value="inventory">Inventory List</TabsTrigger>
-                    <TabsTrigger value="inbound">Inbound History</TabsTrigger>
-                    <TabsTrigger value="outbound">Outbound History</TabsTrigger>
+                    <TabsTrigger value="inventory">Danh sách tồn kho</TabsTrigger>
+                    <TabsTrigger value="inbound">Lịch sử nhập kho</TabsTrigger>
+                    <TabsTrigger value="outbound">Lịch sử xuất kho</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="inventory" className="space-y-4">
                     <Card>
                         <CardHeader>
                             <div className="flex justify-between items-center">
-                                <CardTitle>Current Inventory</CardTitle>
+                                <CardTitle>Tồn kho hiện tại</CardTitle>
                                 <div className="flex gap-2">
                                     <div className="relative w-64">
                                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                                         <Input
-                                            placeholder="Search SKU..."
+                                            placeholder="Tìm SKU..."
                                             className="pl-8"
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -138,11 +138,11 @@ const WarehouseDetail = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Variant ID</TableHead>
-                                        <TableHead>Product Name (Mock)</TableHead>
-                                        <TableHead className="text-right">Quantity</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Last Updated</TableHead>
+                                        <TableHead>Mã biến thể</TableHead>
+                                        <TableHead>Tên sản phẩm (mô phỏng)</TableHead>
+                                        <TableHead className="text-right">Số lượng</TableHead>
+                                        <TableHead>Trạng thái</TableHead>
+                                        <TableHead className="text-right">Cập nhật lần cuối</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -151,7 +151,7 @@ const WarehouseDetail = () => {
                                     ).map((item) => (
                                         <TableRow key={item.variantId}>
                                             <TableCell className="font-medium">{item.variantId}</TableCell>
-                                            <TableCell>Product Variant #{item.variantId}</TableCell>
+                                            <TableCell>Biến thể sản phẩm #{item.variantId}</TableCell>
                                             <TableCell className="text-right font-bold">{item.quantity.toLocaleString()}</TableCell>
                                             <TableCell>{getStockStatusBadge(item.quantity)}</TableCell>
                                             <TableCell className="text-right">
@@ -161,7 +161,7 @@ const WarehouseDetail = () => {
                                     ))}
                                     {inventoryData.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-4">No inventory found in this warehouse.</TableCell>
+                                            <TableCell colSpan={5} className="text-center py-4">Không có tồn kho trong kho này.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -172,10 +172,10 @@ const WarehouseDetail = () => {
 
                 {/* Inbound/Outbound tabs kept as mocks since no API for history yet */}
                 <TabsContent value="inbound">
-                    <div className="p-4 text-center text-muted-foreground">Inbound history not available yet (API Pending)</div>
+                    <div className="p-4 text-center text-muted-foreground">Lịch sử nhập kho chưa khả dụng (đang chờ API)</div>
                 </TabsContent>
                 <TabsContent value="outbound">
-                    <div className="p-4 text-center text-muted-foreground">Outbound history not available yet (API Pending)</div>
+                    <div className="p-4 text-center text-muted-foreground">Lịch sử xuất kho chưa khả dụng (đang chờ API)</div>
                 </TabsContent>
             </Tabs>
         </div>

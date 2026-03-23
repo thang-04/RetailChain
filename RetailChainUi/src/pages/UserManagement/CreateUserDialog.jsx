@@ -96,14 +96,14 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
 
             const selectedRole = roles.find(r => r.id.toString() === formData.roleId);
             if (!selectedRole) {
-                throw new Error('Please select a valid role');
+                throw new Error('Vui lòng chọn vai trò hợp lệ');
             }
             payload.roleIds = [parseInt(formData.roleId)];
 
             if (isSuperAdmin()) {
                 if (selectedRole.code === 'STORE_MANAGER' || selectedRole.code === 'STAFF') {
                     if (!formData.storeId) {
-                        throw new Error('Store is required');
+                        throw new Error('Vui lòng chọn cửa hàng');
                     }
                     payload.storeId = parseInt(formData.storeId);
                 }
@@ -115,7 +115,7 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
             onSuccess();
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || err.response?.data || err.message || 'Failed to create user');
+            setError(err.response?.data?.message || err.response?.data || err.message || 'Không thể tạo người dùng');
         } finally {
             setLoading(false);
         }
@@ -127,14 +127,14 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[425px] sm:max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Create New User</DialogTitle>
+                    <DialogTitle>Tạo người dùng mới</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">
                     {error && <div className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</div>}
 
                     <div className="space-y-2">
-                        <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="username">Tên đăng nhập <span className="text-red-500">*</span></Label>
                         <Input id="username" name="username" value={formData.username} onChange={handleChange} required />
                     </div>
 
@@ -144,21 +144,21 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="fullName">Họ và tên <span className="text-red-500">*</span></Label>
                         <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleChange} required />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="phoneNumber">Phone Number</Label>
+                        <Label htmlFor="phoneNumber">Số điện thoại</Label>
                         <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
                     </div>
 
                     {isSuperAdmin() && (
                         <div className="space-y-2">
-                            <Label>Role <span className="text-red-500">*</span></Label>
+                            <Label>Vai trò <span className="text-red-500">*</span></Label>
                             <Select value={formData.roleId} onValueChange={(val) => handleSelectChange('roleId', val)} required>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a role" />
+                                    <SelectValue placeholder="Chọn vai trò" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {roles.map(r => (
@@ -172,10 +172,10 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
 
                     {isSuperAdmin() && (selectedRoleObj?.code === 'STORE_MANAGER' || selectedRoleObj?.code === 'STAFF') && (
                         <div className="space-y-2">
-                            <Label>Assign Store <span className="text-red-500">*</span></Label>
+                            <Label>Gán cửa hàng <span className="text-red-500">*</span></Label>
                             <Select value={formData.storeId} onValueChange={(val) => handleSelectChange('storeId', val)} required>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a store" />
+                                    <SelectValue placeholder="Chọn cửa hàng" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {stores.map(s => (
@@ -187,9 +187,9 @@ const CreateUserDialog = ({ isOpen, onClose, onSuccess }) => {
                     )}
 
                     <DialogFooter className="mt-6">
-                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                        <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? 'Creating...' : 'Create User'}
+                            {loading ? 'Đang tạo...' : 'Tạo người dùng'}
                         </Button>
                     </DialogFooter>
                 </form>

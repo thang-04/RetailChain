@@ -124,7 +124,7 @@ const AssignStaffShiftModal = ({ isOpen, onClose, storeId, onAssignSuccess }) =>
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <span className="bg-[#24748f]/10 text-[#24748f] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                Store {storeId || "—"}
+                                Cửa hàng {storeId || "—"}
                             </span>
                         </div>
                         <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Phân Công Ca Làm</DialogTitle>

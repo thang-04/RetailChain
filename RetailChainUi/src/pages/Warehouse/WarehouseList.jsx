@@ -32,8 +32,8 @@ const WarehouseList = () => {
            const transformed = res.data.map(wh => ({
              ...wh,
              // Mock missing fields for UI demo
-             address: wh.warehouseType === 1 ? "Central Hub" : `Store ${wh.storeId || 'N/A'}`,
-             manager: "N/A",
+             address: wh.warehouseType === 1 ? "Kho trung tâm" : `Cửa hàng ${wh.storeId || 'Chưa có'}`,
+             manager: "Chưa có",
              utilization: Math.floor(Math.random() * 100), // Mock
              capacity: 10000,
              currentStock: Math.floor(Math.random() * 8000)
@@ -55,37 +55,37 @@ const WarehouseList = () => {
   );
 
   const getStatusBadge = (status, utilization) => {
-    if (status !== 1) return <Badge variant="secondary">Inactive</Badge>;
-    if (utilization > 90) return <Badge variant="destructive">Overload</Badge>;
-    if (utilization > 70) return <Badge className="bg-orange-500 hover:bg-orange-600">High Usage</Badge>;
-    return <Badge className="bg-green-600 hover:bg-green-700">Active</Badge>;
+    if (status !== 1) return <Badge variant="secondary">Ngừng hoạt động</Badge>;
+    if (utilization > 90) return <Badge variant="destructive">Quá tải</Badge>;
+    if (utilization > 70) return <Badge className="bg-orange-500 hover:bg-orange-600">Tải cao</Badge>;
+    return <Badge className="bg-green-600 hover:bg-green-700">Hoạt động</Badge>;
   };
 
   if (loading) {
-    return <div className="p-6 text-center">Loading warehouses...</div>;
+    return <div className="p-6 text-center">Đang tải danh sách kho...</div>;
   }
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Warehouse Management</h1>
-          <p className="text-muted-foreground mt-1">Manage central warehouses and distribution centers.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Quản lý kho</h1>
+          <p className="text-muted-foreground mt-1">Quản lý kho tổng và trung tâm phân phối.</p>
         </div>
         <Button className="flex items-center gap-2">
-          <Plus size={16} /> Add Warehouse
+          <Plus size={16} /> Thêm kho
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Warehouses</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng số kho</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{warehouses.length}</div>
-            <p className="text-xs text-muted-foreground">Active locations</p>
+            <p className="text-xs text-muted-foreground">Điểm kho đang hoạt động</p>
           </CardContent>
         </Card>
          {/* ... (Other metrics cards can be kept static or calculated) ... */}
@@ -94,11 +94,11 @@ const WarehouseList = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Warehouses List</CardTitle>
+            <CardTitle>Danh sách kho</CardTitle>
             <div className="relative w-72">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search warehouse..."
+                placeholder="Tìm kho..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -110,11 +110,11 @@ const WarehouseList = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name / Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Utilization (Mock)</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Mã kho</TableHead>
+                <TableHead>Tên / Loại</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Công suất sử dụng (mô phỏng)</TableHead>
+                <TableHead className="text-right">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -128,7 +128,7 @@ const WarehouseList = () => {
                   <TableCell>
                     <div className="font-semibold">{wh.name}</div>
                     <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                      <MapPin size={12} /> {wh.warehouseType === 1 ? 'Main Warehouse' : 'Store Warehouse'}
+                      <MapPin size={12} /> {wh.warehouseType === 1 ? 'Kho tổng' : 'Kho cửa hàng'}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -143,7 +143,7 @@ const WarehouseList = () => {
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" onClick={(e) => {
                         e.stopPropagation();
-                    }}>Edit</Button>
+                    }}>Sửa</Button>
                   </TableCell>
                 </TableRow>
               ))}

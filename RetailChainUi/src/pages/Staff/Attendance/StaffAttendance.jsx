@@ -75,7 +75,7 @@ const StaffAttendance = () => {
             'ONTIME': { variant: 'default', label: 'Đúng giờ', className: 'bg-green-500' },
             'LATE': { variant: 'destructive', label: 'Muộn', className: 'bg-yellow-500' },
             'EARLY_LEAVE': { variant: 'outline', label: 'Về sớm', className: 'bg-orange-500 text-orange-700' },
-            'FORGOT': { variant: 'secondary', label: 'Quên checkout', className: 'bg-red-500' }
+            'FORGOT': { variant: 'secondary', label: 'Quên chấm công ra', className: 'bg-red-500' }
         };
         const config = statusMap[status] || { variant: 'secondary', label: status || 'Chưa xác định' };
         return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
@@ -103,7 +103,7 @@ const StaffAttendance = () => {
                     <h2 className="text-2xl font-bold tracking-tight text-[#121617] dark:text-white">
                         Chấm công & Hiệu suất
                     </h2>
-                    <p className="text-[#677c83] dark:text-gray-400">Theo dõi check-in và giờ làm hàng ngày</p>
+                    <p className="text-[#677c83] dark:text-gray-400">Theo dõi chấm công vào và giờ làm hằng ngày</p>
                 </div>
                 <div className="flex gap-2 items-center">
                     {/* Store selector for Super Admin */}
@@ -146,7 +146,7 @@ const StaffAttendance = () => {
                             <SelectItem value="ONTIME">Đúng giờ</SelectItem>
                             <SelectItem value="LATE">Muộn</SelectItem>
                             <SelectItem value="EARLY_LEAVE">Về sớm</SelectItem>
-                            <SelectItem value="FORGOT">Quên checkout</SelectItem>
+                            <SelectItem value="FORGOT">Quên chấm công ra</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -170,7 +170,7 @@ const StaffAttendance = () => {
                 </Card>
                 <Card className="border border-[#e2e8f0] dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-[#677c83]">Đã checkout</CardTitle>
+                        <CardTitle className="text-sm font-medium text-[#677c83]">Đã chấm công ra</CardTitle>
                         <span className="material-symbols-outlined text-blue-500">logout</span>
                     </CardHeader>
                     <CardContent>
@@ -221,8 +221,8 @@ const StaffAttendance = () => {
                                     <TableHead>Nhân viên</TableHead>
                                     <TableHead>Ca làm</TableHead>
                                     <TableHead>Ngày</TableHead>
-                                    <TableHead>Check-in</TableHead>
-                                    <TableHead>Check-out</TableHead>
+                                    <TableHead>Chấm công vào</TableHead>
+                                    <TableHead>Chấm công ra</TableHead>
                                     <TableHead>Giờ làm</TableHead>
                                     <TableHead>Trạng thái</TableHead>
                                 </TableRow>
@@ -230,8 +230,8 @@ const StaffAttendance = () => {
                             <TableBody>
                                 {attendanceList.map((record, index) => (
                                     <TableRow key={index}>
-                                        <TableCell className="font-medium">{record.userName || 'N/A'}</TableCell>
-                                        <TableCell>{record.shiftName || 'N/A'}</TableCell>
+                                        <TableCell className="font-medium">{record.userName || 'Chưa có'}</TableCell>
+                                        <TableCell>{record.shiftName || 'Chưa có'}</TableCell>
                                         <TableCell>{formatDate(record.date)}</TableCell>
                                         <TableCell>{record.checkInTime || '--:--'}</TableCell>
                                         <TableCell>{record.checkOutTime || '--:--'}</TableCell>

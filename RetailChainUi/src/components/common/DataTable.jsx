@@ -59,7 +59,7 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder={searchPlaceholder || "Filter items..."}
+          placeholder={searchPlaceholder || "Lọc dữ liệu..."}
           value={(table.getColumn(searchKey)?.getFilterValue()) ?? ""}
           onChange={(event) =>
             table.getColumn(searchKey)?.setFilterValue(event.target.value)
@@ -70,7 +70,7 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
+                Cột <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -138,7 +138,7 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Không có kết quả.
                 </TableCell>
               </TableRow>
             )}
@@ -147,8 +147,8 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} trên{" "}
+          {table.getFilteredRowModel().rows.length} dòng được chọn.
         </div>
         <div className="space-x-2">
           <Button
@@ -157,7 +157,7 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Trước
           </Button>
           <Button
             variant="outline"
@@ -165,7 +165,7 @@ const DataTable = React.memo(function DataTable({ columns, data, searchKey, sear
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Sau
           </Button>
         </div>
       </div>

@@ -55,7 +55,7 @@ const LoginPage = () => {
                             <Input
                                 id="email"
                                 type="email"
-                                placeholder="name@example.com"
+                                placeholder="ten@retailchain.com"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -102,7 +102,7 @@ const LoginPage = () => {
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 text-center">
                     <div className="text-sm text-muted-foreground">
-                        @Retail Chain 2026
+                        RetailChain © 2026
                     </div>
                 </CardFooter>
             </Card>

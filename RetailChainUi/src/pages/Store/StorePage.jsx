@@ -105,7 +105,7 @@ const StorePage = () => {
                 onClick={() => setIsModalOpen(true)}
               >
                 <Plus className="w-5 h-5" />
-                <span>Add Store</span>
+                <span>Thêm cửa hàng</span>
               </Button>
             )}
           </div>
@@ -125,7 +125,7 @@ const StorePage = () => {
                 <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
               </div>
-              <div className="text-lg font-medium text-slate-500 dark:text-slate-400">Loading stores...</div>
+              <div className="text-lg font-medium text-slate-500 dark:text-slate-400">Đang tải danh sách cửa hàng...</div>
             </div>
           ) : filteredStores.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#1a262a] rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 group hover:border-primary/50 transition-all duration-300">

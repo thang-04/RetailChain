@@ -30,20 +30,20 @@ const ProductChainView = () => {
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <h2 className="text-3xl font-bold tracking-tight">Product Details</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Chi tiết sản phẩm</h2>
                 <div className="flex gap-2">
-                    <Button variant="destructive">Deactivate Product</Button>
-                    <Button>Save Changes</Button>
+                    <Button variant="destructive">Ngừng kinh doanh</Button>
+                    <Button>Lưu thay đổi</Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="md:col-span-2">
-                    <CardHeader><CardTitle>General Information</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Thông tin chung</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Product Name</Label>
+                                <Label>Tên sản phẩm</Label>
                                 <Input defaultValue={product.name} />
                             </div>
                             <div className="space-y-2">
@@ -51,42 +51,42 @@ const ProductChainView = () => {
                                 <Input defaultValue={product.sku} disabled />
                             </div>
                             <div className="space-y-2">
-                                <Label>Category</Label>
+                                <Label>Danh mục</Label>
                                 <Input defaultValue={product.category} />
                             </div>
                             <div className="space-y-2">
-                                <Label>Selling Price (VND)</Label>
+                                <Label>Giá bán (VND)</Label>
                                 <Input type="number" defaultValue={product.price} />
                             </div>
                         </div>
                          <div className="space-y-2">
-                            <Label>Description</Label>
+                            <Label>Mô tả</Label>
                             <Input defaultValue={product.description} />
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardHeader><CardTitle>Product Image</CardTitle></CardHeader>
+                    <CardHeader><CardTitle>Hình ảnh sản phẩm</CardTitle></CardHeader>
                     <CardContent className="flex flex-col items-center">
-                        <img src={product.image} alt="Product" className="rounded-lg border mb-4 w-48 h-48 object-cover" />
-                        <Button variant="outline" className="w-full">Change Image</Button>
+                        <img src={product.image} alt="Sản phẩm" className="rounded-lg border mb-4 w-48 h-48 object-cover" />
+                        <Button variant="outline" className="w-full">Đổi ảnh</Button>
                     </CardContent>
                 </Card>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Chain-wide Stock Availability</CardTitle>
+                    <CardTitle>Tình trạng tồn kho toàn hệ thống</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Location</TableHead>
-                                <TableHead className="w-[300px]">Availability</TableHead>
-                                <TableHead className="text-right">Quantity</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead>Vị trí</TableHead>
+                                <TableHead className="w-[300px]">Mức độ sẵn có</TableHead>
+                                <TableHead className="text-right">Số lượng</TableHead>
+                                <TableHead className="text-right">Thao tác</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -101,7 +101,7 @@ const ProductChainView = () => {
                                     </TableCell>
                                     <TableCell className="text-right font-bold text-lg">{loc.stock}</TableCell>
                                     <TableCell className="text-right">
-                                        <Button size="sm" variant="outline">Restock</Button>
+                                        <Button size="sm" variant="outline">Bổ sung hàng</Button>
                                     </TableCell>
                                 </TableRow>
                             ))}

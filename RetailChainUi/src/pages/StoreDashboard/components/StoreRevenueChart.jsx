@@ -35,20 +35,20 @@ const StoreRevenueChart = ({ data = [] }) => {
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Store Revenue Over Time (7 Days)</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Doanh thu cửa hàng theo thời gian (7 ngày)</h3>
             <div className="flex items-center gap-2 mt-1">
               <h4 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {totalRevenue.toLocaleString()} VND
               </h4>
               {/* Fixed badge for now, can be calculated against previous 7 days if API provides it */}
-              <span className="text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">Active</span>
+              <span className="text-sm font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">Đang hoạt động</span>
             </div>
           </div>
           {/* Simple Custom Legend */}
           <div className="flex items-center gap-4 text-xs font-medium">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-primary"></span>
-              <span className="text-slate-600 dark:text-slate-300">Revenue</span>
+              <span className="text-slate-600 dark:text-slate-300">Doanh thu</span>
             </div>
           </div>
         </div>

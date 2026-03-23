@@ -34,11 +34,11 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
             return;
         }
         if (!minStaff || !maxStaff || Number(minStaff) <= 0 || Number(maxStaff) <= 0) {
-            setError("Min/Max nhân sự phải lớn hơn 0");
+            setError("Số lượng nhân sự tối thiểu và tối đa phải lớn hơn 0");
             return;
         }
         if (Number(minStaff) > Number(maxStaff)) {
-            setError("Min nhân sự không được lớn hơn Max nhân sự");
+            setError("Số lượng nhân sự tối thiểu không được lớn hơn số lượng tối đa");
             return;
         }
 
@@ -89,9 +89,9 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
             <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white dark:bg-surface-dark border-border-light dark:border-border-dark gap-0">
                 <DialogHeader className="p-6 pb-4 border-b border-border-light dark:border-border-dark flex flex-row justify-between items-start space-y-0">
                     <div>
-                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Create New Shift Type</DialogTitle>
+                        <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white leading-tight">Tạo loại ca làm mới</DialogTitle>
                         <DialogDescription className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-                            Define a new shift template for this store.
+                            Thiết lập mẫu ca làm mới cho cửa hàng này.
                         </DialogDescription>
                     </div>
                 </DialogHeader>
@@ -105,7 +105,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
                     )}
 
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Shift Name <span className="text-red-500">*</span></label>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tên ca làm <span className="text-red-500">*</span></label>
                         <input
                             type="text"
                             value={name}
@@ -117,7 +117,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Start Time <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giờ bắt đầu <span className="text-red-500">*</span></label>
                             <input
                                 type="time"
                                 value={startTime}
@@ -127,7 +127,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">End Time <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giờ kết thúc <span className="text-red-500">*</span></label>
                             <input
                                 type="time"
                                 value={endTime}
@@ -139,7 +139,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Min Staff <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nhân sự tối thiểu <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 min={1}
@@ -150,7 +150,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Max Staff <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nhân sự tối đa <span className="text-red-500">*</span></label>
                             <input
                                 type="number"
                                 min={1}
@@ -168,7 +168,7 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
                         disabled={loading}
                         className="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         onClick={handleCreate}
@@ -178,12 +178,12 @@ const CreateShiftModal = ({ isOpen, onClose, storeId, onCreateSuccess }) => {
                         {loading ? (
                             <>
                                 <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
-                                Saving...
+                                Đang lưu...
                             </>
                         ) : (
                             <>
                                 <span className="material-symbols-outlined text-[20px]">save</span>
-                                Create Shift
+                                Tạo ca làm
                             </>
                         )}
                     </button>

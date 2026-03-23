@@ -23,14 +23,14 @@ const formatDate = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"];
+const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+  "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
 
 const StaffCalendar = () => {
   const [assignments, setAssignments] = useState([]);
   const [currentMonday, setCurrentMonday] = useState(getMonday(new Date()));
   const [loading, setLoading] = useState(false);
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const daysOfWeek = ['Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'CN'];
   const timeSlots = ['08:00', '12:00', '16:00', '20:00'];
 
   // TODO: lấy storeId từ context/route
@@ -105,18 +105,18 @@ const StaffCalendar = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Shift Calendar</h2>
-          <p className="text-muted-foreground">Weekly schedule for store staff.</p>
+          <h2 className="text-3xl font-bold tracking-tight">Lịch ca làm</h2>
+          <p className="text-muted-foreground">Lịch làm việc theo tuần cho nhân viên cửa hàng.</p>
         </div>
         <div className="flex gap-2">
           <Select defaultValue="week">
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="View" />
+              <SelectValue placeholder="Chế độ xem" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="day">Day View</SelectItem>
-              <SelectItem value="week">Week View</SelectItem>
-              <SelectItem value="month">Month View</SelectItem>
+              <SelectItem value="day">Xem theo ngày</SelectItem>
+              <SelectItem value="week">Xem theo tuần</SelectItem>
+              <SelectItem value="month">Xem theo tháng</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -126,8 +126,8 @@ const StaffCalendar = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
-              {monthNames[currentMonday.getMonth()]} {currentMonday.getFullYear()} - Week {weekNumber}
-              {loading && <span className="ml-2 text-sm text-muted-foreground">Loading...</span>}
+              {monthNames[currentMonday.getMonth()]} {currentMonday.getFullYear()} - Tuần {weekNumber}
+              {loading && <span className="ml-2 text-sm text-muted-foreground">Đang tải...</span>}
             </CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" size="icon" onClick={goToPrevWeek}>
@@ -141,7 +141,7 @@ const StaffCalendar = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-8 gap-4 border rounded-lg p-4">
-            <div className="font-bold text-center py-2 bg-gray-50 dark:bg-gray-800 rounded">Time / Day</div>
+            <div className="font-bold text-center py-2 bg-gray-50 dark:bg-gray-800 rounded">Giờ / Ngày</div>
             {daysOfWeek.map((day, idx) => (
               <div key={day} className="font-bold text-center py-2 bg-gray-50 dark:bg-gray-800 rounded">
                 {day} <span className="text-xs font-normal text-muted-foreground">{weekDays[idx].getDate()}</span>
