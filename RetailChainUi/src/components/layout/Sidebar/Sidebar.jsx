@@ -38,13 +38,13 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/stock-in",
       label: "Nhập kho",
       icon: "input_circle",
-      show: hasPermission('INVENTORY_CREATE'),
+      show: isSuperAdmin(),
     },
     {
       path: "/stock-out",
       label: "Xuất kho",
       icon: "output_circle",
-      show: hasPermission('INVENTORY_CREATE'),
+      show: isSuperAdmin(),
     },
     {
       path: "/reports",

@@ -150,8 +150,15 @@ const AppRoutes = () => {
                         <Route path="/inventory/ledger" element={<StockLedger />} />
                         <Route path="/inventory/:inventoryId" element={<InventoryDetailPage />} />
 
-                        {/* Stock In - VIEW for all, CREATE for STORE_MANAGER+ */}
-                        <Route path="/stock-in" element={<StockInList />} />
+                        {/* Stock In - SUPER_ADMIN only for list view */}
+                        <Route
+                            path="/stock-in"
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                                    <StockInList />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path="/stock-in/create"
                             element={
@@ -161,8 +168,15 @@ const AppRoutes = () => {
                             }
                         />
 
-                        {/* Stock Out - VIEW for all, CREATE for STORE_MANAGER+ */}
-                        <Route path="/stock-out" element={<StockOutList />} />
+                        {/* Stock Out - SUPER_ADMIN only for list view */}
+                        <Route
+                            path="/stock-out"
+                            element={
+                                <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
+                                    <StockOutList />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route
                             path="/stock-out/create"
                             element={
