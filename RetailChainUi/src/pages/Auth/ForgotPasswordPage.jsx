@@ -163,7 +163,7 @@ const ForgotPasswordPage = () => {
                                 <Input 
                                     id="email" 
                                     type="email" 
-                                    placeholder="example@retailchain.com" 
+                                    placeholder="ten@retailchain.com" 
                                     className="pl-10"
                                     required 
                                     value={email}

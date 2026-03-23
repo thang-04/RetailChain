@@ -54,7 +54,7 @@ const AttendanceHistoryPage = () => {
       'ONTIME': { variant: 'default', label: 'Đúng giờ', className: 'bg-green-500' },
       'LATE': { variant: 'destructive', label: 'Muộn', className: 'bg-yellow-500' },
       'EARLY_LEAVE': { variant: 'outline', label: 'Về sớm', className: 'bg-orange-500 text-orange-700' },
-      'FORGOT': { variant: 'secondary', label: 'Quên checkout', className: 'bg-red-500' }
+      'FORGOT': { variant: 'secondary', label: 'Quên chấm công ra', className: 'bg-red-500' }
     };
     const config = statusMap[status] || { variant: 'secondary', label: status || 'Chưa xác định' };
     return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
@@ -72,7 +72,7 @@ const AttendanceHistoryPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#121617] dark:text-white">Lịch sử chấm công</h1>
-          <p className="text-[#677c83] dark:text-gray-400">Xem lịch sử check-in và check-out của bạn</p>
+          <p className="text-[#677c83] dark:text-gray-400">Xem lịch sử chấm công vào và chấm công ra của bạn</p>
         </div>
         <Button variant="outline" asChild>
           <Link to="/attendance">Quay lại</Link>
@@ -164,8 +164,8 @@ const AttendanceHistoryPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Ngày</TableHead>
-                  <TableHead>Check-in</TableHead>
-                  <TableHead>Check-out</TableHead>
+                  <TableHead>Chấm công vào</TableHead>
+                  <TableHead>Chấm công ra</TableHead>
                   <TableHead>Giờ làm</TableHead>
                   <TableHead>Trạng thái</TableHead>
                 </TableRow>

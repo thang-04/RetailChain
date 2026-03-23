@@ -1,5 +1,5 @@
 // src/pages/Attendance/AttendancePage.jsx
-// Trang chấm công cho Staff - Check-in/Check-out
+// Trang chấm công cho nhân viên - chấm công vào/chấm công ra
 
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -76,15 +76,15 @@ const AttendancePage = () => {
         if (data.warning) {
           toast.warning(data.warning);
         } else {
-          toast.success(data.message || 'Check-in thành công');
+          toast.success(data.message || 'Chấm công vào thành công');
         }
         setNote('');
       } else {
-        toast.error(response.desc || response.message || 'Check-in thất bại');
+        toast.error(response.desc || response.message || 'Chấm công vào thất bại');
       }
     } catch (error) {
       console.error('Checkin error:', error);
-      const errorMsg = error.response?.data?.desc || error.message || 'Check-in thất bại';
+      const errorMsg = error.response?.data?.desc || error.message || 'Chấm công vào thất bại';
       toast.error(errorMsg);
     } finally {
       setChecking(false);
@@ -120,15 +120,15 @@ const AttendancePage = () => {
         if (data.warning) {
           toast.warning(data.warning);
         } else {
-          toast.success(data.message || 'Check-out thành công');
+          toast.success(data.message || 'Chấm công ra thành công');
         }
         setNote('');
       } else {
-        toast.error(response.desc || response.message || 'Check-out thất bại');
+        toast.error(response.desc || response.message || 'Chấm công ra thất bại');
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      const errorMsg = error.response?.data?.desc || error.message || 'Check-out thất bại';
+      const errorMsg = error.response?.data?.desc || error.message || 'Chấm công ra thất bại';
       toast.error(errorMsg);
     } finally {
       setChecking(false);
@@ -140,9 +140,9 @@ const AttendancePage = () => {
       'ONTIME': { variant: 'default', label: 'Đúng giờ', className: 'bg-green-500' },
       'LATE': { variant: 'destructive', label: 'Muộn', className: 'bg-yellow-500' },
       'EARLY_LEAVE': { variant: 'outline', label: 'Về sớm', className: 'bg-orange-500 text-orange-700' },
-      'FORGOT': { variant: 'secondary', label: 'Quên checkout', className: 'bg-red-500' }
+      'FORGOT': { variant: 'secondary', label: 'Quên chấm công ra', className: 'bg-red-500' }
     };
-    const config = statusMap[status] || { variant: 'secondary', label: status || 'Chưa checkin' };
+    const config = statusMap[status] || { variant: 'secondary', label: status || 'Chưa chấm công' };
     return <Badge variant={config.variant} className={config.className}>{config.label}</Badge>;
   };
 
@@ -155,7 +155,7 @@ const AttendancePage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#121617] dark:text-white">Chấm công</h1>
-          <p className="text-[#677c83] dark:text-gray-400">Check-in và Check-out hàng ngày</p>
+          <p className="text-[#677c83] dark:text-gray-400">Chấm công vào và chấm công ra hằng ngày</p>
         </div>
         <Button variant="outline" asChild>
           <Link to="/attendance/history">Xem lịch sử</Link>
@@ -171,11 +171,11 @@ const AttendancePage = () => {
           {/* Status Grid */}
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-[#f1f5f9] dark:bg-gray-800 rounded-lg">
-              <p className="text-sm text-[#677c83] dark:text-gray-400 mb-1">Check-in</p>
+              <p className="text-sm text-[#677c83] dark:text-gray-400 mb-1">Chấm công vào</p>
               <p className="text-2xl font-semibold">{todayStatus?.checkInTime || '--:--'}</p>
             </div>
             <div className="text-center p-4 bg-[#f1f5f9] dark:bg-gray-800 rounded-lg">
-              <p className="text-sm text-[#677c83] dark:text-gray-400 mb-1">Check-out</p>
+              <p className="text-sm text-[#677c83] dark:text-gray-400 mb-1">Chấm công ra</p>
               <p className="text-2xl font-semibold">{todayStatus?.checkOutTime || '--:--'}</p>
             </div>
             <div className="text-center p-4 bg-[#f1f5f9] dark:bg-gray-800 rounded-lg">
@@ -221,7 +221,7 @@ const AttendancePage = () => {
                       Đang lấy vị trí...
                     </span>
                   ) : (
-                    '📍 Check-in'
+                    '📍 Chấm công vào'
                   )}
                 </Button>
               ) : (
@@ -236,7 +236,7 @@ const AttendancePage = () => {
                       Đang lấy vị trí...
                     </span>
                   ) : (
-                    '🏁 Check-out'
+                    '🏁 Chấm công ra'
                   )}
                 </Button>
               )}
@@ -249,7 +249,7 @@ const AttendancePage = () => {
 
             {/* Info Text */}
             <p className="mt-4 text-xs text-center text-[#677c83] dark:text-gray-400">
-              Vui lòng bật GPS và cho phép trình duyệt truy cập vị trí để check-in/check-out
+              Vui lòng bật GPS và cho phép trình duyệt truy cập vị trí để chấm công vào/chấm công ra
             </p>
           </CardContent>
         </Card>

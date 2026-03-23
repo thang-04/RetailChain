@@ -14,6 +14,19 @@ import { Package, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const INVENTORY_PREVIEW_LIMIT = 5;
 
+const getStatusLabel = (status) => {
+    switch (status) {
+        case "In Stock":
+            return "Còn hàng";
+        case "Low Stock":
+            return "Sắp hết hàng";
+        case "Out of Stock":
+            return "Hết hàng";
+        default:
+            return status;
+    }
+};
+
 const StoreInventoryTable = ({ inventory }) => {
     const { id } = useParams();
     // Use mock default if no inventory provided
@@ -64,7 +77,7 @@ const StoreInventoryTable = ({ inventory }) => {
                     to={`/store/${id}/inventory`}
                     className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer"
                 >
-                    View All
+                    Xem tất cả
                 </Link>
             </CardHeader>
             <CardContent className="p-0">
@@ -86,7 +99,7 @@ const StoreInventoryTable = ({ inventory }) => {
                                 <TableCell className="px-6 py-3">
                                     <Badge variant="secondary" className={`border-none shadow-none text-xs flex w-fit items-center ${getStatusColor(item.status)}`}>
                                         {getStatusIcon(item.status)}
-                                        {item.status}
+                                        {getStatusLabel(item.status)}
                                     </Badge>
                                 </TableCell>
                             </TableRow>

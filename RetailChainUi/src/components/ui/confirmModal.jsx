@@ -5,10 +5,10 @@ const ConfirmModal = ({
     isOpen,
     onClose,
     onConfirm,
-    title = "Confirm Action",
-    message = "Are you sure you want to proceed?",
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    title = "Xác nhận thao tác",
+    message = "Bạn có chắc chắn muốn tiếp tục không?",
+    confirmText = "Xác nhận",
+    cancelText = "Hủy",
     variant = "warning" // warning, danger, info, success
 }) => {
     if (!isOpen) return null;

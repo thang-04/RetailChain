@@ -69,6 +69,12 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
     if (!isOpen) return null;
 
     // --- Tab: Existing ---
+    const getRoleLabel = (role) => {
+        if (role === 'STAFF') return 'Nhân viên';
+        if (role === 'STORE_MANAGER') return 'Quản lý cửa hàng';
+        return role;
+    };
+
     const displayStaff = staffList.filter(s => {
         const search = searchQuery.toLowerCase();
         return (
@@ -94,7 +100,7 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
             else onClose();
         } catch (error) {
             console.error("Failed to assign staff", error);
-            alert("Failed to assign staff. Please try again.");
+            alert("Không thể gán nhân sự. Vui lòng thử lại.");
         } finally {
             setIsSavingExisting(false);
         }
@@ -116,7 +122,7 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
         setCreateError('');
 
         try {
-            if (!formData.roleId) throw new Error("Please select a role");
+            if (!formData.roleId) throw new Error("Vui lòng chọn vai trò");
 
             const payload = {
                 username: formData.username,
@@ -133,7 +139,7 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
             if (onSuccess) onSuccess();
             else onClose();
         } catch (err) {
-            setCreateError(err.response?.data?.message || err.response?.data || err.message || 'Failed to create user');
+            setCreateError(err.response?.data?.message || err.response?.data || err.message || 'Không thể tạo người dùng');
         } finally {
             setLoadingCreate(false);
         }
@@ -145,8 +151,8 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                 {/* Header */}
                 <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Add Staff to Store</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Assign existing staff or create a new user profile.</p>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Thêm nhân sự vào cửa hàng</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Gán nhân sự hiện có hoặc tạo hồ sơ người dùng mới.</p>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-full p-1 hover:bg-slate-100 dark:hover:bg-slate-800">
                         <span className="material-symbols-outlined">close</span>
@@ -159,13 +165,13 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                         onClick={() => setActiveTab('existing')}
                         className={`flex-1 py-3 text-sm font-medium transition-all ${activeTab === 'existing' ? 'text-primary border-b-2 border-primary bg-white dark:bg-[#1a1d21]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent'}`}
                     >
-                        Assign Existing Unassigned Staff
+                        Gán nhân sự chưa phân công
                     </button>
                     <button
                         onClick={() => setActiveTab('create')}
                         className={`flex-1 py-3 text-sm font-medium transition-all ${activeTab === 'create' ? 'text-primary border-b-2 border-primary bg-white dark:bg-[#1a1d21]' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent'}`}
                     >
-                        Create New Staff Profile
+                        Tạo hồ sơ nhân sự mới
                     </button>
                 </div>
 
@@ -176,13 +182,13 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                             <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800 shrink-0">
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px]">search</span>
-                                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" placeholder="Search by name, email, or username..." type="text" />
+                                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} autoFocus className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" placeholder="Tìm theo tên, email hoặc tên đăng nhập..." type="text" />
                                 </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto min-h-[300px]">
                                 {loadingExisting ? (
-                                    <div className="p-10 text-center text-slate-500">Loading available staff...</div>
+                                    <div className="p-10 text-center text-slate-500">Đang tải danh sách nhân sự khả dụng...</div>
                                 ) : (
                                     <table className="w-full text-left border-collapse">
                                         <thead>
@@ -198,8 +204,8 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                                                         checked={displayStaff.length > 0 && selectedIds.size === displayStaff.length}
                                                     />
                                                 </th>
-                                                <th className="py-3 px-6 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Staff Member</th>
-                                                <th className="py-3 px-6 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</th>
+                                                <th className="py-3 px-6 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Nhân sự</th>
+                                                <th className="py-3 px-6 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Vai trò</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -225,12 +231,12 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                                                         </div>
                                                     </td>
                                                     <td className="py-4 px-6 text-slate-600 dark:text-slate-400 text-sm">
-                                                        {(staff.roles && staff.roles.length > 0) ? staff.roles.join(', ') : 'Staff'}
+                                                        {(staff.roles && staff.roles.length > 0) ? staff.roles.map(getRoleLabel).join(', ') : 'Nhân viên'}
                                                     </td>
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={3} className="py-10 text-center text-slate-500">No unassigned staff found matching your criteria.</td>
+                                                    <td colSpan={3} className="py-10 text-center text-slate-500">Không tìm thấy nhân sự chưa phân công phù hợp với điều kiện lọc.</td>
                                                 </tr>
                                             )}
                                         </tbody>
@@ -239,13 +245,13 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
                             </div>
 
                             <div className="px-6 py-5 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/20 shrink-0">
-                                <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">{selectedIds.size} staff member(s) selected</span>
+                                <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Đã chọn {selectedIds.size} nhân sự</span>
                                 <div className="flex gap-3">
                                     <button onClick={onClose} className="h-10 px-5 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700">
-                                        Cancel
+                                        Hủy
                                     </button>
                                     <button onClick={handleAssign} disabled={selectedIds.size === 0 || isSavingExisting} className="h-10 px-5 bg-primary hover:bg-[#1d617a] text-white text-sm font-semibold rounded-lg shadow-sm shadow-primary/30 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50">
-                                        <span>{isSavingExisting ? "Assigning..." : "Assign to Store"}</span>
+                                        <span>{isSavingExisting ? "Đang gán..." : "Gán vào cửa hàng"}</span>
                                     </button>
                                 </div>
                             </div>
@@ -259,41 +265,41 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
-                                        <Input id="username" name="username" value={formData.username} onChange={handleFormChange} required placeholder="e.g. jdoe123" />
+                                        <Label htmlFor="username">Tên đăng nhập <span className="text-red-500">*</span></Label>
+                                        <Input id="username" name="username" value={formData.username} onChange={handleFormChange} required placeholder="Ví dụ: nguyenvana" />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
-                                        <Input id="email" name="email" type="email" value={formData.email} onChange={handleFormChange} required placeholder="example@email.com" />
+                                        <Input id="email" name="email" type="email" value={formData.email} onChange={handleFormChange} required placeholder="ten@retailchain.com" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
-                                    <Input id="password" name="password" type="password" value={formData.password} onChange={handleFormChange} required minLength={6} placeholder="Min 6 characters" />
+                                    <Label htmlFor="password">Mật khẩu <span className="text-red-500">*</span></Label>
+                                    <Input id="password" name="password" type="password" value={formData.password} onChange={handleFormChange} required minLength={6} placeholder="Tối thiểu 6 ký tự" />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
-                                        <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleFormChange} required placeholder="John Doe" />
+                                        <Label htmlFor="fullName">Họ và tên <span className="text-red-500">*</span></Label>
+                                        <Input id="fullName" name="fullName" value={formData.fullName} onChange={handleFormChange} required placeholder="Nguyễn Văn A" />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phoneNumber">Phone Number</Label>
-                                        <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleFormChange} placeholder="(+1) 123 456 7890" />
+                                        <Label htmlFor="phoneNumber">Số điện thoại</Label>
+                                        <Input id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleFormChange} placeholder="0912 345 678" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Role <span className="text-red-500">*</span></Label>
+                                    <Label>Vai trò <span className="text-red-500">*</span></Label>
                                     <Select value={formData.roleId} onValueChange={handleRoleChange} required>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select Staff or Store Manager role" />
+                                            <SelectValue placeholder="Chọn vai trò nhân viên hoặc quản lý cửa hàng" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {roles.map(r => (
                                                 <SelectItem key={r.id} value={r.id.toString()}>
-                                                    {r.name === 'STAFF' ? 'Staff' : (r.name === 'STORE_MANAGER' ? 'Store Manager' : r.name)}
+                                                    {getRoleLabel(r.name)}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -303,10 +309,10 @@ const AddStaffModal = ({ isOpen, onClose, storeId, onSuccess }) => {
 
                             <div className="mt-auto px-6 py-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-slate-50 dark:bg-slate-800/20 shrink-0">
                                 <button type="button" onClick={onClose} className="h-10 px-5 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700">
-                                    Cancel
+                                    Hủy
                                 </button>
                                 <button type="submit" disabled={loadingCreate} className="h-10 px-5 bg-primary hover:bg-[#1d617a] text-white text-sm font-semibold rounded-lg shadow-sm shadow-primary/30 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50">
-                                    <span>{loadingCreate ? "Creating..." : "Create & Assign"}</span>
+                                    <span>{loadingCreate ? "Đang tạo..." : "Tạo và gán"}</span>
                                 </button>
                             </div>
                         </form>

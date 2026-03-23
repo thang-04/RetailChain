@@ -58,7 +58,7 @@ const UserManagementPage = () => {
             setUsers(response.data || []);
         } catch (err) {
             console.error('Error fetching users:', err);
-            setError('Failed to load users');
+            setError('Không thể tải danh sách người dùng');
         } finally {
             setLoading(false);
         }
@@ -81,14 +81,14 @@ const UserManagementPage = () => {
             fetchUsers();
         } catch (err) {
             console.error('Error toggling block status:', err);
-            setError('Failed to update user status');
+            setError('Không thể cập nhật trạng thái người dùng');
         }
     };
 
 
 
     const formatRole = (roleString) => {
-        if (!roleString) return 'Unknown';
+        if (!roleString) return 'Không xác định';
         return roleString.split('_').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
         ).join(' ');
@@ -104,14 +104,14 @@ const UserManagementPage = () => {
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">Quản lý người dùng</h1>
                     <p className="text-muted-foreground">
-                        Manage your subordinate accounts and their scopes.
+                        Quản lý tài khoản cấp dưới và phạm vi truy cập của họ.
                     </p>
                 </div>
                 <Button onClick={() => setIsCreateOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Create User
+                    Tạo người dùng
                 </Button>
             </div>
 
@@ -119,7 +119,7 @@ const UserManagementPage = () => {
                 <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search users by name or email..."
+                        placeholder="Tìm người dùng theo tên hoặc email..."
                         className="pl-8"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -131,24 +131,24 @@ const UserManagementPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>User Info</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Scope</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead>Thông tin người dùng</TableHead>
+                            <TableHead>Vai trò</TableHead>
+                            <TableHead>Phạm vi</TableHead>
+                            <TableHead>Trạng thái</TableHead>
+                            <TableHead className="text-right">Thao tác</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    Loading users...
+                                    Đang tải danh sách người dùng...
                                 </TableCell>
                             </TableRow>
                         ) : filteredUsers.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    No users found in your scope.
+                                    Không tìm thấy người dùng trong phạm vi quản lý.
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -173,16 +173,16 @@ const UserManagementPage = () => {
                                     <TableCell>
                                         <div className="flex flex-col gap-1 text-sm">
                                             {user.storeId && (
-                                                <span className="text-muted-foreground">Store ID: <span className="text-foreground font-medium">{user.storeId}</span></span>
+                                                <span className="text-muted-foreground">Cửa hàng: <span className="text-foreground font-medium">{user.storeId}</span></span>
                                             )}
                                             {!user.storeId && (
-                                                <span className="text-muted-foreground italic">Global Access</span>
+                                                <span className="text-muted-foreground italic">Toàn hệ thống</span>
                                             )}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={user.status === 1 ? 'default' : 'destructive'}>
-                                            {user.status === 1 ? 'Active' : 'Blocked'}
+                                            {user.status === 1 ? 'Hoạt động' : 'Bị khóa'}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -190,7 +190,7 @@ const UserManagementPage = () => {
                                             <Button
                                                 variant="outline"
                                                 size="icon"
-                                                title="Edit User"
+                                                title="Chỉnh sửa người dùng"
                                                 onClick={() => {
                                                     setUserToEdit(user);
                                                     setIsEditOpen(true);
@@ -202,7 +202,7 @@ const UserManagementPage = () => {
                                             <Button
                                                 variant={user.status === 1 ? "outline" : "default"}
                                                 size="icon"
-                                                title={user.status === 1 ? "Block User" : "Unblock User"}
+                                                title={user.status === 1 ? "Khóa người dùng" : "Mở khóa người dùng"}
                                                 onClick={() => handleToggleBlock(user)}
                                                 className={user.status === 1 ? "text-red-500 hover:text-red-600 hover:bg-red-50" : "bg-green-600 hover:bg-green-700"}
                                             >

@@ -20,6 +20,15 @@ const StaffList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const getStatusLabel = (status) => {
+    const statusMap = {
+      Active: "Hoạt động",
+      Inactive: "Ngừng hoạt động",
+    };
+
+    return statusMap[status] || status;
+  };
+
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -46,24 +55,24 @@ const StaffList = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Staff Management</h2>
-          <p className="text-muted-foreground">Manage your store employees and their roles.</p>
+          <h2 className="text-3xl font-bold tracking-tight">Quản lý nhân viên</h2>
+          <p className="text-muted-foreground">Quản lý nhân viên cửa hàng và vai trò của họ.</p>
         </div>
         <Button className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Add Staff
+          Thêm nhân viên
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
           <div className="flex justify-between items-center">
-            <CardTitle>All Employees</CardTitle>
+            <CardTitle>Tất cả nhân viên</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative w-64">
                 <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" />
                 <Input
-                  placeholder="Search staff..."
+                  placeholder="Tìm nhân viên..."
                   className="pl-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -77,17 +86,17 @@ const StaffList = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-10">Loading staff data...</div>
+            <div className="text-center py-10">Đang tải dữ liệu nhân viên...</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Store</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Nhân viên</TableHead>
+                  <TableHead>Vai trò</TableHead>
+                  <TableHead>Bộ phận</TableHead>
+                  <TableHead>Cửa hàng</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -108,7 +117,7 @@ const StaffList = () => {
                     <TableCell>{employee.store}</TableCell>
                     <TableCell>
                       <Badge variant={employee.status === 'Active' ? 'default' : 'secondary'}>
-                        {employee.status}
+                        {getStatusLabel(employee.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

@@ -97,7 +97,7 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
             setFormData(prev => ({ ...prev, image: url }));
         } catch (error) {
             console.error("Upload failed:", error);
-            alert("Failed to upload image.");
+            alert("Không thể tải ảnh lên.");
         } finally {
             setIsUploading(false);
         }
@@ -117,24 +117,24 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
             <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-2xl">
                 <DialogHeader className="p-6 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                        {initialData ? "Edit Product" : "Add New Product"}
+                        {initialData ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới"}
                     </DialogTitle>
                     <DialogDescription className="text-slate-500 dark:text-slate-400">
-                        {initialData ? "Update product details below." : "Enter details to create a new product model."}
+                        {initialData ? "Cập nhật thông tin sản phẩm bên dưới." : "Nhập thông tin để tạo mẫu sản phẩm mới."}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     {/* Image Upload Section */}
                     <div className="flex flex-col gap-2">
-                        <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Product Image</Label>
+                        <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Ảnh sản phẩm</Label>
                         <div className="flex items-center gap-4">
                             <div className="relative w-24 h-24 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 group">
                                 {isUploading ? (
                                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                                 ) : formData.image ? (
                                     <>
-                                        <img src={formData.image} alt="Product" className="w-full h-full object-cover" />
+                                        <img src={formData.image} alt="Sản phẩm" className="w-full h-full object-cover" />
                                         <button
                                             type="button"
                                             onClick={handleRemoveImage}
@@ -156,7 +156,7 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
                                     disabled={isUploading || loading}
                                     className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                                 />
-                                <p className="text-xs text-slate-500 mt-2">Recommended: 500x500px, Max 5MB. Supports JPG, PNG.</p>
+                                <p className="text-xs text-slate-500 mt-2">Khuyến nghị: 500x500px, tối đa 5MB. Hỗ trợ JPG, PNG.</p>
                             </div>
                         </div>
                     </div>
@@ -164,7 +164,7 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
                     <div className="grid grid-cols-2 gap-5">
                         <div className="space-y-2">
                             <Label htmlFor="code" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Product Code
+                                Mã sản phẩm
                             </Label>
                             <div className="relative">
                                 <Input
@@ -174,7 +174,7 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
                                     readOnly
                                     disabled
                                     className="h-10 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed pr-10"
-                                    placeholder={loadingCode ? "Generating..." : "Auto-generated"}
+                                    placeholder={loadingCode ? "Đang tạo..." : "Tự động tạo"}
                                 />
                                 {loadingCode && (
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -182,19 +182,19 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
                                     </div>
                                 )}
                             </div>
-                            {!initialData && <p className="text-xs text-slate-500">Code will be generated automatically based on Category.</p>}
+                            {!initialData && <p className="text-xs text-slate-500">Mã sẽ được tạo tự động theo danh mục.</p>}
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="category" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Category
+                                Danh mục
                             </Label>
                             <Select
                                 value={String(formData.categoryId)}
                                 onValueChange={(value) => handleSelectChange("categoryId", parseInt(value))}
                             >
                                 <SelectTrigger className="h-10 border-slate-200 dark:border-slate-700">
-                                    <SelectValue placeholder="Select Category" />
+                                    <SelectValue placeholder="Chọn danh mục" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {categories.length > 0 ? (
@@ -215,14 +215,14 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
 
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Product Name <span className="text-red-500">*</span>
+                            Tên sản phẩm <span className="text-red-500">*</span>
                         </Label>
                         <Input
                             id="name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            placeholder="e.g. Premium Cotton T-Shirt"
+                            placeholder="Ví dụ: Áo thun cotton cao cấp"
                             required
                             className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
                         />
@@ -230,50 +230,50 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
 
                     <div className="space-y-2">
                         <Label htmlFor="description" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Description
+                            Mô tả
                         </Label>
                         <Input
                             id="description"
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
-                            placeholder="Brief description of the product..."
+                            placeholder="Mô tả ngắn về sản phẩm..."
                             className="h-10 border-slate-200 dark:border-slate-700 focus:ring-primary/20"
                         />
                     </div>
 
                     <div className={initialData ? "grid grid-cols-2 gap-5" : "w-full"}>
                         <div className="space-y-2">
-                            <Label htmlFor="gender" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Gender</Label>
+                            <Label htmlFor="gender" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới tính mục tiêu</Label>
                             <Select
                                 value={formData.gender}
                                 onValueChange={(value) => handleSelectChange("gender", value)}
                             >
                                 <SelectTrigger className="h-10 border-slate-200 dark:border-slate-700">
-                                    <SelectValue placeholder="Select gender" />
+                                    <SelectValue placeholder="Chọn giới tính" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="MEN">Men</SelectItem>
-                                    <SelectItem value="WOMEN">Women</SelectItem>
-                                    <SelectItem value="UNISEX">Unisex</SelectItem>
-                                    <SelectItem value="KIDS">Kids</SelectItem>
+                                    <SelectItem value="MEN">Nam</SelectItem>
+                                    <SelectItem value="WOMEN">Nữ</SelectItem>
+                                    <SelectItem value="UNISEX">Dùng chung</SelectItem>
+                                    <SelectItem value="KIDS">Trẻ em</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         {initialData && (
                             <div className="space-y-2">
-                                <Label htmlFor="status" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status</Label>
+                                <Label htmlFor="status" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Trạng thái</Label>
                                 <Select
                                     value={String(formData.status)}
                                     onValueChange={(value) => handleSelectChange("status", parseInt(value))}
                                 >
                                     <SelectTrigger className="h-10 border-slate-200 dark:border-slate-700">
-                                        <SelectValue placeholder="Select status" />
+                                        <SelectValue placeholder="Chọn trạng thái" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="1">Active</SelectItem>
-                                        <SelectItem value="0">Inactive</SelectItem>
+                                        <SelectItem value="1">Đang kinh doanh</SelectItem>
+                                        <SelectItem value="0">Ngừng kinh doanh</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -282,10 +282,10 @@ const ProductForm = ({ open, onOpenChange, onSubmit, initialData, loading, categ
 
                     <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="font-semibold text-slate-600">
-                            Cancel
+                            Hủy
                         </Button>
                         <Button type="submit" disabled={loading || isUploading} className="font-bold shadow-lg shadow-primary/20">
-                            {loading ? "Saving..." : (isUploading ? "Uploading..." : (initialData ? "Update Product" : "Create Product"))}
+                            {loading ? "Đang lưu..." : (isUploading ? "Đang tải ảnh..." : (initialData ? "Cập nhật sản phẩm" : "Tạo sản phẩm"))}
                         </Button>
                     </DialogFooter>
                 </form>

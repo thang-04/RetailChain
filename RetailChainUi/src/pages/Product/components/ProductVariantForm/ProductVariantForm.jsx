@@ -147,7 +147,7 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
             <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-white dark:bg-slate-900 border-none shadow-2xl rounded-2xl">
                 <DialogHeader className="p-6 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                     <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                        Tạo variants
+                        Tạo phiên bản sản phẩm
                     </DialogTitle>
                     <DialogDescription className="text-slate-500 dark:text-slate-400">
                         Nhập danh sách size và màu của <span className="font-semibold">{product?.name || "sản phẩm"}</span>. Hệ thống sẽ tự tạo tất cả tổ hợp size × màu.
@@ -209,7 +209,7 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
                                         ))}
                                 </div>
                                 <p className="text-xs text-slate-500 mt-2">
-                                    Tip: Bạn có thể dán nhiều giá trị, ngăn cách bằng dấu phẩy hoặc xuống dòng.
+                                    Mẹo: Bạn có thể dán nhiều giá trị, ngăn cách bằng dấu phẩy hoặc xuống dòng.
                                 </p>
                             </div>
                         )}
@@ -291,11 +291,11 @@ const ProductVariantForm = ({ open, onOpenChange, onSubmit, loading, product }) 
 
                     <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="font-semibold text-slate-600">
-                            Huỷ
+                            Hủy
                         </Button>
                         <Button type="submit" disabled={!canSubmit} className="font-bold shadow-lg shadow-primary/20">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            {loading ? "Đang lưu..." : "Tạo variants"}
+                            {loading ? "Đang lưu..." : "Tạo phiên bản"}
                         </Button>
                     </DialogFooter>
                 </form>

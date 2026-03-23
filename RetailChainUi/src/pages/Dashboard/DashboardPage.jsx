@@ -47,15 +47,15 @@ const DashboardPage = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="sr-only">
-            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Bảng điều khiển cửa hàng"}
           </h1>
           <h2 className="text-3xl font-extrabold text-text-main dark:text-white tracking-tight">
-            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Store Dashboard"}
+            {canViewAllStores ? "Tổng quan chuỗi bán lẻ" : "Bảng điều khiển cửa hàng"}
           </h2>
           <p className="text-text-muted dark:text-gray-400 mt-1">
             {canViewAllStores 
               ? "Hiệu suất thời gian thực" 
-              : `Performance for ${user?.storeName || 'your store'}`}
+              : `Hiệu suất của ${user?.storeName || 'cửa hàng của bạn'}`}
           </p>
         </div>
         {canViewReports && (

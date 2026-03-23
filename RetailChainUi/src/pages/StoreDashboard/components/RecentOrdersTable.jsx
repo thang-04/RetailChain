@@ -18,21 +18,34 @@ const RecentOrdersTable = ({ orders }) => {
     { id: "ORD-0291", customer: "Robert W.", amount: "$85.00", status: "Pending", time: "09:55 AM", avatar: "RW", color: "bg-purple-100" },
   ];
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "Completed":
+        return "Hoàn thành";
+      case "Processing":
+        return "Đang xử lý";
+      case "Pending":
+        return "Chờ xử lý";
+      default:
+        return status;
+    }
+  };
+
   return (
     <Card className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm overflow-hidden flex-1">
       <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border-light dark:border-border-dark space-y-0">
-        <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Recent Sales Orders</CardTitle>
-        <a className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer">View All</a>
+        <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Đơn bán hàng gần đây</CardTitle>
+        <a className="text-sm text-primary font-semibold hover:text-primary-dark hover:underline cursor-pointer">Xem tất cả</a>
       </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
             <TableRow className="hover:bg-transparent border-b border-border-light dark:border-border-dark">
-              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Order ID</TableHead>
-              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Customer</TableHead>
-              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Amount</TableHead>
-              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Status</TableHead>
-              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Time</TableHead>
+              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Mã đơn</TableHead>
+              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Khách hàng</TableHead>
+              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Giá trị</TableHead>
+              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Trạng thái</TableHead>
+              <TableHead className="px-6 py-3 text-xs uppercase text-slate-500 font-semibold tracking-wider">Thời gian</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-border-light dark:divide-border-dark">
@@ -54,7 +67,7 @@ const RecentOrdersTable = ({ orders }) => {
                     order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
                     'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'
                   }`}>
-                    {order.status}
+                    {getStatusLabel(order.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-6 py-3 text-sm text-slate-400 font-mono">{order.time}</TableCell>

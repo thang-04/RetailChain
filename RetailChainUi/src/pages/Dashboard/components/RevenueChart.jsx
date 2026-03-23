@@ -81,7 +81,7 @@ const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
         <CardTitle className="text-base font-medium text-text-main dark:text-white tracking-wide">Hiệu suất thời gian thực</CardTitle>
         <Select value={timeRange} onValueChange={onTimeRangeChange}>
           <SelectTrigger className="w-[120px] h-8 text-xs bg-gray-50 dark:bg-gray-800 border-none shadow-none">
-            <SelectValue placeholder="Period" />
+            <SelectValue placeholder="Kỳ xem" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="30days">30 ngày</SelectItem>

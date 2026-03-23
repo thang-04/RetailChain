@@ -21,14 +21,14 @@ import { useNavigate } from "react-router-dom";
 
 const StatusBadge = ({ quantity }) => {
   const q = typeof quantity === "number" ? quantity : Number(quantity || 0);
-  let label = "Out of Stock";
+  let label = "Hết hàng";
   let variant = "destructive";
 
   if (q > 10) {
     label = "Còn hàng";
     variant = "default";
   } else if (q > 0) {
-    label = "Sắp hết ";
+    label = "Sắp hết";
     variant = "secondary";
   }
 

@@ -23,6 +23,34 @@ const groupPermissions = (permissions) => {
 
 // Helper: Format tên category từ SNAKE_CASE sang Title Case
 const formatCategory = (cat) => {
+    const categoryMap = {
+        SUPER_ADMIN: 'Quản trị tối cao',
+        REGIONAL_ADMIN: 'Quản lý khu vực',
+        STORE_MANAGER: 'Quản lý cửa hàng',
+        STAFF: 'Nhân viên',
+        PROFILE: 'Hồ sơ',
+        PASSWORD: 'Mật khẩu',
+        STORE_SCOPE: 'Phạm vi cửa hàng',
+        REGIONAL_ADMIN_SCOPE: 'Phạm vi khu vực',
+        WAREHOUSE_SCOPE: 'Phạm vi kho',
+        PERMISSION: 'Quyền hạn',
+        ROLE: 'Vai trò',
+        USER: 'Người dùng',
+        STORE: 'Cửa hàng',
+        WAREHOUSE: 'Kho',
+        INVENTORY: 'Tồn kho',
+        PRODUCT: 'Sản phẩm',
+        ORDER: 'Đơn hàng',
+        REPORT: 'Báo cáo',
+        SUPPLIER: 'Nhà cung cấp',
+        ATTENDANCE: 'Chấm công',
+        SHIFT: 'Ca làm việc',
+    };
+
+    if (categoryMap[cat]) {
+        return categoryMap[cat];
+    }
+
     return cat
         .split('_')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -33,15 +61,31 @@ const formatCategory = (cat) => {
 const formatPermissionName = (name) => {
     const parts = (name || '').split('_');
     const action = parts[parts.length - 1];
-    return action.charAt(0).toUpperCase() + action.slice(1).toLowerCase();
+    const actionMap = {
+        VIEW: 'Xem',
+        CREATE: 'Tạo',
+        UPDATE: 'Cập nhật',
+        DELETE: 'Xóa',
+        ASSIGN: 'Phân công',
+        APPROVE: 'Duyệt',
+        EXPORT: 'Xuất',
+        IMPORT: 'Nhập',
+        MANAGE: 'Quản lý',
+        BLOCK: 'Khóa',
+        UNBLOCK: 'Mở khóa',
+        CHECKIN: 'Chấm công vào',
+        CHECKOUT: 'Chấm công ra',
+    };
+
+    return actionMap[action?.toUpperCase()] || (action.charAt(0).toUpperCase() + action.slice(1).toLowerCase());
 };
 
 // Helper: Lấy mô tả permission
 const getPermissionDesc = (name) => {
     const parts = (name || '').split('_');
-    const action = parts[parts.length - 1]?.toLowerCase();
+    const action = formatPermissionName(name).toLowerCase();
     const resource = parts.slice(0, -1).join(' ').toLowerCase();
-    return `Can ${action} ${resource}`;
+    return `Cho phép ${action} ${resource}`;
 };
 
 // Icon cho từng category
@@ -71,10 +115,10 @@ const getCategoryIcon = (cat) => {
 // Role description map
 const getRoleDescription = (code) => {
     const descMap = {
-        SUPER_ADMIN: 'Full access to all system modules and configuration.',
-        REGIONAL_ADMIN: 'Manage stores and warehouses in assigned region.',
-        STORE_MANAGER: 'Manage staff and store operations.',
-        STAFF: 'Basic POS operations and self-service.',
+        SUPER_ADMIN: 'Toàn quyền truy cập vào mọi phân hệ và cấu hình hệ thống.',
+        REGIONAL_ADMIN: 'Quản lý cửa hàng và kho trong khu vực được phân công.',
+        STORE_MANAGER: 'Quản lý nhân sự và vận hành cửa hàng.',
+        STAFF: 'Thực hiện các tác vụ cơ bản và tự phục vụ trên hệ thống.',
     };
     return descMap[code] || '';
 };
@@ -230,7 +274,7 @@ const RolePermissionPage = () => {
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-3">
-                        <h2 className="text-lg font-bold text-text-main dark:text-white">Roles</h2>
+                        <h2 className="text-lg font-bold text-text-main dark:text-white">Vai trò</h2>
                     </div>
                     {/* Search */}
                     <div className="relative">
@@ -239,7 +283,7 @@ const RolePermissionPage = () => {
                         </span>
                         <Input
                             className="pl-9 text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600"
-                            placeholder="Search roles..."
+                            placeholder="Tìm vai trò..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -263,7 +307,7 @@ const RolePermissionPage = () => {
                             >
                                 {isSelected && (
                                     <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
-                                        Current Selection
+                                        Đang chọn
                                     </span>
                                 )}
                                 <div className="flex items-center justify-between mt-1">
@@ -282,12 +326,12 @@ const RolePermissionPage = () => {
                                 </p>
                                 <div className="flex items-center justify-between mt-2">
                                     <span className="text-xs text-text-muted dark:text-gray-400">
-                                        {(role.permissions || []).length} Permissions
+                                        {(role.permissions || []).length} quyền
                                     </span>
                                     {isSelected ? (
-                                        <span className="text-xs font-medium text-primary">Active</span>
+                                        <span className="text-xs font-medium text-primary">Đang dùng</span>
                                     ) : (
-                                        <span className="text-xs font-medium text-primary cursor-pointer hover:underline">Manage</span>
+                                        <span className="text-xs font-medium text-primary cursor-pointer hover:underline">Quản lý</span>
                                     )}
                                 </div>
                             </div>
@@ -297,7 +341,7 @@ const RolePermissionPage = () => {
                     {filteredRoles.length === 0 && (
                         <div className="text-center py-8 text-text-muted">
                             <span className="material-symbols-outlined text-3xl mb-2 block">search_off</span>
-                            <p className="text-sm">Không tìm thấy role nào</p>
+                            <p className="text-sm">Không tìm thấy vai trò nào</p>
                         </div>
                     )}
                 </div>
@@ -313,18 +357,18 @@ const RolePermissionPage = () => {
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="material-symbols-outlined text-primary text-[20px]">shield_person</span>
-                                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Role Settings</span>
+                                        <span className="text-xs font-bold text-primary uppercase tracking-wider">Cấu hình vai trò</span>
                                     </div>
                                     <h2 className="text-xl font-bold text-text-main dark:text-white">
-                                        {formatCategory(selectedRole.name || selectedRole.code || '')} Permissions
+                                        {formatCategory(selectedRole.name || selectedRole.code || '')} quyền hạn
                                         {selectedRole?.code === 'SUPER_ADMIN' && (
                                             <span className="ml-3 px-2 py-0.5 text-[10px] bg-primary/10 text-primary border border-primary/20 rounded uppercase tracking-wider">
-                                                Immutable Role
+                                                Vai trò cố định
                                             </span>
                                         )}
                                     </h2>
                                     <p className="text-sm text-text-muted dark:text-gray-400 mt-0.5">
-                                        Configure what users with the {formatCategory(selectedRole.name || '')} role can see and do.
+                                        Cấu hình những gì người dùng thuộc vai trò {formatCategory(selectedRole.name || '')} được xem và thao tác.
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
@@ -335,14 +379,14 @@ const RolePermissionPage = () => {
                                                 onClick={handleDiscard}
                                                 disabled={!hasChanges() || saving || selectedRole?.code === 'SUPER_ADMIN'}
                                             >
-                                                Discard
+                                                Hoàn tác
                                             </Button>
                                             <Button
                                                 onClick={handleSave}
                                                 disabled={!hasChanges() || saving || selectedRole?.code === 'SUPER_ADMIN'}
                                                 className="bg-primary hover:bg-primary/90"
                                             >
-                                                {saving ? 'Saving...' : 'Save Changes'}
+                                                {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
                                             </Button>
                                         </>
                                     )}
@@ -353,15 +397,15 @@ const RolePermissionPage = () => {
                         <div className="px-6 py-2 border-b border-gray-100 dark:border-gray-800">
                             {selectedRole?.code === 'SUPER_ADMIN' ? (
                                 <div className="p-2 text-xs text-blue-600 bg-blue-50 rounded-md dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
-                                    <span className="font-bold uppercase mr-2">Note:</span> Role Super Admin là mặc định và không thể thay đổi để đảm bảo an toàn hệ thống.
+                                    <span className="font-bold uppercase mr-2">Lưu ý:</span> Vai trò Super Admin là mặc định và không thể thay đổi để đảm bảo an toàn hệ thống.
                                 </div>
                             ) : !isCurrentUserAdmin ? (
                                 <div className="p-2 text-xs text-amber-600 bg-amber-50 rounded-md dark:bg-amber-900/20 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
-                                    <span className="font-bold uppercase mr-2">Read-only:</span> Chỉ Super Admin mới có quyền chỉnh sửa phân quyền.
+                                    <span className="font-bold uppercase mr-2">Chỉ xem:</span> Chỉ Super Admin mới có quyền chỉnh sửa phân quyền.
                                 </div>
                             ) : (
                                 <div className="p-2 text-xs text-blue-600 bg-blue-50 rounded-md dark:bg-blue-900/20 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
-                                    <span className="font-bold uppercase mr-2">Tip:</span> Các quyền quản lý Role nhạy cảm đã bị ẩn để tránh sai sót.
+                                    <span className="font-bold uppercase mr-2">Gợi ý:</span> Các quyền quản lý vai trò nhạy cảm đã được ẩn để tránh sai sót.
                                 </div>
                             )}
                         </div>
@@ -434,8 +478,8 @@ const RolePermissionPage = () => {
                     <div className="flex-1 flex items-center justify-center text-text-muted">
                         <div className="text-center">
                             <span className="material-symbols-outlined text-5xl mb-3 block">shield_person</span>
-                            <p className="text-lg font-medium">Select a role to manage permissions</p>
-                            <p className="text-sm mt-1">Choose a role from the left panel to view and edit its permissions.</p>
+                            <p className="text-lg font-medium">Chọn một vai trò để quản lý quyền</p>
+                            <p className="text-sm mt-1">Chọn vai trò ở cột bên trái để xem và chỉnh sửa quyền hạn.</p>
                         </div>
                     </div>
                 )}

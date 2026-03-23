@@ -9,6 +9,17 @@ const StockLedger = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const getTransactionLabel = (type) => {
+        const typeMap = {
+            "Stock In": "Nhập kho",
+            "Stock Out": "Xuất kho",
+            "Transfer": "Chuyển kho",
+            "Sales": "Bán hàng",
+        };
+
+        return typeMap[type] || type;
+    };
+
     useEffect(() => {
         const fetch = async () => {
             try {
@@ -27,25 +38,25 @@ const StockLedger = () => {
     return (
         <div className="p-6 space-y-6">
              <div>
-                <h2 className="text-3xl font-bold tracking-tight">Stock Ledger & Traceability</h2>
-                <p className="text-muted-foreground">Track every stock movement across the chain.</p>
+                <h2 className="text-3xl font-bold tracking-tight">Sổ kho và truy vết</h2>
+                <p className="text-muted-foreground">Theo dõi mọi biến động tồn kho trên toàn chuỗi.</p>
             </div>
 
             <Card>
                 <CardHeader>
                     <div className="flex flex-col md:flex-row gap-4 justify-between">
-                        <CardTitle className="pt-2">Transaction History</CardTitle>
+                        <CardTitle className="pt-2">Lịch sử giao dịch kho</CardTitle>
                         <div className="flex gap-2">
-                            <Input placeholder="Filter by Product..." className="w-[200px]" />
+                            <Input placeholder="Lọc theo sản phẩm..." className="w-[200px]" />
                             <Select defaultValue="all">
                                 <SelectTrigger className="w-[150px]">
-                                    <SelectValue placeholder="Transaction Type" />
+                                    <SelectValue placeholder="Loại giao dịch" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Types</SelectItem>
-                                    <SelectItem value="in">Stock In</SelectItem>
-                                    <SelectItem value="out">Stock Out</SelectItem>
-                                    <SelectItem value="transfer">Transfer</SelectItem>
+                                    <SelectItem value="all">Tất cả loại</SelectItem>
+                                    <SelectItem value="in">Nhập kho</SelectItem>
+                                    <SelectItem value="out">Xuất kho</SelectItem>
+                                    <SelectItem value="transfer">Chuyển kho</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -53,18 +64,18 @@ const StockLedger = () => {
                 </CardHeader>
                 <CardContent>
                     {loading ? (
-                        <div className="text-center py-10">Loading ledger...</div>
+                        <div className="text-center py-10">Đang tải sổ kho...</div>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Time</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Product</TableHead>
-                                    <TableHead className="text-right">Quantity</TableHead>
-                                    <TableHead>Location</TableHead>
-                                    <TableHead>Reference</TableHead>
-                                    <TableHead>User</TableHead>
+                                    <TableHead>Thời gian</TableHead>
+                                    <TableHead>Loại</TableHead>
+                                    <TableHead>Sản phẩm</TableHead>
+                                    <TableHead className="text-right">Số lượng</TableHead>
+                                    <TableHead>Vị trí</TableHead>
+                                    <TableHead>Tham chiếu</TableHead>
+                                    <TableHead>Người thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -76,7 +87,7 @@ const StockLedger = () => {
                                                 trx.type === 'Stock In' ? 'text-green-600' :
                                                 trx.type === 'Sales' ? 'text-blue-600' : 'text-orange-600'
                                             }`}>
-                                                {trx.type}
+                                                {getTransactionLabel(trx.type)}
                                             </span>
                                         </TableCell>
                                         <TableCell>{trx.product}</TableCell>

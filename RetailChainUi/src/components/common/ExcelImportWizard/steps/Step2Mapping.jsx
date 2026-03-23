@@ -69,9 +69,9 @@ const Step2Mapping = ({ headers, detectedMapping, onMappingConfirm, onBack }) =>
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-2">Map cột Excel với trường dữ liệu</h3>
+        <h3 className="text-lg font-medium mb-2">Ghép cột Excel với trường dữ liệu</h3>
         <p className="text-sm text-muted-foreground">
-          Hệ thống đã tự động phát hiện mapping. Bạn có thể điều chỉnh nếu cần.
+          Hệ thống đã tự động phát hiện cách ghép cột. Bạn có thể điều chỉnh nếu cần.
         </p>
       </div>
 
@@ -80,7 +80,7 @@ const Step2Mapping = ({ headers, detectedMapping, onMappingConfirm, onBack }) =>
           <TableHeader>
             <TableRow>
               <TableHead>Cột trong Excel</TableHead>
-              <TableHead>Map với trường</TableHead>
+              <TableHead>Ghép với trường</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

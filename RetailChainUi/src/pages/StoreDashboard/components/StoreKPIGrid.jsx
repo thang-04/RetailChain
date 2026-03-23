@@ -15,10 +15,10 @@ const StoreKPIGrid = ({ data }) => {
               <span className="material-symbols-outlined">inventory_2</span>
             </div>
             <Badge variant="secondary" className="flex items-center text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-full border-none shadow-none">
-              In Stock
+              Còn hàng
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Physical Items</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tổng số lượng hàng hóa</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-primary transition-colors">{totalStockQuantity.toLocaleString()}</h3>
         </CardContent>
       </Card>
@@ -31,10 +31,10 @@ const StoreKPIGrid = ({ data }) => {
               <span className="material-symbols-outlined">category</span>
             </div>
             <Badge variant="secondary" className="flex items-center text-xs font-medium text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full border-none shadow-none">
-              Varieties
+              Phiên bản
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Unique Products</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Sản phẩm khác nhau</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1 group-hover:text-blue-600 transition-colors">{totalProductVariants.toLocaleString()}</h3>
         </CardContent>
       </Card>
@@ -48,10 +48,10 @@ const StoreKPIGrid = ({ data }) => {
               <span className="material-symbols-outlined">inventory</span>
             </div>
             <Badge variant="secondary" className="flex items-center text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-full border-none shadow-none">
-              Attention
+              Cần chú ý
             </Badge>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Low Stock Items</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Mặt hàng sắp hết</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{lowStockCount}</h3>
         </CardContent>
       </Card>
@@ -63,9 +63,9 @@ const StoreKPIGrid = ({ data }) => {
             <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
               <span className="material-symbols-outlined">groups</span>
             </div>
-            <span className="text-xs font-medium text-slate-500 px-2 py-1">On Shift</span>
+            <span className="text-xs font-medium text-slate-500 px-2 py-1">Đang làm việc</span>
           </div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Staff</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Nhân sự hoạt động</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {activeStaff}
             {data?.totalStaff !== undefined && <span className="text-lg text-slate-400 font-normal">/{data.totalStaff}</span>}

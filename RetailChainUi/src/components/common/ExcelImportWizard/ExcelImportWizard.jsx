@@ -22,9 +22,9 @@ import Step2Mapping from "./steps/Step2Mapping";
 import Step3Review from "./steps/Step3Review";
 
 const STEPS = [
-  { id: 1, label: "Upload", icon: "📤" },
-  { id: 2, label: "Map", icon: "🔗" },
-  { id: 3, label: "Review", icon: "👁️" },
+  { id: 1, label: "Tải lên", icon: "📤" },
+  { id: 2, label: "Ghép cột", icon: "🔗" },
+  { id: 3, label: "Soát dữ liệu", icon: "👁️" },
 ];
 
 const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
@@ -84,7 +84,7 @@ const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
 
   useEffect(() => {
     if (hasDraft && draftData && open) {
-      const shouldRestore = window.confirm("Bạn có draft chưa lưu. Có muốn khôi phục không?");
+      const shouldRestore = window.confirm("Bạn có dữ liệu nháp chưa lưu. Bạn có muốn khôi phục không?");
       if (shouldRestore) {
         setFile(draftData.file);
         setParsedData(draftData.parsedData);
@@ -186,7 +186,7 @@ const ExcelImportWizard = ({ open, onOpenChange, onImport }) => {
       pushUndoState({ parsedData: data, rowStates: states });
       toast.success(`Đã đọc ${data.length} dòng`);
       
-      // Chuyển sang bước 2 (Map) sau khi upload thành công
+      // Chuyển sang bước 2 sau khi tải tệp thành công
       setCurrentStep(2);
     } catch (err) {
       toast.error(err.message);
