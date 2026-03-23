@@ -172,8 +172,15 @@ const AppRoutes = () => {
                             }
                         />
 
-                        {/* Attendance Module - All authenticated users */}
-                        <Route path="/attendance" element={<AttendancePage />} />
+                        {/* Attendance Module - STAFF and STORE_MANAGER only, NOT SUPER_ADMIN */}
+                        <Route
+                            path="/attendance"
+                            element={
+                                <ProtectedRoute allowedRoles={['STAFF', 'STORE_MANAGER']}>
+                                    <AttendancePage />
+                                </ProtectedRoute>
+                            }
+                        />
                         <Route path="/attendance/history" element={<AttendanceHistoryPage />} />
 
                         {/* Staff Module - STORE_MANAGER+ for management */}

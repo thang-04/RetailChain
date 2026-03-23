@@ -63,7 +63,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/attendance",
       label: "Chấm công",
       icon: "access_time",
-      show: isStaff() || isStoreManager() || isSuperAdmin(),
+      show: isStaff() || isStoreManager(),
     },
     {
       path: "/staff/attendance",
