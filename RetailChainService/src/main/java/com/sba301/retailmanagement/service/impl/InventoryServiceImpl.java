@@ -574,7 +574,6 @@ public class InventoryServiceImpl implements InventoryService {
         history.setDocument(doc);
         history.setDocumentItemId(item.getId());
         history.setDocumentItem(item);
-        history.setWarehouseId(warehouse.getId());
         history.setWarehouse(warehouse);
         history.setVariantId(variant.getId());
         history.setVariant(variant);

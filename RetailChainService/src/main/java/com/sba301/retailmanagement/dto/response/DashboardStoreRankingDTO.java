@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,7 +24,7 @@ public class DashboardStoreRankingDTO {
     /**
      * Tổng doanh thu của cửa hàng (tính từ inventory documents).
      */
-    private Long revenue;
+    private BigDecimal revenue;
 
 }
 

@@ -1,7 +1,7 @@
 // src/pages/StoreDashboard/components/InventoryItemModal.jsx
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, AlertTriangle, CheckCircle2, X, Hash, Tag, LayoutGrid, Layers, DollarSign } from "lucide-react";
+import { Package, AlertTriangle, CheckCircle2, X, Hash, Tag, LayoutGrid, Layers } from "lucide-react";
 
 const getStatusConfig = (status) => {
     switch (status) {
@@ -78,7 +78,7 @@ const InventoryItemModal = ({ item, onClose }) => {
                     <InfoRow icon={<Tag className="w-4 h-4" />} label="Tên sản phẩm" value={item.name} />
                     <InfoRow icon={<LayoutGrid className="w-4 h-4" />} label="Danh mục" value={item.category} />
                     <InfoRow icon={<Layers className="w-4 h-4" />} label="Số lượng tồn kho" value={`${item.stock ?? 0} sản phẩm`} />
-                    <InfoRow icon={<DollarSign className="w-4 h-4" />} label="Giá bán" value={item.price} />
+                    <InfoRow icon={<span className="text-xs font-bold text-sky-600">VND</span>} label="Giá bán" value={item.price} />
                 </div>
 
                 {/* Footer */}

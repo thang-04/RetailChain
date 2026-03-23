@@ -47,8 +47,8 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
                     .map(InventoryDocument::getDocumentCode)
                     .ifPresent(dto::setDocumentName);
         }
-        if (e.getWarehouseId() != null) {
-            warehouseRepository.findById(e.getWarehouseId())
+        if (e.getWarehouse() != null) {
+            warehouseRepository.findById(e.getWarehouse().getId())
                     .map(Warehouse::getName)
                     .ifPresent(dto::setWarehouseName);
         }
@@ -72,7 +72,7 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
         dto.setId(e.getId());
         dto.setDocumentId(e.getDocumentId());
         dto.setDocumentItemId(e.getDocumentItemId());
-        dto.setWarehouseId(e.getWarehouseId());
+        dto.setWarehouseId(e.getWarehouse() != null ? e.getWarehouse().getId() : null);
         dto.setVariantId(e.getVariantId());
         dto.setAction(e.getAction());
         dto.setQuantity(e.getQuantity());
@@ -161,7 +161,7 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
         dto.setId(e.getId());
         dto.setDocumentId(e.getDocumentId());
         dto.setDocumentItemId(e.getDocumentItemId());
-        dto.setWarehouseId(e.getWarehouseId());
+        dto.setWarehouseId(e.getWarehouse() != null ? e.getWarehouse().getId() : null);
         dto.setVariantId(e.getVariantId());
         dto.setAction(e.getAction());
         dto.setQuantity(e.getQuantity());
@@ -182,7 +182,9 @@ public class InventoryHistoryServiceImpl implements InventoryHistoryService {
 
         InventoryHistory inventoryHistory = new InventoryHistory();
 
-        inventoryHistory.setWarehouseId(request.getWarehouseId());
+        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+                .orElseThrow(() -> new RuntimeException("Warehouse not found: " + request.getWarehouseId()));
+        inventoryHistory.setWarehouse(warehouse);
         inventoryHistory.setVariantId(request.getVariantId());
         inventoryHistory.setAction(request.getAction());
         inventoryHistory.setQuantity(request.getQuantity());
